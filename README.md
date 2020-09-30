@@ -1,13 +1,13 @@
 # GettingThingsDone
-- Getting Things Done is a kind of time management law which was proposed by David Allen.
+- Getting Things Done is a kind of time management system which was proposed by David Allen.
 - Usually, we abbreviate Getting Things Done as GTD.
 - Choose language version: 
   - [EnglishVersion]()
   - [ChineseVersion](https://github.com/xiaoland/GettingThingsDone/)
 
 ## Indroduction
-- 正如开头所说的，GTD是一种时间管理方式，它在2002年由David Allen提出。
-- 实现GTD的方式多种多样，从纸质到日历再到各种现有的计划安排软件，都是可以的。
+- 正如开头所说的，GTD是一种时间管理系统，它在2002年由David Allen提出
+- 实现GTD的方式多种多样，从纸质到日历再到各种现有的计划安排软件，都是可以的
 - 但本项目单纯就是扎根于GTD的一个计划系统，通过本系统，您可以完全地实现GTD，详细情况我将会在下面说明
 
 ### How GTD works
@@ -36,3 +36,28 @@
   - **回顾-REVIEW**
     - 回顾也是GTD中的一个重要步骤
     - 通过回顾并检查你所有的清单，然后对它们进行鞥新，这样才能确保GTD系统的运作，而且在回顾的同时可能还需要对未来以后的行动进行计划（如果你一周回顾一次的话）
+### How we works
+- 那么，这个项目是如何使用，或者说工作的呢
+- **交互（前端）**
+  - 首先，我们需要一个可视化的交互口以便用户操作，而这种可视化的交互口是可以有很多种实现方式的。在这里，我就对一些初级阶段需要实现的交互方式进行列举和说明
+    - 1、网页/WEB端：不得不说，web工具真的是很好用，轻量简洁。我个人目前考虑使用php来实现，不过我还不会php，但我会努力的，有人愿意也可以联系我一起开发
+    - 2、DUEROS语音交互：通过语音交互，你可以很方便的对inbox进行整理、分类、规划等等，而DUEROS的各种设备销量都很不错，其对第三方技能开发的支持也很友善，因此我会在DUEROS上做一个技能，然后用户可以连接到公用或自己的服务器来使用
+    - 3、xiaolan/wukong-robot语音交互：xiaolan和wukong-robot都是运行在各种DIY设备上的语音交互机器人，但它们与DUEROS的区别就是其都由广大开发者制作的。而其中的xiaolan就是我做的一个，虽然没有wukong厉害，但我会加油的
+- **后端**
+  - 很明显，后端就是支持整个软件运行的部分，其重要性显而易见
+  - 那么关于后端我是打算使用python来编写的（毕竟我python很熟），而且用python做后端的软件也不少，就比如「Instagram」
+  - 后端包括了「服务端」和「基本业务」
+    - 服务端就是给DUEROS等更多的非自有前端（如WEB端就是自有前端）的一个接口，用户也可以根据自己的喜好，按照我们提供的API接口来开发自己喜欢的交互方式
+    - 而基本业务就是最底层的部分了。基本业务其实就是完全配合GTD，再加上一些创新的实现
+- 到这里，相信你已经对本项目有了一定的认识，如果您想要了解更多，请查看我们的[Wiki](https://github.com/xiaoland/GettingThingsDone/wiki)
+
+## About
+
+### Author
+- Lan_zhijiang(This is me)
+- 当然也欢迎大家来一起开发
+  - Wechat：18680171381
+  - QQ: 1481605673
+
+### UpdateLog
+- 完成README.md-Chinese-Version-1
