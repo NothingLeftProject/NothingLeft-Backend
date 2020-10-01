@@ -19,16 +19,15 @@
   - And, David Allen thinks, the stress is not from task itself, but the messes causes by the tasks remain in your brain.
   - The things we have to do is to list the tasks in our brain into a file system which out of your brain, such as real notebook, e-mail, etc. Then, you can focus on what you have to do now. 
 - 关于GTD的操作方法：
-  - **收集-COLLECT**
+  - **COLLECT**
     - It is to list all the unfinished things(called as stuff) and put them into an inbox.
     - Inbox can be anything which can recording, but it not recommend you use a temporary thing.
-  - **整理-CLASSIFY**
+  - **CLASSIFY**
     - After you put those(stuff) into the inbox, you need to sort them out regularly.
     - Then you should classify these stuffs according to "can take action" and "can't take action"
     - To those stuffs in "can't take action", you need to further classify them. Such as "data", "someday/future" and "trash".
     - And to those stuffs in "can take action", you need to classify them according to can it be finished in two minutes. If can, you should take action right now. If not, you can plan the next action of it.
-    - 而对于「可以行动」中的stuff，你需要按照其能否在两分钟内完成进行操作，如果可以则立即行动，如果不可以则对其下一步行动进行「组织」
-  - **组织-BUILD**
+  - **ORGANIZE**
     - 组织主要分成对「参考资料的组织」和对「下一步行动的组织」
     - 对「参考资料的组织」主要就是一个文档管理系统
     - 而对「下一步行动的组织」则一般可以分为「下一步行动清单」和「追踪（等待）清单」以及「未来清单」
