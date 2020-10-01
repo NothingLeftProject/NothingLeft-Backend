@@ -2,8 +2,8 @@
 - Getting Things Done is a kind of time management system which was proposed by David Allen.
 - Usually, we abbreviate Getting Things Done as GTD.
 - Choose language version: 
-  - [EnglishVersion]()
-  - [ChineseVersion](https://github.com/xiaoland/GettingThingsDone/)
+  - [EnglishVersion](./README_en.md)
+  - [ChineseVersion](./README.md)
 
 ## Indroduction
 - 正如开头所说的，GTD是一种时间管理系统，它在2002年由David Allen提出
@@ -17,7 +17,7 @@
   - GTD认为你的压力并非来源于事情太多，而是因为你有太多事情没有做
   - GTD的目的就是要确保你所有该做的事情都做到了
   - DavidAllen认为，压力不是来自任务本身，而是任务在大脑里造成的混沌塞积。
-  - 我们要做的，就是逐一清点大脑里的事务，将所有的事情都手机到大脑之外的文件系统，比如实实在在的记事簿、邮箱等，这样，你才能专心完成眼前的事情
+  - 我们要做的，就是逐一清点大脑里的事务，将所有的事情都记录到大脑之外的文件系统，比如实实在在的记事簿、邮箱等，这样，你才能专心完成眼前的事情
 - 关于GTD的操作方法：
   - **收集-COLLECT**
     - 就是将你所有的未尽事项（stuff）统统罗列出来，放入一个inbox中，inbox可以是任何具有记录功能的物品，但不推荐暂时性的
