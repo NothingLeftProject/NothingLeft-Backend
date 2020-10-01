@@ -11,20 +11,22 @@
 - But the core of us is a planning(time management) system rooted in GTD. With this system, you can achieve GTD easily and totally. More information about our project will be showed under here.
 
 ### How GTD works
-- 关于这个问题，你可以在[百度百科](https://baike.baidu.com/item/GTD/7384910?fromtitle=Getting%20Things%20Done&fromid=18081892&fr=aladdin)详细了解，在这里，我只会做一些大致的介绍
-- 关于GTD的理念：
-  - GTD的核心理念在于只有当你把一切都安排好后，你才能心无旁骛地专心做好眼前的工作，提高效率
-  - GTD认为你的压力并非来源于事情太多，而是因为你有太多事情没有做
-  - GTD的目的就是要确保你所有该做的事情都做到了
-  - DavidAllen认为，压力不是来自任务本身，而是任务在大脑里造成的混沌塞积。
-  - 我们要做的，就是逐一清点大脑里的事务，将所有的事情都手机到大脑之外的文件系统，比如实实在在的记事簿、邮箱等，这样，你才能专心完成眼前的事情
+- About this question, you can know more on [Wikipedia](https://en.wikipedia.org/wiki/Getting_Things_Done). I will only make some simply introduction here.
+- The core of GTD：
+  - GTD's core thinks that only when you arrage everything well, you can focus on what you going to do and improve your effectiveness.
+  - GTD thinks your stress is not because there are too many things to do, but because you have too many things didn't do.
+  - So, the purpose of GTD is to make sure the things you need to do had been all finished.
+  - And, David Allen thinks, the stress is not from task itself, but the messes causes by the tasks remain in your brain.
+  - The things we have to do is to list the tasks in our brain into a file system which out of your brain, such as real notebook, e-mail, etc. Then, you can focus on what you have to do now. 
 - 关于GTD的操作方法：
   - **收集-COLLECT**
-    - 就是将你所有的未尽事项（stuff）统统罗列出来，放入一个inbox中，inbox可以是任何具有记录功能的物品，但不推荐暂时性的
+    - It is to list all the unfinished things(called as stuff) and put them into an inbox.
+    - Inbox can be anything which can recording, but it not recommend you use a temporary thing.
   - **整理-CLASSIFY**
-    - 将stuff放入inbox后，你就要定期对inbox进行整理，清空它
-    - 然后把这些stuff按照「可以行动」和「不可以行动」分开
-    - 对于「不可以行动」中的stuff，你需要进一步对其分类，如继续分为「参考资料」「未来」「垃圾」等
+    - After you put those(stuff) into the inbox, you need to sort them out regularly.
+    - Then you should classify these stuffs according to "can take action" and "can't take action"
+    - To those stuffs in "can't take action", you need to further classify them. Such as "data", "someday/future" and "trash".
+    - And to those stuffs in "can take action", you need to classify them according to can it be finished in two minutes. If can, you should take action right now. If not, you can plan the next action of it.
     - 而对于「可以行动」中的stuff，你需要按照其能否在两分钟内完成进行操作，如果可以则立即行动，如果不可以则对其下一步行动进行「组织」
   - **组织-BUILD**
     - 组织主要分成对「参考资料的组织」和对「下一步行动的组织」
