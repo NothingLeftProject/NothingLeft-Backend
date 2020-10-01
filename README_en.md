@@ -18,7 +18,7 @@
   - So, the purpose of GTD is to make sure the things you need to do had been all finished.
   - And, David Allen thinks, the stress is not from task itself, but the messes causes by the tasks remain in your brain.
   - The things we have to do is to list the tasks in our brain into a file system which out of your brain, such as real notebook, e-mail, etc. Then, you can focus on what you have to do now. 
-- 关于GTD的操作方法：
+- The opreation method of GTD：
   - **COLLECT**
     - It is to list all the unfinished things(called as stuff) and put them into an inbox.
     - Inbox can be anything which can recording, but it not recommend you use a temporary thing.
