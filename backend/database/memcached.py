@@ -52,13 +52,16 @@ class GtdMemcachedManipulator():
         """
         if type(key) == int or type(key) == str or type(key) == float:
             self.log.add_log("MemcachedManipulator: Add: key " + str(key) + " value: " + str(value), 1)
-            self.mc.add(key, value)
-            return True
+            try:
+                self.mc.add(key, value)
+            except self.mc.MemcachedKeyError:
+                self.log.add_log("MemcachedManipulator: Add failed: there is already a key called " + str(key), 2)
+                return False
+            else:
+                return True
                 
         self.log.add_log("MemcachedManipulator: key can't be a list or dict", 3)
         return False
-
-        
 
     def _replace(self, key, value):
 
@@ -134,12 +137,16 @@ class GtdMemcachedManipulator():
         :param key 键
         :return any
         """
-        if type(key) != int or type(key) != str or type(key) != float:
-            self.log.add_log("MemcachedManipulator: key can't be a list or dict", 3)
-            return None
-
-        self.log.add_log("MemcachedManipulator: Get: key: " + str(key), 1)
-        return self.mc.get(key)
+        if type(key) == int or type(key) == str or type(key) == float:
+            self.log.add_log("MemcachedManipulator: Get: key: " + str(key), 1)
+            try:
+                return self.mc.get(key)
+            except self.mc.MemcachedKeyError:
+                self.log.add_log("MemcachedManipulator: key: " + str(key) + "not found!", 3)
+                return None
+            
+        self.log.add_log("MemcachedManipulator: key can't be a list or dict", 3)
+        return None
 
     def _get_multi(self, param):
 
@@ -150,7 +157,7 @@ class GtdMemcachedManipulator():
         """
         if type(param) == list or type(param) == tuple:
             self.log.add_log("MemcachedManipulator: Get multi: keys: " + str(param), 1)
-            self.mc.delete_multi(param)
+            return self.mc.get_multi(param)
         
         self.log.add_log("MemcachedManipulator: key can't be a list or dict", 3)
         return None
@@ -217,6 +224,4 @@ class GtdMemcachedManipulator():
         self.mc = memcache.Client(
             [self.memcached_server_address]
         )
-        self.mc.
-
         
