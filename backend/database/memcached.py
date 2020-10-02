@@ -40,8 +40,6 @@ class GtdMemcachedManipulator():
         self.log.add_log("MemcachedManipulator: key can't be a list or dict", 3)
         return False
 
-        
-
     def _add(self, key, value):
 
         """
@@ -79,8 +77,6 @@ class GtdMemcachedManipulator():
         self.log.add_log("MemcachedManipulator: key can't be a list or dict", 3)
         return False
 
-        
-
     def _set_multi(self, param):
 
         """
@@ -95,8 +91,6 @@ class GtdMemcachedManipulator():
             
         self.log.add_log("MemcachedManipulator: In set multi, the param must be a dict!", 3)
         return False
-        
-        
 
     def _delete(self, key):
 
@@ -112,8 +106,6 @@ class GtdMemcachedManipulator():
             
         self.log.add_log("MemcachedManipulator: key can't be a list or dict", 3)
         return False
-
-        
 
     def _delete_multi(self, param):
 
