@@ -11,7 +11,7 @@
 - But the core of us is a planning(time management) system rooted in GTD. With this system, you can achieve GTD easily and totally. More information about our project will be showed under here.
 
 ### How GTD works
-- About this topic, you can know more on [Wikipedia](https://en.wikipedia.org/wiki/Getting_Things_Done). I will only make some simply introduction here.
+- About this topic, you can go to [Wikipedia](https://en.wikipedia.org/wiki/Getting_Things_Done). I will only make some simply introduction here.
 - The core of GTD：
   - GTD's core thinks that only when you arrage everything well, you can focus on what you going to do and improve your effectiveness.
   - GTD thinks your stress is not because there are too many things to do, but because you have too many things didn't do.
@@ -33,25 +33,26 @@
     - And for "organization of net actions" can divided into "next actions list" and "future/someday list".
     - And if an action connect to many actions, then you need to refine it into specific actions.
     - For example, if you are going to write a report about your hometown, that means you need to divided it into "Planning", "Picking", "Classify", "Make powerpoint and document"...and some specific actions.
-    - GTD中对「下一步行动清单」与一般的「to-do list」最大的不同就在于其进行了进一步的细化，就比如按照地点：「电脑旁」「办公室」「家」「超市」等分别记录只有在这些地方才可以执行的行动，这样等你到了这些地点的时候，你就可以一目了然地知道该做哪些工作了
+    - The biggest difference between the "next actions list" and the general "to-do list" in GTD is that it has been further refined, according to the following locations: "next to the computer", "office", "home", "supermarket", etc. Record the actions that can only be performed in these places, so that when you get to these places, you can know at a glance that you need to do some work.
   - **REVIEW**
-    - 回顾也是GTD中的一个重要步骤
-    - 通过回顾并检查你所有的清单，然后对它们进行鞥新，这样才能确保GTD系统的运作，而且在回顾的同时可能还需要对未来以后的行动进行计划（如果你一周回顾一次的话）
+    - Review
+    - Review is also an important step in GTD.
+    - By reviewing and checking all your lists, and then updating them, in order to ensure the operation of the GTD system, and while reviewing, you may also need to plan for future actions (if you review once a week)
 ### How we works
 - So, how this project work?
 - **Front**
-  - First, we need to support an interfaction port for user. 
-  - 首先，我们需要一个可视化的交互口以便用户操作，而这种可视化的交互口是可以有很多种实现方式的。在这里，我就对一些初级阶段需要实现的交互方式进行列举和说明
-    - 1、网页/WEB端：不得不说，web工具真的是很好用，轻量简洁。我个人目前考虑使用php来实现，不过我还不会php，但我会努力的，有人愿意也可以联系我一起开发
-    - 2、DUEROS语音交互：通过语音交互，你可以很方便的对inbox进行整理、分类、规划等等，而DUEROS的各种设备销量都很不错，其对第三方技能开发的支持也很友善，因此我会在DUEROS上做一个技能，然后用户可以连接到公用或自己的服务器来使用
-    - 3、xiaolan/wukong-robot语音交互：xiaolan和wukong-robot都是运行在各种DIY设备上的语音交互机器人，但它们与DUEROS的区别就是其都由广大开发者制作的。而其中的xiaolan就是我做的一个，虽然没有wukong厉害，但我会加油的
+  - First, we need to support an interfaction port for user. And this kind of visual interaction port can be implemented in many ways. Here, I will enumerate and explain some of the interaction methods that need to be implemented at the initial stage.
+    - ***1, WebClient***: I have to say, the tools on web are really useful, they are simple and easy to use. I plan to use php to write this web client, but I can't because I don't use php, but I will make effort on ti. If you like develop with me, please cotact me by the email under there.
+    - ***2, Dueros/AmazonEcho***: According to speech interfaction, you can do anything to inbox such as planning easily. I will develop a skill on them(dueros and amazon echo) so that you can use this event.
+      - Tips: Dueros is same as the Amazon Echo, But Dueros works in a Chinese environment.
+    - ***3, xiaolan/wukong-robot***: xiaoland and wukong-robot are a smart robot which can run on raspberrypi. Both of them are public on github, you can search them to get more info. And xiaolan is develop by me, although it not great than wukong-robot, but I will keep working hard.
 - **Backend**
-  - 很明显，后端就是支持整个软件运行的部分，其重要性显而易见
-  - 那么关于后端我是打算使用python来编写的（毕竟我python很熟），而且用python做后端的软件也不少，就比如「Instagram」
-  - 后端包括了「服务端」和「基本业务」
-    - 服务端就是给DUEROS等更多的非自有前端（如WEB端就是自有前端）的一个接口，用户也可以根据自己的喜好，按照我们提供的API接口来开发自己喜欢的交互方式
-    - 而基本业务就是最底层的部分了。基本业务其实就是完全配合GTD，再加上一些创新的实现
-- 到这里，相信你已经对本项目有了一定的认识，如果您想要了解更多，请查看我们的[Wiki](https://github.com/xiaoland/GettingThingsDone/wiki)
+  - Obviously, the backend is the part that supports the operation of the entire software, and its importance is obvious.
+  - So, about the backend, I plan to use python to write (after all I am very familiar with python), and there are a lot of software using python as the backend, such as "Instagram"
+  - It includes "server" and "base"
+    - The server is an interface for more non-own front such as Dueros (web client is its own front end). Users can also develop their own interaction according to their own preferences and according to the API interface we provide.
+    - The "base" is the most basic part. The "base" is actually fully compatible with GTD, but will also add some new ideas.
+- At this point, I believe that you have a certain understanding of this event, if you want to know more, please go to our [Wiki](https://github.com/xiaoland/GettingThingsDone/wiki)
 
 ## About
 
