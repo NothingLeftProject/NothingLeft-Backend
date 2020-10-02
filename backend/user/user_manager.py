@@ -79,3 +79,4 @@ class GtdUserManager():
         
         return user_info
 
+        # add_user_group  set_user_group  delete_user_group  update_user_group_info
