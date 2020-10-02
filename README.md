@@ -54,10 +54,10 @@
 ## About
 
 ### Author
-- Lan_zhijiang(This is me)
+- Lan_zhijiang(That's me)
 - 当然也欢迎大家来一起开发
   - Wechat：18680171381
   - QQ: 1481605673
 
-### UpdateLog
-- 完成README.md-Chinese-Version-1
+### Usage
+- 请查看本项目的[Wiki](https:/github.com/xiaoland/GettingThinsDone/wiki)
