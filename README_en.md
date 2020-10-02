@@ -28,11 +28,11 @@
     - To those stuffs in "can't take action", you need to further classify them. Such as "data", "someday/future" and "trash".
     - And to those stuffs in "can take action", you need to classify them according to can it be finished in two minutes. If can, you should take action right now. If not, you can plan the next action of it.
   - **ORGANIZE**
-    - 组织主要分成对「参考资料的组织」和对「下一步行动的组织」
-    - 对「参考资料的组织」主要就是一个文档管理系统
-    - 而对「下一步行动的组织」则一般可以分为「下一步行动清单」和「追踪（等待）清单」以及「未来清单」
-    - 而且如果一个行动涉及到多步骤的行动，那么你就需要将其细化成具体的行动
-    - 如：写一个关于家乡文化的调查报告，那么你就需要将其分为「设计计划」「搜集资料」「整理资料」「编写文稿和PPT」等细化出来的行动
+    - Organizations are mainly divided into "organization of data" and "organization of next actions"
+    - For "organization of data" is mainly like a file management system.
+    - And for "organization of net actions" can divided into "next actions list" and "future/someday list".
+    - And if an action connect to many actions, then you need to refine it into specific actions.
+    - For example, if you are going to write a report about your hometown, that means you need to divided it into "Planning", "Picking", "Classify", "Make powerpoint and document"...and some specific actions.
     - GTD中对「下一步行动清单」与一般的「to-do list」最大的不同就在于其进行了进一步的细化，就比如按照地点：「电脑旁」「办公室」「家」「超市」等分别记录只有在这些地方才可以执行的行动，这样等你到了这些地点的时候，你就可以一目了然地知道该做哪些工作了
   - **REVIEW**
     - 回顾也是GTD中的一个重要步骤
@@ -56,10 +56,11 @@
 ## About
 
 ### Author
-- Lan_zhijiang(This is me)
-- 当然也欢迎大家来一起开发
+- Lan_zhijiang(That's me)
+- Of course, everyone is welcome to develop together.
   - Wechat：18680171381
-  - QQ: 1481605673
+  - Twitter: Lanzhijiang
+  - E-mail: lanzhijiang@foxmail.com
 
-### UpdateLog
-- 完成README.md-Chinese-Version-1
+### Usage
+
