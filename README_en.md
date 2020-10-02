@@ -63,4 +63,4 @@
   - E-mail: lanzhijiang@foxmail.com
 
 ### Usage
-
+- Please go to [Wiki](https:/github.com/xiaoland/GettingThinsDone/wiki)
