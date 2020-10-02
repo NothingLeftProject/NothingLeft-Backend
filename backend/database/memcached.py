@@ -11,7 +11,7 @@ class GtdMemcachedManipulator():
 
         self.log = log
         self.setting = setting
-        self.connect_memcached_server = database_name
+        self.database_name = database_name
         self.memcached_settings = setting["memcachedSettings"]
         
         try:
@@ -215,6 +215,7 @@ class GtdMemcachedManipulator():
         :return 
         """
         self.disconnect()
+        self.database_name = database_name
         try:
             self.memcached_server_address = self.memcached_settings["address"][database_name]
         except KeyError:
