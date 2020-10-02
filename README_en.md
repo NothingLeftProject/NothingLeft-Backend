@@ -11,7 +11,7 @@
 - But the core of us is a planning(time management) system rooted in GTD. With this system, you can achieve GTD easily and totally. More information about our project will be showed under here.
 
 ### How GTD works
-- About this question, you can know more on [Wikipedia](https://en.wikipedia.org/wiki/Getting_Things_Done). I will only make some simply introduction here.
+- About this topic, you can know more on [Wikipedia](https://en.wikipedia.org/wiki/Getting_Things_Done). I will only make some simply introduction here.
 - The core of GTD：
   - GTD's core thinks that only when you arrage everything well, you can focus on what you going to do and improve your effectiveness.
   - GTD thinks your stress is not because there are too many things to do, but because you have too many things didn't do.
