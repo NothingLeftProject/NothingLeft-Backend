@@ -74,7 +74,7 @@ class GtdLog():
         
         try:
             log_file = open(self.get_log_file_path(), "a")
-            log_file.write('\r\n' + log)
+            log_file.write(log + '\r\n')
             log_file.close()
         except IOError:
             print("[WARNING] " + self.get_formatted_time() + " Can't write into the log file!")
