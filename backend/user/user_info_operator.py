@@ -6,7 +6,7 @@
 from backend.user.user_manager import GtdUserManager
 
 
-class GtdUerInfoOperator():
+class GtdUerInfoManager():
 
     def __init__(self, account, log, setting):
 
@@ -32,28 +32,35 @@ class GtdUerInfoOperator():
 
         return account, account_info
 
-    def set_nickname(self, nickname, account=None):
+    def set_info(self, key, value, account=None):
 
         """
-        设置用户昵称
-        :param account: 被操作的账户
-        :param nickname: 昵称
-        :return: bool
-        """
-        account, account_info = self.reset_param(account)
-
-        self.log.add_log("UserInfoOperator: Set " + account + " 's nickname to " + nickname, 1)
-        account_info["nickname"] = nickname
-
-        return self.gtd_user_manager.update_user_info(account, account_info)
-
-    def set_email(self, email, account=None):
-
-        """
-
-        :param email:
-        :param account:
+        设置用户的指定信息
+        :param key: 用户信息dict中要被设置的那个key
+        :param value: 要设置为的value
+        :param account: 账户名
         :return:
         """
         account, account_info = self.reset_param(account)
 
+        self.log.add_log("UserInfoManager: Set " + account + " 's " + key + " to " + str(value), 1)
+        account_info[key] = value
+        self.account_info = account_info
+
+        return self.gtd_user_manager.update_user_info(account, account_info)
+
+    def get_info(self, key, account=None):
+
+        """
+        获取用户的指定信息
+        :param key: 用户信息dict中要被设置的那个key
+        :param value: 要设置为的value
+        :param account: 账户名
+        :return:
+        """
+        account, account_info = self.reset_param(account)
+
+        value = account_info[key]
+        self.log.add_log("UserInfoManager: Get " + account + " 's " + key + " :" + value, 1)
+
+        return value
