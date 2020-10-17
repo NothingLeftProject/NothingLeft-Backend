@@ -1,6 +1,6 @@
 # coding=utf-8
 # author: Lan_zhijiang
-# desciption: The code manage users
+# desciption: 用户信息管理器
 # date: 2020/10/17
 
 from backend.user.user_manager import GtdUserManager
