@@ -1,10 +1,10 @@
 # coding=utf-8
 # author: Lan_zhijiang
-# desciption: The code manage users
+# desciption: 用户管理器
 # date: 2020/10/2
 
 import json
-from backend.file_system.database.memcached import GtdMemcachedManipulator
+from backend.database.memcached import GtdMemcachedManipulator
 
 
 class GtdUserManager():
@@ -25,6 +25,10 @@ class GtdUserManager():
         :param email: 电子邮箱
         :return bool
         """
+        if "/" in account or "." in account:
+            self.log.add_log("UserManager: '/' or '.' is banned in account name", 3)
+            return False
+
         user_info = json.load(open("./backend/data/json/user_info_template.json", "r", encoding="utf-8"))
         user_info["account"] = str(account)
         user_info["password"] = str(password)
@@ -34,6 +38,7 @@ class GtdUserManager():
             return False
         else:
             self.log.add_log("UserManager: Add user successed!", 1)
+            return True
 
     def delete_user(self, account):
 
