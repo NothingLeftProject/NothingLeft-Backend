@@ -1,0 +1,16 @@
+{
+    "account": "",
+    "password": "",
+    "nickname": "",
+    "email": [],
+    "telephone": [],
+    "avatar": "",
+    "language": "",
+    "gender": "",
+    "timezone": "",
+    "location": {
+        "home": "",
+        "school": "",
+        "company": ""
+    }
+}

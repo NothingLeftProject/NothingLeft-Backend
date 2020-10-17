@@ -1,6 +1,6 @@
 # coding=utf-8
 # author: Lan_zhijiang
-# desciption: The code opreation memcached database
+# desciption: 操作memcached数据库
 # date: 2020/10/2
 
 import memcache
@@ -18,7 +18,7 @@ class GtdMemcachedManipulator():
         try:
             self.memcached_server_address = self.memcached_settings["address"][database_name]
         except KeyError:
-            self.log.add_log("MemcachedManipulator: Can't find memcached server named: " 
+            self.log.add_log("MemcachedManipulator: Can't find memcached server named: "
                              + database_name + "'s address in the settings, please check it.", 3)
 
         self.mc = memcache.Client(
@@ -212,7 +212,7 @@ class GtdMemcachedManipulator():
         try:
             self.memcached_server_address = self.memcached_settings["address"][database_name]
         except KeyError:
-            self.log.add_log("MemcachedManipulator: Can't find memcached server named: " 
+            self.log.add_log("MemcachedManipulator: Can't find memcached server named: "
                              + database_name + "'s address in the settings, please check it.", 3)
 
         self.mc = memcache.Client(
