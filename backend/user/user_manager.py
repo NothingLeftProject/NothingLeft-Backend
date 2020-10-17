@@ -35,6 +35,16 @@ class GtdUserManager():
         else:
             self.log.add_log("UserManager: Add user successed!", 1)
 
+    def delete_user(self, account):
+
+        """
+        删除某个用户
+        :param account: 账户名
+        :return:
+        """
+        self.log.add_log("UserManager: Delete user: " + account, 1)
+        return self.memcached_manipulator._delete(account)
+
     def update_user_info(self, account, info):
 
         """
@@ -63,7 +73,7 @@ class GtdUserManager():
 
         """
         获取用户信息（可多个）
-        :param account: 账户名 list
+        :param accounts: 账户名 list
         :return dict
         """
         if type(accounts) != list:
@@ -79,4 +89,4 @@ class GtdUserManager():
         
         return user_info
 
-        # add_user_group  set_user_group  delete_user_group  update_user_group_info
+
