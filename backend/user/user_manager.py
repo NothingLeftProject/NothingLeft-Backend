@@ -33,6 +33,7 @@ class GtdUserManager():
         user_info["account"] = str(account)
         user_info["password"] = str(password)
         user_info["email"][0] = email
+        user_info["dataPath"] = "./backend/data/gtd/" + account + "/"
         if self.memcached_manipulator._add(account, user_info) == False:
             self.log.add_log("UserManager: Add user failed, this user had already exits. user: " + account, 3)
             return False
