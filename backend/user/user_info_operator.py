@@ -42,7 +42,7 @@ class GtdUerInfoOperator():
         """
         account, account_info = self.reset_param(account)
 
-        self.log.add_log("UserInfoOperator: Set %s 's nickname to %s"%account%nickname, 1)
+        self.log.add_log("UserInfoOperator: Set " + account + " 's nickname to " + nickname, 1)
         account_info["nickname"] = nickname
 
         return self.gtd_user_manager.update_user_info(account, account_info)
