@@ -13,6 +13,7 @@ class GtdInboxManager():
 
         self.log = log
         self.setting = setting
+        self.inbox_path = self.setting["dataPath"] + "inbox/"
 
         self.inbox = self.get_inbox()
 
@@ -22,7 +23,30 @@ class GtdInboxManager():
         获取inbox
         :return:
         """
-        data_path = "./backend/data/gtd/" + self.setting["account"] + ""
+        inbox = {}
+        inbox_list = os.listdir(self.inbox_path)
+
+        if inbox_list is None or inbox_list == []:
+            info = {
+                "numberOfStuff": 0
+            }
+            json.dump(info, open(self.inbox_path + "info.json", "w", encoding="utf-8"))
+
+        for event in inbox_list:
+            if event == "info.json":
+                inbox["info"] = json.load(open(self.inbox_path+event, "r", encoding="utf-8"))
+            else:
+                inbox["stuff"].append(event.replace(".json", ""))
+
+        return inbox
+
+    def update_inbox_info(self):
+
+        """
+        更新inbox的info.json
+        :return:
+        """
+        json.dump(self.inbox["info"], open(self.inbox_path+"info.json", "w", encoding="utf-8"))
 
     def add_stuff(self, name, tags=None, remarks=None, desc=None):
 
@@ -32,6 +56,21 @@ class GtdInboxManager():
         :param tags: 标签（不推荐填写）
         :param remarks: 备注（对后续处理可以起到提示）
         :param desc: 更加详细的描述（不推荐）
-        :return: int(index)
+        :return: int(index), bool(remind_clean)
         """
+        remind_clean = False
+        stuff_info = json.load(open("./backend/data/json/inbox_stuff_template.json", "r", encoding="utf-8"))
+        stuff_info["name"] = name
+        stuff_info["tags"] = tags
+        stuff_info["remarks"] = remarks
+        stuff_info["desc"] = desc
+        stuff_info["createdTime"] = self.log.get_data + " " + self.log.get_formatted_time()
 
+        self.inbox["info"]["numberOfStuff"]+=1
+        if self.inbox["info"]["numberOfStuff"] > self.setting["inboxStuffLimit"]:
+            remind_clean = True
+
+        self.log.add_log("InboxManager: Add stuff: " + name, 1)
+        json.dump(stuff_info, open(self.inbox_path + self.inbox["info"]["numberOfStuff"] + ".json", "w", encoding="utf-8"))
+
+        return self.inbox["info"]["numberOfStuff"], remind_clean
