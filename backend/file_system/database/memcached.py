@@ -5,6 +5,7 @@
 
 import memcache
 
+
 class GtdMemcachedManipulator():
 
     def __init__(self, log, setting, database_name="default"):
