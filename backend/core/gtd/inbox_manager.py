@@ -36,7 +36,7 @@ class GtdInboxManager():
             if event == "info.json":
                 inbox["info"] = json.load(open(self.inbox_path+event, "r", encoding="utf-8"))
             else:
-                inbox["stuff"].append(event.replace(".json", ""))
+                inbox["stuff"].append(event)
 
         return inbox
 
@@ -66,11 +66,30 @@ class GtdInboxManager():
         stuff_info["desc"] = desc
         stuff_info["createdTime"] = self.log.get_data + " " + self.log.get_formatted_time()
 
-        self.inbox["info"]["numberOfStuff"]+=1
+        self.inbox["info"]["numberOfStuff"] += 1
         if self.inbox["info"]["numberOfStuff"] > self.setting["inboxStuffLimit"]:
             remind_clean = True
 
-        self.log.add_log("InboxManager: Add stuff: " + name, 1)
+        self.log.add_log("InboxManager: Add stuff-" + name, 1)
+        self.inbox["stuff"].append(self.inbox["info"]["numberOfStuff"] + ".json")
         json.dump(stuff_info, open(self.inbox_path + self.inbox["info"]["numberOfStuff"] + ".json", "w", encoding="utf-8"))
 
         return self.inbox["info"]["numberOfStuff"], remind_clean
+
+    def delete_stuff(self, index):
+
+        """
+        删除某个stuff
+        :param index: stuff的index
+        :return: bool
+        """
+        index = str(index)
+        if index in self.inbox["stuff"]:
+            self.log.add_log("InboxManager: Delete stuff-" + index, 1)
+
+            stuff_path = self.inbox_path + index + ".json"
+            self.inbox["info"]["numberOfStuff"] -= 1
+            self.inbox["stuff"].remove(index)
+            os.remove(stuff_path)
+        else:
+            self.log.add_log("InboxManager: Can't find stuff-" + index + " in the inbox", 3)
