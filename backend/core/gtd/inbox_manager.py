@@ -89,7 +89,7 @@ class GtdInboxManager():
         :return: bool
         """
         index = str(index)
-        if index <= self.inbox["info"]["numberOfStuff"]:
+        if int(index) <= self.inbox["info"]["numberOfStuff"]:
             self.log.add_log("InboxManager: Delete stuff-" + index, 1)
 
             stuff_path = self.inbox_path + index + ".json"
@@ -109,11 +109,11 @@ class GtdInboxManager():
         """
         index = int(index)
         if index <= self.inbox["info"]["numberOfStuff"]:
-            self.log.add_log("InboxManager: Try getting stuff-" + index, 1)
+            self.log.add_log("InboxManager: Try getting stuff-" + str(index), 1)
 
             return self.inbox["stuff"][index]
         else:
-            self.log.add_log("InboxManager: Can't find stuff-" + index + " in the inbox", 3)
+            self.log.add_log("InboxManager: Can't find stuff-" + str(index) + " in the inbox", 3)
             return None
 
     def search_stuff(self, keyword):
