@@ -101,4 +101,13 @@ class GtdInboxManager():
         :param index: stuff的index
         :return: dict
         """
-        
+        index = str(index)
+        if index in self.inbox["stuff"]:
+            self.log.add_log("InboxManager: Try getting stuff-" + index, 1)
+
+            stuff_path = self.inbox_path + index + ".json"
+            return json.load(open(stuff_path, "r", encoding="utf-8"))
+        else:
+            self.log.add_log("InboxManager: Can't find stuff-" + index + " in the inbox", 3)
+            return None
+
