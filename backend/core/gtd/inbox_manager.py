@@ -93,3 +93,12 @@ class GtdInboxManager():
             os.remove(stuff_path)
         else:
             self.log.add_log("InboxManager: Can't find stuff-" + index + " in the inbox", 3)
+
+    def get_stuff(self, index):
+
+        """
+        获取某个stuff的信息
+        :param index: stuff的index
+        :return: dict
+        """
+        
