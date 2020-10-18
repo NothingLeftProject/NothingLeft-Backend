@@ -15,7 +15,9 @@ class GtdInboxManager():
         self.setting = setting
         self.inbox_path = self.setting["dataPath"] + "inbox/"
 
-        self.inbox = self.get_inbox()
+        self.inbox = {}
+        self.inbox_search_info = {}
+        self.get_inbox()
 
     def get_inbox(self):
 
@@ -38,15 +40,17 @@ class GtdInboxManager():
             else:
                 inbox["stuff"].append(event)
 
-        return inbox
-
-    def update_inbox_info(self):
+    def update_inbox_to_local(self, stuff_info, stuff_path):
 
         """
-        更新inbox的info.json
+        更新inbox到本地
+        :param stuff_path: stuff路径
+        :param stuff_info: stuff信息
         :return:
         """
-        json.dump(self.inbox["info"], open(self.inbox_path+"info.json", "w", encoding="utf-8"))
+        if stuff_info is not None and stuff_path is not None:  # may be a bug
+            json.dump(stuff_info, open(stuff_path, "w", encoding="utf-8"))
+        json.dump(self.inbox["info"], open(self.inbox_path + "info.json", "w", encoding="utf-8"))
 
     def add_stuff(self, name, tags=None, remarks=None, desc=None):
 
@@ -72,7 +76,7 @@ class GtdInboxManager():
 
         self.log.add_log("InboxManager: Add stuff-" + name, 1)
         self.inbox["stuff"].append(self.inbox["info"]["numberOfStuff"] + ".json")
-        json.dump(stuff_info, open(self.inbox_path + self.inbox["info"]["numberOfStuff"] + ".json", "w", encoding="utf-8"))
+        self.update_inbox_to_local(stuff_info, self.inbox_path + self.inbox["info"]["numberOfStuff"] + ".json")
 
         return self.inbox["info"]["numberOfStuff"], remind_clean
 
@@ -91,6 +95,7 @@ class GtdInboxManager():
             self.inbox["info"]["numberOfStuff"] -= 1
             self.inbox["stuff"].remove(index)
             os.remove(stuff_path)
+            self.update_inbox_to_local(None, None)
         else:
             self.log.add_log("InboxManager: Can't find stuff-" + index + " in the inbox", 3)
 
@@ -110,4 +115,12 @@ class GtdInboxManager():
         else:
             self.log.add_log("InboxManager: Can't find stuff-" + index + " in the inbox", 3)
             return None
+
+    def search_stuff(self, keyword):
+
+        """
+        搜索stuff
+        :param keyword: 搜索关键词
+        :return:
+        """
 
