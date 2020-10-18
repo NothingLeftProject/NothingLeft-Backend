@@ -16,7 +16,6 @@ class GtdInboxManager():
         self.inbox_path = self.setting["dataPath"] + "inbox/"
 
         self.inbox = {}
-        self.inbox_search_info = {}
         self.get_inbox()
 
     def get_inbox(self):
@@ -25,7 +24,6 @@ class GtdInboxManager():
         获取inbox
         :return:
         """
-        inbox = {}
         inbox_list = os.listdir(self.inbox_path)
 
         if inbox_list is None or inbox_list == []:
@@ -36,9 +34,12 @@ class GtdInboxManager():
 
         for event in inbox_list:
             if event == "info.json":
-                inbox["info"] = json.load(open(self.inbox_path+event, "r", encoding="utf-8"))
+                self.inbox["info"] = json.load(open(self.inbox_path+event, "r", encoding="utf-8"))
             else:
-                inbox["stuff"].append(event)
+                self.inbox["stuff"].append(event.replace(".json", ""))  # 小于最大值不就得了？
+                self.inbox["searchInfo"].append(
+                    {"fileName": event, ""}
+                )
 
     def update_inbox_to_local(self, stuff_info, stuff_path):
 
