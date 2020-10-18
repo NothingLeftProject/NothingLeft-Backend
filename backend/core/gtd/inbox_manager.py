@@ -36,10 +36,10 @@ class GtdInboxManager():
             if event == "info.json":
                 self.inbox["info"] = json.load(open(self.inbox_path+event, "r", encoding="utf-8"))
             else:
-                self.inbox["stuff"].append(event.replace(".json", ""))  # 小于最大值不就得了？
-                self.inbox["searchInfo"].append(
-                    {"fileName": event, ""}
-                )
+                stuff_info = json.load(open(self.inbox_path + event, "r", encoding="utf-8"))
+                event = event.replace(".json", "")
+                # self.inbox["stuff"].append(event)  # 小于最大值不就得了？
+                self.inbox["stuff"].append(stuff_info)
 
     def update_inbox_to_local(self, stuff_info, stuff_path):
 
@@ -76,7 +76,7 @@ class GtdInboxManager():
             remind_clean = True
 
         self.log.add_log("InboxManager: Add stuff-" + name, 1)
-        self.inbox["stuff"].append(self.inbox["info"]["numberOfStuff"] + ".json")
+        self.inbox["stuff"].append(stuff_info)
         self.update_inbox_to_local(stuff_info, self.inbox_path + self.inbox["info"]["numberOfStuff"] + ".json")
 
         return self.inbox["info"]["numberOfStuff"], remind_clean
@@ -89,7 +89,7 @@ class GtdInboxManager():
         :return: bool
         """
         index = str(index)
-        if index in self.inbox["stuff"]:
+        if index <= self.inbox["info"]["numberOfStuff"]:
             self.log.add_log("InboxManager: Delete stuff-" + index, 1)
 
             stuff_path = self.inbox_path + index + ".json"
@@ -107,12 +107,11 @@ class GtdInboxManager():
         :param index: stuff的index
         :return: dict
         """
-        index = str(index)
-        if index in self.inbox["stuff"]:
+        index = int(index)
+        if index <= self.inbox["info"]["numberOfStuff"]:
             self.log.add_log("InboxManager: Try getting stuff-" + index, 1)
 
-            stuff_path = self.inbox_path + index + ".json"
-            return json.load(open(stuff_path, "r", encoding="utf-8"))
+            return self.inbox["stuff"][index]
         else:
             self.log.add_log("InboxManager: Can't find stuff-" + index + " in the inbox", 3)
             return None
