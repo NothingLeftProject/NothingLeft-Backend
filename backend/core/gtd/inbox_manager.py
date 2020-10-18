@@ -97,8 +97,10 @@ class GtdInboxManager():
             self.inbox["stuff"].remove(index)
             os.remove(stuff_path)
             self.update_inbox_to_local(None, None)
+            return True
         else:
             self.log.add_log("InboxManager: Can't find stuff-" + index + " in the inbox", 3)
+            return False
 
     def get_stuff(self, index):
 
@@ -115,6 +117,16 @@ class GtdInboxManager():
         else:
             self.log.add_log("InboxManager: Can't find stuff-" + str(index) + " in the inbox", 3)
             return None
+
+    def update_stuff(self, index, key, value):
+
+        """
+        更新stuff信息
+        :param index: stuff的index
+        :param key: 要更新的键
+        :param value: 值
+        :return: bool
+        """
 
     def search_stuff(self, keyword):
 
