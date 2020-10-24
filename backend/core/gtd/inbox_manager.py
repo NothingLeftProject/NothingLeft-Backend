@@ -127,6 +127,27 @@ class GtdInboxManager():
         :param value: 值
         :return: bool
         """
+        index = int(index)
+        if index <= self.inbox["info"]["numberOfStuff"]:
+            if (type(key) is list or type(key) is tuple) and (type(value) is list or type(value) is tuple):
+
+                self.log.add_log("InboxManager: Update stuff info: \n    "
+                                + str(key) + "\n    " + str(value), 1)
+
+                for n_k in range(0, len(key)):
+                    try:
+                        self.inbox["stuff"][index][key[n_k]] = value[n_k]
+                    except KeyError:
+                        self.log.add_log("InboxManager: Can't find key: " + key[n_k] + " while updating info!", 3)
+                        continue
+
+                return True
+            else:
+                self.log.add_log("InboxManger: param key and value has to be a list or tuple!", 3)
+                return False
+        else:
+            self.log.add_log("InboxManager: Can't find stuff-" + str(index) + " in the inbox", 3)
+            return False
 
     def search_stuff(self, keyword):
 
