@@ -16,13 +16,14 @@ class GtdUserManager():
         
         self.memcached_manipulator = GtdMemcachedManipulator(log, setting) 
 
-    def add_user(self, account, password, email):
+    def add_user(self, account, password, email, user_type="user"):
 
         """
         添加用户
         :param account: 账户名
         :param password: 密码(md5)
         :param email: 电子邮箱
+        :param user_type: 用户类型
         :return bool
         """
         if "/" in account or "." in account:
@@ -33,7 +34,7 @@ class GtdUserManager():
         user_info["account"] = str(account)
         user_info["password"] = str(password)
         user_info["email"][0] = email
-        user_info["dataPath"] = "./backend/data/gtd/" + account + "/"
+        user_info["type"] = user_type
         if self.memcached_manipulator._add(account, user_info) == False:
             self.log.add_log("UserManager: Add user failed, this user had already exits. user: " + account, 3)
             return False

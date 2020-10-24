@@ -1,6 +1,7 @@
 {
     "account": "",
     "password": "",
+    "type": "",
     "nickname": "",
     "email": [],
     "telephone": [],
@@ -12,6 +13,5 @@
         "home": "",
         "school": "",
         "company": ""
-    },
-    "dataPath": ""
+    }
 }
