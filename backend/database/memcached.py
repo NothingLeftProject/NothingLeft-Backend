@@ -13,17 +13,17 @@ class GtdMemcachedManipulator():
         self.log = log
         self.setting = setting
         self.database_name = database_name
-        self.memcached_settings = setting["memcachedSettings"]
+        self.memcached_settings = setting["databaseSettings"]["memcached"]
         
         try:
             self.memcached_server_address = self.memcached_settings["address"][database_name]
         except KeyError:
             self.log.add_log("MemcachedManipulator: Can't find memcached server named: "
                              + database_name + "'s address in the settings, please check it.", 3)
-
-        self.mc = memcache.Client(
-            [self.memcached_server_address]
-        )
+        else:
+            self.mc = memcache.Client(
+                [self.memcached_server_address]
+            )
 
     def _set(self, key, value):
 
