@@ -6,7 +6,7 @@
 import pymysql
 
 
-class GtdMySqlManipulator():
+class MySqlManipulator():
 
     def __init__(self, log, setting, database_name="default"):
 
@@ -29,3 +29,11 @@ class GtdMySqlManipulator():
                                       charset="utf-8")
 
             self.cursor = self.db.cursor()
+
+    def create_table(self, name):
+
+        """
+        创建表
+        :return:
+        """
+

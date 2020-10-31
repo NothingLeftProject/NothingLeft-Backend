@@ -6,7 +6,7 @@
 import memcache
 
 
-class GtdMemcachedManipulator():
+class MemcachedManipulator():
 
     def __init__(self, log, setting, database_name="default"):
 

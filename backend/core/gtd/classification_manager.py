@@ -4,7 +4,7 @@
 # date: 2020/10/25
 
 
-class GtdClassificationManager():
+class ClassificationManager():
 
     def __init__(self, log, setting):
 

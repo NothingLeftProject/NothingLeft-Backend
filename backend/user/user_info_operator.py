@@ -3,14 +3,14 @@
 # desciption: 用户信息管理器
 # date: 2020/10/17
 
-from backend.user.user_manager import GtdUserManager
+from backend.user.user_manager import UserManager
 
 
 class GtdUerInfoManager():
 
     def __init__(self, account, log, setting):
 
-        self.gtd_user_manager = GtdUserManager(log, setting)
+        self.gtd_user_manager = UserManager(log, setting)
         self.log = log
         self.setting = setting
 

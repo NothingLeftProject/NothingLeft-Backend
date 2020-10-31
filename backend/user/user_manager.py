@@ -4,17 +4,17 @@
 # date: 2020/10/2
 
 import json
-from backend.database.memcached import GtdMemcachedManipulator
+from backend.database.memcached import MemcachedManipulator
 
 
-class GtdUserManager():
+class UserManager():
 
     def __init__(self, log, setting):
 
         self.log = log
         self.setting = setting
         
-        self.memcached_manipulator = GtdMemcachedManipulator(log, setting) 
+        self.memcached_manipulator = MemcachedManipulator(log, setting)
 
     def add_user(self, account, password, email, user_type="user"):
 
