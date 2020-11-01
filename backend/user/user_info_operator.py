@@ -11,13 +11,13 @@ class GtdUerInfoManager():
 
     def __init__(self, account, log, setting):
 
-        self.gtd_user_manager = UserManager(log, setting)
-        self.memcached_manipulator = MemcachedManipulator(log, setting)
         self.log = log
         self.setting = setting
 
         self.account = account
         self.account_info = self.get_user_info([account])
+        self.gtd_user_manager = UserManager(log, setting)
+        self.memcached_manipulator = MemcachedManipulator(log, setting)
 
     def update_user_info(self, account, info):
 
@@ -31,7 +31,7 @@ class GtdUerInfoManager():
             self.log.add_log("UserInfoManager: Failed to update user info: info must be a dict", 3)
             return False
 
-        user_info = self.memcached_manipulator._get(account)
+        user_info = self.memcached_manipulator._get("user-" + account)
 
         for now_key in info.keys():
             try:
@@ -40,7 +40,7 @@ class GtdUerInfoManager():
             except KeyError:
                 self.log.add_log("User Manager: can't find " + str(now_key) + " in user_info, skip!", 3)
 
-        self.memcached_manipulator._replace(account, user_info)
+        self.memcached_manipulator._replace("user-" + account, user_info)
         return True
 
     def get_user_info(self, accounts):
@@ -54,12 +54,15 @@ class GtdUerInfoManager():
             self.log.add_log("UserInfoManager: Param 'account' must be a list!", 3)
             return False
 
+        for i in range(0, len(accounts)):
+            accounts[i] = "user-" + accounts[i]
+
         user_info = self.memcached_manipulator._get_multi(accounts)
 
         for account in accounts:
-            self.log.add_log("UserManager: Getting " + str(account) + "'s info", 1)
+            self.log.add_log("UserManager: Getting " + str(account).replace("user-", "") + "'s info", 1)
             if user_info[account] is None:
-                self.log.add_log("UserManager: Can't find " + str(account), 3)
+                self.log.add_log("UserManager: Can't find " + str(account).replace("user-", ""), 3)
 
         return user_info
 
