@@ -4,6 +4,7 @@
 # date: 2020/10/2
 
 import json
+from backend.data.encryption import Encryption
 from backend.database.memcached import MemcachedManipulator
 
 
@@ -13,7 +14,8 @@ class UserManager():
 
         self.log = log
         self.setting = setting
-        
+
+        self.encryption = Encryption(log, setting)
         self.memcached_manipulator = MemcachedManipulator(log, setting)
 
     def add_user(self, account, password, email, user_type="user"):
@@ -35,7 +37,7 @@ class UserManager():
         user_info["password"] = str(password)
         user_info["email"][0] = email
         user_info["type"] = user_type
-        if self.memcached_manipulator._add(account, user_info) == False:
+        if self.memcached_manipulator._add(account, user_info) is False:
             self.log.add_log("UserManager: Add user failed, this user had already exits. user: " + account, 3)
             return False
         else:
@@ -52,48 +54,55 @@ class UserManager():
         self.log.add_log("UserManager: Delete user: " + account, 1)
         return self.memcached_manipulator._delete(account)
 
-    def update_user_info(self, account, info):
+    def sign_up(self, param):
 
         """
-        更新用户信息
-        :param account: 账户名
-        :param info: 要更新的信息
-        :return bool
+        注册
+        :param param: 注册数据
+        :return: bool
         """
-        if type(info) != dict:
-            self.log.add_log("UserManager: Failed to update user info: info must be a dict", 3)
+        self.log.add_log("UserManager: Start sign_up", 1)
+        try:
+            account = param["account"]
+            password = param["password"]
+            email = param["email"]
+            user_type = param["user_type"]
+        except KeyError:
+            self.log.add_log("UserManager: sign_up: Your param is incomplete!", 3)
             return False
+        else:
+            password = self.encryption.md5(password)
+            return self.add_user(account, password, email, user_type)
 
-        user_info = self.memcached_manipulator._get(account)
-        
-        for now_key in info.keys():
-            try:
-                self.log.add_log("UserManager: Updating " + str(now_key) + "'s info", 1)
-                user_info[now_key] = info[now_key]
-            except KeyError:
-                self.log.add_log("User Manager: can't find " + str(now_key) + " in user_info, skip!", 3)
-        
-        self.memcached_manipulator._replace(account, user_info)
-        return True
-
-    def get_user_info(self, accounts):
+    def login(self, param):
 
         """
-        获取用户信息（可多个）
-        :param accounts: 账户名 list
-        :return dict
+        登录
+        :param param:
+        :return: bool(fail) str(success)
         """
-        if type(accounts) != list:
-            self.log.add_log("UserManager: Param 'account' must be a list!", 3)
+        try:
+            account = param["account"]
+            password = param["password"]
+        except KeyError:
+            self.log.add_log("UserManager: login: Your param is incomplete!", 3)
             return False
-        
-        user_info = self.memcached_manipulator._get_multi(accounts)
+        else:
+            self.log.add_log("UserManager: Try login " + account)
+            password = self.encryption.md5(password)
 
-        for account in accounts:
-            self.log.add_log("UserManager: Getting " + str(account) + "'s info", 1)
-            if user_info[account] is None:
-                self.log.add_log("UserManager: Can't find " + str(account), 3)
-        
-        return user_info
+            user_info = self.memcached_manipulator._get(account)
+            if user_info is False:
+                if password == user_info["password"]:
+                    token = self.log.get_time_stamp() + account
+                    self.setting["user"]["token"] = token
+                    self.setting["user"]["account"] = account
+                    self.setting["user"]["avatar"] = user_info["avatar"]
 
-
+                    return token
+                else:
+                    self.log.add_log("UserManager: Your password is wrong!", 3)
+                    return False
+            else:
+                self.log.add_log("UserManager: login: Can't find your account or something wrong with the memcached.", 3)
+                return False
