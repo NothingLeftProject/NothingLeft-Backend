@@ -1,4 +1,6 @@
 # NothingLeft
+- Logo:
+  - ![NonthingLeft-Logo](https://github.com/xiaoland/NothingLeft/blob/docs/image/NothingLeft-Logo.png)
 - NothingLeft是一个基于GTD理念的时间管理平台
 - 通过NothingLeft，你可以做到事情滴水不漏，事件安排得有条不紊
 - 而且NothingLeft允许任何人利用其API开发他喜欢的交互方式，当然，我们的默认交互方式是WEB和语音交互
