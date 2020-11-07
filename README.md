@@ -5,12 +5,12 @@
 - 而且NothingLeft允许任何人利用其API开发他喜欢的交互方式，当然，我们的默认交互方式是WEB和语音交互
 
 ## Indroduction
-- Getting Things Done is a kind of time management system which was proposed by David Allen. Usually, we abbreviate Getting Things Done as GTD.
 - Choose language version: 
   - [EnglishVersion](./README_en.md)
   - [ChineseVersion](./README.md)
 
 ### What is GTD:
+- - Getting Things Done is a kind of time management system which was proposed by David Allen. Usually, we abbreviate Getting Things Done as GTD.
 - [Gtd-Introduction](./GTD.md)
 
 ### How we works
@@ -39,4 +39,4 @@
   - QQ: 1481605673
 
 ### Usage
-- 请查看本项目的[Wiki](https:/github.com/xiaoland/GettingThinsDone/wiki)
+- 请查看本项目的[Wiki](https:/xiaoland.github.io/nothingleft)
