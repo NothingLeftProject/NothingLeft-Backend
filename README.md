@@ -3,11 +3,11 @@
 - NothingLeft是一个基于GTD理念的时间管理平台
 - 通过NothingLeft，你可以做到事情滴水不漏，事件安排得有条不紊
 - 而且NothingLeft允许任何人利用其API开发他喜欢的交互方式，当然，我们的默认交互方式是WEB和语音交互
-
-## Indroduction
-- Choose language version: 
+- - Choose language version: 
   - [EnglishVersion](./README_en.md)
   - [ChineseVersion](./README.md)
+
+## Indroduction
 
 ### What is GTD:
 - - Getting Things Done is a kind of time management system which was proposed by David Allen. Usually, we abbreviate Getting Things Done as GTD.
