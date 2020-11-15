@@ -28,5 +28,6 @@
 ## 索引-Index
 
 ### 用户系统-UserSystem
+- [Index of UserSystem](/backend/user_system/index.md)
 - [用户管理器-UserManager](/backend/user_system/user_manager.md)
 
