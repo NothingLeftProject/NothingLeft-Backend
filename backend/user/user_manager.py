@@ -6,6 +6,7 @@
 import json
 from backend.data.encryption import Encryption
 from backend.database.memcached import MemcachedManipulator
+from backend.user.user_group_manager import UserGroupManager
 
 
 class UserManager():
@@ -17,15 +18,16 @@ class UserManager():
 
         self.encryption = Encryption(log, setting)
         self.memcached_manipulator = MemcachedManipulator(log, setting)
+        self.user_group_manager = UserGroupManager(log, setting)
 
-    def add_user(self, account, password, email, user_type="user"):
+    def sign_up(self, account, password, email, user_group="user"):
 
         """
-        添加用户
+        注册用户
         :param account: 账户名
         :param password: 密码(md5)
         :param email: 电子邮箱
-        :param user_type: 用户类型
+        :param user_group: 用户组
         :return bool
         """
         if "/" in account or "." in account or "-" in account:
@@ -36,12 +38,14 @@ class UserManager():
         user_info["account"] = str(account)
         user_info["password"] = str(password)
         user_info["email"][0] = email
-        user_info["type"] = user_type
+        user_info["userGroup"] = user_group
+        self.user_group_manager.add_user_in(account, user_group)
+
         if self.memcached_manipulator._add("user-" + account, user_info) is False:
-            self.log.add_log("UserManager: Add user failed, this user had already exits. user: " + account, 3)
+            self.log.add_log("UserManager: Sign up failed, this user had already exists. user: " + account, 3)
             return False
         else:
-            self.log.add_log("UserManager: Add user successed!", 1)
+            self.log.add_log("UserManager: Sign up success!", 1)
             return True
 
     def delete_user(self, account):
@@ -52,29 +56,9 @@ class UserManager():
         :return:
         """
         self.log.add_log("UserManager: Delete user: " + account, 1)
-        return self.memcached_manipulator._delete(account)
+        return self.memcached_manipulator._delete("user-" + account)
 
-    def sign_up(self, param):
-
-        """
-        注册
-        :param param: 注册数据
-        :return: bool
-        """
-        self.log.add_log("UserManager: Start sign_up", 1)
-        try:
-            account = param["account"]
-            password = param["password"]
-            email = param["email"]
-            user_type = param["user_type"]
-        except KeyError:
-            self.log.add_log("UserManager: sign_up: Your param is incomplete!", 3)
-            return False
-        else:
-            password = self.encryption.md5(password)
-            return self.add_user(account, password, email, user_type)
-
-    def login(self, param):
+    def login(self, param):  # 设立到LocalCaller的core中
 
         """
         登录
