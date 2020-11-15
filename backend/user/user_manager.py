@@ -58,38 +58,32 @@ class UserManager():
         self.log.add_log("UserManager: Delete user: " + account, 1)
         return self.memcached_manipulator._delete("user-" + account)
 
-    def login(self, param):  # 设立到LocalCaller的core中
+    def login(self, account, password):
 
         """
         登录
-        :param param:
+        :param account: 账户
+        :param password: 密码
         :return: bool(fail) str(success)
         """
-        try:
-            account = param["account"]
-            password = param["password"]
-        except KeyError:
-            self.log.add_log("UserManager: login: Your param is incomplete!", 3)
-            return False
-        else:
-            self.log.add_log("UserManager: Try login " + account)
-            password = self.encryption.md5(password)
+        self.log.add_log("UserManager: Try login " + account)
 
-            user_info = self.memcached_manipulator._get("user-" + account)
-            if user_info is False:
-                if password == user_info["password"]:
-                    token = self.encryption.md5(self.log.get_time_stamp() + account)
-                    self.setting["user"]["token"] = token
-                    self.setting["user"]["account"] = account
-                    self.setting["user"]["avatar"] = user_info["avatar"]
+        user_info = self.memcached_manipulator._get("user-" + account)
+        if user_info is False:
+            if password == user_info["password"]:
+                token = self.encryption.md5(self.log.get_time_stamp() + account)
+                self.setting["user"]["token"] = token
+                self.setting["user"]["account"] = account
+                self.setting["user"]["avatar"] = user_info["avatar"]
 
-                    # add user group manager to get permission
+                # add user group manager to get permission
 
-                    self.log.add_log("UserManager: login success, your token: " + token, 1)
-                    return token
-                else:
-                    self.log.add_log("UserManager: Your password is wrong!", 3)
-                    return False
+                self.log.add_log("UserManager: login success, your token: " + token, 1)
+                return token
             else:
-                self.log.add_log("UserManager: login: Can't find your account or something wrong with the memcached.", 3)
+                self.log.add_log("UserManager: Your password is wrong!", 3)
                 return False
+
+        else:
+            self.log.add_log("UserManager: login: Can't find your account or something wrong with the memcached.", 3)
+            return False

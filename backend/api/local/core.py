@@ -15,12 +15,22 @@ class LocalCallerCore():
 
         self.user_manager = UserManager(log, setting)
 
-    def user_login(self):
+    def user_login(self, param):
 
         """
         用户登录
         :return:
         """
+        self.log.add_log("LocalCallerCore: start user_login", 1)
+        try:
+            account = param["account"]
+            password = param["password"]
+        except KeyError:
+            self.log.add_log("UserManager: login: Your param is incomplete!", 3)
+            return False
+        else:
+            self.user_manager.login(account, password)
+
 
     def user_sign_up(self, param):
 
