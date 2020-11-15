@@ -31,7 +31,6 @@ class LocalCallerCore():
         else:
             self.user_manager.login(account, password)
 
-
     def user_sign_up(self, param):
 
         """
