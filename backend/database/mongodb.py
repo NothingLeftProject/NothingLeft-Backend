@@ -128,6 +128,7 @@ class MongoDBManipulator():
                     self.log.add_log("MongoDB: add one document fail", 3)
                     return False
                 else:
+                    self.log.add_log("MongoDB: add one document success", 1)
                     return result
 
     def add_many_document(self, db_name, coll_name, docu_s):
@@ -157,6 +158,7 @@ class MongoDBManipulator():
                     self.log.add_log("MongoDB: add many document fail", 3)
                     return False
                 else:
+                    self.log.add_log("MongoDB: add many document success", 1)
                     return result
 
     def get_document(self, db_name, coll_name, keyword=None, find_type=0):
@@ -171,6 +173,7 @@ class MongoDBManipulator():
         :param find_type: 查找模式
         :return: False/dict
         """
+        self.log.add_log("MongoDB: try to get document from " + db_name + "/" + coll_name, 1)
         if keyword is None:
             keyword = {}
         if keyword is dict:
@@ -211,6 +214,7 @@ class MongoDBManipulator():
         :param values: 字段对应的关键词
         :return: dict
         """
+        self.log.add_log("MongoDB: keyword generate start", 1)
         keyword = {}
         if mode == 1:
             for index in range(0, len(keys)):
@@ -226,7 +230,40 @@ class MongoDBManipulator():
                 self.log.add_log("MongoDB: generate keyword: if you choose mode 2, you have to fill mode2_mode correctly", 3)
                 return False
         else:
-            self.log.add_log("MongoDB: unknown mode", 3)
+            self.log.add_log("MongoDB: generate keyword: unknown mode", 3)
             keyword = False
         return keyword
+
+    def update_many_document(self, db_name, coll_name, query, values):
+
+        """
+        更新记录（文档）（多个）
+        :param db_name: 数据库名
+        :param coll_name: 集合名
+        :param query: 查找条件
+        :param values: 要修改的值（只要是一条以内的都可以）
+        :return:
+        """
+        try:
+            db = self.server[db_name]
+        except:
+            self.log.add_log("MongoDB: no database named " + db_name + " or something else wrong", 3)
+            return False
+        else:
+            try:
+                coll = db[coll_name]
+            except:
+                self.log.add_log("MongoDB: no collection named " + coll_name + " or something else wrong", 3)
+                return False
+            else:
+                try:
+                    result = coll.update_many(query, values)
+                except:
+                    self.log.add_log("MongoDB: add many document fail", 3)
+                    return False
+                else:
+                    self.log.add_log("MongoDB: update value success. Update count: "
+                                     + str(result.modified_count), 1)
+                    return result
+
 
