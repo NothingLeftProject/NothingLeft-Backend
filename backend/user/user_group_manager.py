@@ -1,6 +1,6 @@
 # coding=utf-8
 # author: Lan_zhijiang
-# desciption: 用户组管理器
+# description: 用户组管理器
 # date: 2020/11/1
 
 from backend.database.memcached import MemcachedManipulator
