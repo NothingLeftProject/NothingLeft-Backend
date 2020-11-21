@@ -241,7 +241,7 @@ class MongoDBManipulator():
         :param db_name: 数据库名
         :param coll_name: 集合名
         :param query: 查找条件
-        :param values: 要修改的值（只要是一条以内的都可以）
+        :param values: 要修改的值（只要是一条以内的都可以） {"$set": {}}
         :return:
         """
         try:
