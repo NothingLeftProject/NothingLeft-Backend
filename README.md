@@ -26,7 +26,7 @@
   - 后端包括了「服务端」和「基本业务」
     - 服务端就是给DUEROS等更多的非自有前端（如WEB端就是自有前端）的一个接口，用户也可以根据自己的喜好，按照我们提供的API接口来开发自己喜欢的交互方式
     - 而基本业务就是最底层的部分了。基本业务其实就是完全配合GTD，再加上一些创新的实现
-- 到这里，相信你已经对本项目有了一定的认识，如果您想要了解更多，请查看我们的[Wiki](https://github.com/xiaoland/GettingThingsDone/wiki)
+- 到这里，相信你已经对本项目有了一定的认识，如果您想要了解更多，请查看我们的[Wiki](https://nothingleftproject.github.io/NothingLeft/)
 
 ## About
 
@@ -39,4 +39,4 @@
   - QQ: 1481605673
 
 ### Usage
-- 请查看本项目的[Wiki](https:/xiaoland.github.io/nothingleft)
+- 请查看本项目的[Wiki](https://nothingleftproject.github.io/NothingLeft/)
