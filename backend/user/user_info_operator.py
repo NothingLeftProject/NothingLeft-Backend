@@ -31,20 +31,22 @@ class UerInfoManager():
         :type info: dict
         :return bool
         """
+        result = True
         if type(info) != dict:
             self.log.add_log("UserInfoManager: Failed to update user info: info must be a dict", 3)
             return False
 
-        id_list = []
         key_list = info.keys()
         for event in self.user_info_template:
-            if event.keys[1] in key_list:
-                id_list.append(event["_id"])
-
-        for now_key in info.keys():
-            self.log.add_log("UserManager: Updating " + str(now_key) + "'s info", 1)
-
-        return True
+            if event.keys[1] in key_list:  # needs to verify
+                try:
+                    if self.mongodb_manipulator.update_many_documents("user", account, {"_id": event["_id"]}, info[event.keys[1]]) is False:
+                        self.log.add_log("UserInfoManager: meet database error while updating " + event.keys[1] + ", skip", 3)
+                        result = False
+                except KeyError:
+                    self.log.add_log("UserInfoManager: can not find " + event.keys[1] + ", in your info list", 3)
+                    result = False
+        return result
 
     def get_user_info(self, accounts):
 
