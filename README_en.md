@@ -1,4 +1,4 @@
-# NothingLeft
+# NothingLeft——A time management platform
 -NothingLeft is a time management platform based on GTD concept.
 -Through NothingLeft, you can make things drip-proof and arrange events in an orderly manner.
 -And NothingLeft allows anyone to use its API to develop his favorite interaction method, of course, our default interaction method is WEB and voice interaction.
@@ -17,7 +17,7 @@
 - So, how this project work?
 - **Front**
   - First, we need to support an interfaction port for user. And this kind of visual interaction port can be implemented in many ways. Here, I will enumerate and explain some of the interaction methods that need to be implemented at the initial stage.
-    - ***1, WebClient***: I have to say, the tools on web are really useful, they are simple and easy to use. I plan to use php to write this web client, but I can't because I don't use php, but I will make effort on ti. If you like develop with me, please cotact me by the email under there.
+    - ***1, WebClient***: I have to say, the tools on web are really useful, they are simple and easy to use. I plan to use flutter to write this web UI, but I can't because I don't use JS, but I will make effort on ti. If you like to join me, please cotact me by the email under there.
     - ***2, Dueros/AmazonEcho***: According to speech interfaction, you can do anything to inbox such as planning easily. I will develop a skill on them(dueros and amazon echo) so that you can use this event.
       - Tips: Dueros is same as the Amazon Echo, But Dueros works in a Chinese environment.
     - ***3, xiaolan/wukong-robot***: xiaoland and wukong-robot are a smart robot which can run on raspberrypi. Both of them are public on github, you can search them to get more info. And xiaolan is develop by me, although it not great than wukong-robot, but I will keep working hard.
