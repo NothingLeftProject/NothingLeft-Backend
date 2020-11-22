@@ -79,6 +79,9 @@ class UserManager():
 
         user_info = self.mongodb_manipulator.get_document("user", account)
         if user_info is False:
+            self.log.add_log("UserManager: login: Can't find your account or something wrong with the memcached.", 3)
+            return False
+        else:
             if password == user_info["password"]:
                 token = self.encryption.md5(self.log.get_time_stamp() + account)
 
@@ -93,7 +96,3 @@ class UserManager():
             else:
                 self.log.add_log("UserManager: Your password is wrong", 3)
                 return False
-
-        else:
-            self.log.add_log("UserManager: login: Can't find your account or something wrong with the memcached.", 3)
-            return False
