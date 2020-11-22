@@ -246,24 +246,19 @@ class MongoDBManipulator():
         """
         try:
             db = self.server[db_name]
+            coll = db[coll_name]
         except:
-            self.log.add_log("MongoDB: no database named " + db_name + " or something else wrong", 3)
+            self.log.add_log("MongoDB: update_many_document: something went wrong", 3)
             return False
         else:
             try:
-                coll = db[coll_name]
+                result = coll.update_many(query, values)
             except:
-                self.log.add_log("MongoDB: no collection named " + coll_name + " or something else wrong", 3)
+                self.log.add_log("MongoDB: update many document fail", 3)
                 return False
             else:
-                try:
-                    result = coll.update_many(query, values)
-                except:
-                    self.log.add_log("MongoDB: add many document fail", 3)
-                    return False
-                else:
-                    self.log.add_log("MongoDB: update value success. Update count: "
-                                     + str(result.modified_count), 1)
-                    return result
+                self.log.add_log("MongoDB: update document success. Update count: "
+                                    + str(result.modified_count), 1)
+                return result
 
 
