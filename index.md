@@ -1,6 +1,6 @@
 # NothingLeft-Document
 - By Lanzhijiang
-- ![NonthingLeft-Logo](https://github.com/xiaoland/NothingLeft/blob/docs/image/NothingLeft-Logo.png)
+- ![NonthingLeft-Logo](https://github.com/NothingLeftProject/NothingLeft/blob/docs/image/NothingLeft-Logo.png)
 ## 前言-Preface
 - 本文档是「NothingLeft」的说明文档，它将指导你使用、或一起开发本项目
 - 如果您有更好地意见或者什么发现，请务必提出来，让我们一起协同进步
