@@ -131,7 +131,7 @@ class MongoDBManipulator():
                     self.log.add_log("MongoDB: add one document success", 1)
                     return result
 
-    def add_many_document(self, db_name, coll_name, docu_s):
+    def add_many_documents(self, db_name, coll_name, docu_s):
 
         """
         添加多个文档
@@ -161,22 +161,21 @@ class MongoDBManipulator():
                     self.log.add_log("MongoDB: add many document success", 1)
                     return result
 
-    def get_document(self, db_name, coll_name, keyword=None, find_type=0):
+    def get_document(self, db_name, coll_name, query=None, find_type=0):
 
         """
         获取某集合中的数据
-        :type keyword: dict
-        :type keyword: dict
+        :type query: dict
         :param db_name: 数据库名
         :param coll_name: 集合名
-        :param keyword: 查找关键词，不指定则返回全部数据
+        :param query: 查找关键词，不指定则返回全部数据
         :param find_type: 查找模式
         :return: False/dict
         """
         self.log.add_log("MongoDB: try to get document from " + db_name + "/" + coll_name, 1)
-        if keyword is None:
-            keyword = {}
-        if keyword is dict:
+        if query is None:
+            query = {}
+        if query is dict:
             try:
                 db = self.server[db_name]
                 coll = db[coll_name]
@@ -188,9 +187,9 @@ class MongoDBManipulator():
                     if find_type == 0:
                         result = coll.find()
                     elif find_type == 1:
-                        result = coll.find(keyword)
+                        result = coll.find(query)
                     elif find_type == 2:
-                        result = coll.find({}, keyword)
+                        result = coll.find({}, query)
                     else:
                         self.log.add_log("MongoDB: find type error!", 3)
                         return False
@@ -200,48 +199,48 @@ class MongoDBManipulator():
                 else:
                     return result
         else:
-            self.log.add_log("MongoDB: get one: param keyword must be a dict")
+            self.log.add_log("MongoDB: get one: param query must be a dict")
 
-    def generate_keyword(self, mode, keys, values=None, mode2_mode=None):
+    def generate_finding_query(self, mode, keys, values=None, mode2_mode=None):
 
         """
-        根据模式生成查询的keyword
+        根据模式生成查询的query
         :type keys: list
         :type values: list
-        :param mode: keyword生成模式 1：关键词 2：要的字段
+        :param mode: query生成模式 1：关键词 2：要的字段
         :param mode2_mode: 模式2的模式：1：要的字段 0:不要的字段
         :param keys: 字段
         :param values: 字段对应的关键词
         :return: dict
         """
-        self.log.add_log("MongoDB: keyword generate start", 1)
-        keyword = {}
+        self.log.add_log("MongoDB: query generate start", 1)
+        query = {}
         if mode == 1:
             for index in range(0, len(keys)):
-                keyword[keys[index]] = values[index]
+                query[keys[index]] = values[index]
         elif mode == 2:
             if mode2_mode == 1:
                 for i in keys:
-                    keyword[i] = 1
+                    query[i] = 1
             elif mode2_mode == 0:
                 for i in keys:
-                    keyword[i] = 0
+                    query[i] = 0
             else:
-                self.log.add_log("MongoDB: generate keyword: if you choose mode 2, you have to fill mode2_mode correctly", 3)
+                self.log.add_log("MongoDB: generate finding query: if you choose mode 2, you have to fill mode2_mode correctly", 3)
                 return False
         else:
-            self.log.add_log("MongoDB: generate keyword: unknown mode", 3)
-            keyword = False
-        return keyword
+            self.log.add_log("MongoDB: generate finding query: unknown mode", 3)
+            query = False
+        return query
 
-    def update_many_document(self, db_name, coll_name, query, values):
+    def update_many_documents(self, db_name, coll_name, query, values):
 
         """
         更新记录（文档）（多个）
         :param db_name: 数据库名
         :param coll_name: 集合名
         :param query: 查找条件
-        :param values: 要修改的值（只要是一条以内的都可以） {"$set": {}}
+        :param values: 要修改的值（只要是一条以内的都可以） {"key": "value"}
         :return:
         """
         try:
@@ -251,6 +250,7 @@ class MongoDBManipulator():
             self.log.add_log("MongoDB: update_many_document: something went wrong", 3)
             return False
         else:
+            values = {"$set": values}
             try:
                 result = coll.update_many(query, values)
             except:
@@ -259,6 +259,32 @@ class MongoDBManipulator():
             else:
                 self.log.add_log("MongoDB: update document success. Update count: "
                                     + str(result.modified_count), 1)
+                return result
+
+    def delete_many_documents(self, db_name, coll_name, query):
+
+        """
+        删除多个文档
+        :param db_name: 数据库名
+        :param coll_name: 集合名
+        :param query: 删除条件
+        :return:
+        """
+        try:
+            db = self.server[db_name]
+            coll = db[coll_name]
+        except:
+            self.log.add_log("MongoDB: delete_many_document: something went wrong", 3)
+            return False
+        else:
+            try:
+                result = coll.delete_many(query)
+            except:
+                self.log.add_log("MongoDB: delete many document fail", 3)
+                return False
+            else:
+                self.log.add_log("MongoDB: delete document success. Update count: "
+                                    + str(result.deleted_count), 1)
                 return result
 
 
