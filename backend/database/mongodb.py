@@ -95,11 +95,31 @@ class MongoDBManipulator():
         """
         try:
             db = self.server[db_name]
-            docu = db[coll_name]
+            coll = db[coll_name]
         except:
             self.log.add_log("MongoDB: add coll: " + coll_name + "to db: " + db_name + " fail", 3)
+            return False
         else:
             self.log.add_log("MongoDB: add coll: " + coll_name + "to db: " + db_name + " success", 1)
+            return True
+
+    def delete_collection(self, db_name, coll_name):
+
+        """
+        删除集合
+        :param db_name: 集合所在的数据库名
+        :param coll_name: 要删除的集合名
+        :return: bool
+        """
+        try:
+            db = self.server[db_name]
+            db[coll_name].drop()
+        except:
+            self.log.add_log("MongoDB: delete coll: " + coll_name + "in db: " + db_name + " fail", 3)
+            return False
+        else:
+            self.log.add_log("MongoDB: delete coll: " + coll_name + "in db: " + db_name + " success", 1)
+            return True
 
     def add_one_document(self, db_name, coll_name, docu):
 
