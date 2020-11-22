@@ -3,11 +3,12 @@
 # desciption: 用户信息管理器
 # date: 2020/10/17
 
+import json
 from backend.user.user_manager import UserManager
-from backend.database.memcached import MemcachedManipulator
+from backend.database.mongodb import MongoDBManipulator
 
 
-class GtdUerInfoManager():
+class UerInfoManager():
 
     def __init__(self, account, log, setting):
 
@@ -17,7 +18,9 @@ class GtdUerInfoManager():
         self.account = account
         self.account_info = self.get_user_info([account])
         self.gtd_user_manager = UserManager(log, setting)
-        self.memcached_manipulator = MemcachedManipulator(log, setting)
+        self.mongodb_manipulator = MongoDBManipulator(log, setting)
+
+        self.user_info_template = json.load(open("./data/json/user_info_template.json", "r", encoding="utf-8"))
 
     def update_user_info(self, account, info):
 
@@ -25,22 +28,22 @@ class GtdUerInfoManager():
         更新用户信息
         :param account: 账户名
         :param info: 要更新的信息
+        :type info: dict
         :return bool
         """
         if type(info) != dict:
             self.log.add_log("UserInfoManager: Failed to update user info: info must be a dict", 3)
             return False
 
-        user_info = self.memcached_manipulator._get("user-" + account)
+        id_list = []
+        key_list = info.keys()
+        for event in self.user_info_template:
+            if event.keys[1] in key_list:
+                id_list.append(event["_id"])
 
         for now_key in info.keys():
-            try:
-                self.log.add_log("UserManager: Updating " + str(now_key) + "'s info", 1)
-                user_info[now_key] = info[now_key]
-            except KeyError:
-                self.log.add_log("User Manager: can't find " + str(now_key) + " in user_info, skip!", 3)
+            self.log.add_log("UserManager: Updating " + str(now_key) + "'s info", 1)
 
-        self.memcached_manipulator._replace("user-" + account, user_info)
         return True
 
     def get_user_info(self, accounts):
@@ -57,7 +60,7 @@ class GtdUerInfoManager():
         for i in range(0, len(accounts)):
             accounts[i] = "user-" + accounts[i]
 
-        user_info = self.memcached_manipulator._get_multi(accounts)
+        user_info = self.mongodb_manipulator._get_multi(accounts)
 
         for account in accounts:
             self.log.add_log("UserManager: Getting " + str(account).replace("user-", "") + "'s info", 1)

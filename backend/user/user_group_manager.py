@@ -3,17 +3,17 @@
 # description: 用户组管理器
 # date: 2020/11/1
 
-from backend.database.memcached import MemcachedManipulator
+from backend.database.mongodb import MongoDBManipulator
 
 
-class UserGroupManager():
+class UserGroupManager:
 
     def __init__(self, log, setting):
 
         self.log = log
         self.setting = setting
 
-        self.memcached_manipulator = MemcachedManipulator(log, setting)
+        self.mongodb_manipulator = MongoDBManipulator(log, setting)
 
     def add_user_in(self, account, group_name):
 
