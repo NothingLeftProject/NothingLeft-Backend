@@ -1,17 +1,19 @@
-{
-    "account": "",
-    "password": "",
-    "type": "",
-    "nickname": "",
-    "email": [],
-    "telephone": [],
-    "avatar": "",
-    "language": "",
-    "gender": "",
-    "timezone": "",
-    "location": {
-        "home": "",
-        "school": "",
-        "company": ""
+[
+    {"account":  ""},
+    {"password":  ""},
+    {"email": []},
+    {"telephone":  []},
+    {"userGroup":  ""},
+    {"avatar":  ""},
+    {"nickname": ""},
+    {"token":  null},
+    {"lang": "zh"},
+    {"gender":  null},
+    {"timezone": ""},
+    {"placeInfo": {
+            "working": "",
+            "home": "",
+            "school": ""
+        }
     }
-}
+]
