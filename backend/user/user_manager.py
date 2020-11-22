@@ -82,7 +82,7 @@ class UserManager:
             if password == user_info["password"]:
                 token = self.encryption.md5(self.log.get_time_stamp() + account)
 
-                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 0}, {"token": token})
+                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 7}, {"token": token})
                 self.setting["user"]["account"] = account
                 self.setting["user"]["avatar"] = user_info["avatar"]  # needs a solution
 
