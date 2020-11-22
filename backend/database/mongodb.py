@@ -6,7 +6,7 @@
 import pymongo
 
 
-class MongoDBManipulator():
+class MongoDBManipulator:
 
     def __init__(self, log, setting, database_name="default"):
 
