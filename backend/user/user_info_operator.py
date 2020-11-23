@@ -76,50 +76,36 @@ class UserInfoManager():
 
         return users_info
 
-    def reset_param(self, account):
+    def get_one_user_multi_info(self, account, keys):
 
         """
-        将给出的参数进行判断，然后重置「减少重复代码」
+        获取单个用户的信息（支持多个信息，但只支持单个用户）
+        :type keys: list
+        :param keys: 要查询的keys
         :param account: 账户名
         :return:
         """
-        if account is None:
-            account = self.account
-            account_info = self.account_info
-        else:
-            account_info = self.get_user_info([account])
+        result = {}
 
-        return account, account_info
+        for key in keys:
+            self.log.add_log("UserInfoManager: try to get user- " + account + "'s " + key, 1)
+            result[key] = self.mongodb_manipulator.get_document("user", account, {key: 1}, 2)
 
-    def set_info(self, key, value, account=None):
+        return result
+
+    def get_multi_users_multi_info(self, accounts, keys):
 
         """
-        设置用户的指定信息
-        :param key: 用户信息dict中要被设置的那个key
-        :param value: 要设置为的value
-        :param account: 账户名
+        获取多个用户多个信息
+        :type keys: dict
+        :type accounts: list
+        :param accounts: 账户名列表 list
+        :param keys: 要查询的keys，dict{account: [key, key, key]}
         :return:
         """
-        account, account_info = self.reset_param(account)
+        result = {}
+        for account in accounts:
+            self.log.add_log("UserInfoManager: try to get " + account + "'s multi info", 1)
+            result[account] = self.get_one_user_multi_info(account, keys[account])
 
-        self.log.add_log("UserInfoManager: Set " + account + " 's " + key + " to " + str(value), 1)
-        account_info[key] = value
-        self.account_info = account_info
-
-        return self.update_user_info(account, account_info)
-
-    def get_info(self, key, account=None):
-
-        """
-        获取用户的指定信息
-        :param key: 用户信息dict中要被设置的那个key
-        :param value: 要设置为的value
-        :param account: 账户名
-        :return:
-        """
-        account, account_info = self.reset_param(account)
-
-        value = account_info[key]
-        self.log.add_log("UserInfoManager: Get " + account + " 's " + key + " :" + value, 1)
-
-        return value
+        return result
