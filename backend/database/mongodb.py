@@ -29,61 +29,20 @@ class MongoDBManipulator:
                 [self.memcached_server_address]
             )
 
-    def get_database_names_list(self):
+    def add_database(self, db_name):
 
         """
-        获取所有数据库名称
-        :return: list
-        """
-        self.database_names_list = self.server.list_database_names()
-        self.log.add_log("MongoDB: database names list has been updated", 1)
-        return self.database_names_list
-
-    def is_database_exist(self, name):
-
-        """
-        判断某个数据库是否存在
-        :param name: 数据表名称
+        添加数据库
+        :param db_name: 数据库名
         :return: bool
         """
-        self.get_database_names_list()
-
-        if name in self.collection_names_list:
-            self.log.add_log("MongoDB: database " + name + " already exist", 1)
-            return True
-        else:
-            self.log.add_log("MongoDB: database " + name + " is not exist", 1)
+        self.log.add_log("MongoDB: try add database: " + db_name, 1)
+        try:
+            self.server[db_name]
+        except:
             return False
-
-    def get_collection_names_list(self, db_name):
-
-        """
-        获取某个数据库中所有集合名称
-        :param db_name: 数据库名称
-        :return:
-        """
-        db = self.server[db_name]
-
-        self.collection_names_list[db_name] = db.list_collection_names()
-        self.log.add_log("MongoDB: collection names list had been updated", 1)
-        return self.collection_names_list[db_name]
-
-    def is_collection_exist(self, db_name, coll_name):
-
-        """
-        判断某个集合是否存在
-        :param db_name: 数据库名称
-        :param coll_name: 要查询的集合的名称
-        :return:
-        """
-        self.get_collection_names_list(db_name)
-
-        if coll_name in self.collection_names_list[db_name]:
-            self.log.add_log("MongoDB: collection " + coll_name + " already exist", 1)
-            return True
         else:
-            self.log.add_log("MongoDB: collection " + coll_name + " is not exist", 1)
-            return False
+            return True
 
     def add_collection(self, db_name, coll_name):
 
@@ -120,6 +79,62 @@ class MongoDBManipulator:
         else:
             self.log.add_log("MongoDB: delete coll: " + coll_name + "in db: " + db_name + " success", 1)
             return True
+
+    def get_database_names_list(self):
+
+        """
+        获取所有数据库名称
+        :return: list
+        """
+        self.database_names_list = self.server.list_database_names()
+        self.log.add_log("MongoDB: database names list has been updated", 1)
+        return self.database_names_list
+
+    def get_collection_names_list(self, db_name):
+
+        """
+        获取某个数据库中所有集合名称
+        :param db_name: 数据库名称
+        :return:
+        """
+        db = self.server[db_name]
+
+        self.collection_names_list[db_name] = db.list_collection_names()
+        self.log.add_log("MongoDB: collection names list had been updated", 1)
+        return self.collection_names_list[db_name]
+
+    def is_database_exist(self, name):
+
+        """
+        判断某个数据库是否存在
+        :param name: 数据表名称
+        :return: bool
+        """
+        self.get_database_names_list()
+
+        if name in self.collection_names_list:
+            self.log.add_log("MongoDB: database " + name + " already exist", 1)
+            return True
+        else:
+            self.log.add_log("MongoDB: database " + name + " is not exist", 1)
+            return False
+
+    def is_collection_exist(self, db_name, coll_name):
+
+        """
+        判断某个集合是否存在
+        :param db_name: 数据库名称
+        :param coll_name: 要查询的集合的名称
+        :return:
+        """
+        self.get_collection_names_list(db_name)
+
+        if coll_name in self.collection_names_list[db_name]:
+            self.log.add_log("MongoDB: collection " + coll_name + " already exist", 1)
+            return True
+        else:
+            self.log.add_log("MongoDB: collection " + coll_name + " is not exist", 1)
+            return False
 
     def add_one_document(self, db_name, coll_name, docu):
 
