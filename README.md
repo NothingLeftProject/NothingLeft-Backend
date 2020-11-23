@@ -32,11 +32,11 @@
 
 ### Author
 - Lan_zhijiang(我)
-- 当然也欢迎大家来一起开发
-  - DingTalk: 18680171381
-  - Email: lanzhijiang@foxmail.com
-  - Wechat：18680171381
-  - QQ: 1481605673
+  - 当然也欢迎大家来一起开发
+    - DingTalk: 18680171381
+    - Email: lanzhijiang@foxmail.com
+    - Wechat：18680171381
+    - QQ: 1481605673
 
 ### Usage
 - 请查看本项目的[Wiki](https://nothingleftproject.github.io/NothingLeft/)
