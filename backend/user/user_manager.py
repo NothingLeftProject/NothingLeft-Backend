@@ -81,9 +81,9 @@ class UserManager:
         """
         self.log.add_log("UserManager: Try login " + account)
 
-        user_info = self.mongodb_manipulator.get_document("user", account)
+        user_info = self.mongodb_manipulator.get_document("user", account, {"password": 1, "avatar": 1}, 2)
         if user_info is False:
-            self.log.add_log("UserManager: login: Can't find your account or something wrong with the memcached.", 3)
+            self.log.add_log("UserManager: login: Can't find your account or something wrong in the mongodb.", 3)
             return False
         else:
             if password == user_info["password"]:
