@@ -8,7 +8,7 @@ from backend.user.user_manager import UserManager
 from backend.database.mongodb import MongoDBManipulator
 
 
-class UerInfoManager():
+class UserInfoManager():
 
     def __init__(self, account, log, setting):
 
@@ -48,28 +48,33 @@ class UerInfoManager():
                     result = False
         return result
 
-    def get_user_info(self, accounts):
+    def get_users_all_info(self, accounts):
 
         """
-        获取用户信息（可多个）
-        :param accounts: 账户名 list
+        获取用户所有信息（可多个用户）
+        :type accounts: list
+        :param accounts: 账户名
         :return dict
         """
         if type(accounts) != list:
             self.log.add_log("UserInfoManager: Param 'account' must be a list!", 3)
             return False
 
-        for i in range(0, len(accounts)):
-            accounts[i] = "user-" + accounts[i]
-
-        user_info = self.mongodb_manipulator._get_multi(accounts)
+        users_info = []
 
         for account in accounts:
             self.log.add_log("UserManager: Getting " + str(account).replace("user-", "") + "'s info", 1)
-            if user_info[account] is None:
+            user_info = self.mongodb_manipulator.get_document("user", account, {"_id": 0}, 2)
+
+            for i in user_info:
+                key = i.keys[0]
+                user_info[key] = i[key]
+
+            users_info.append(user_info)
+            if users_info[account] is None:
                 self.log.add_log("UserManager: Can't find " + str(account).replace("user-", ""), 3)
 
-        return user_info
+        return users_info
 
     def reset_param(self, account):
 
