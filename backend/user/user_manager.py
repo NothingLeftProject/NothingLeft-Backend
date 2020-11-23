@@ -34,10 +34,14 @@ class UserManager:
             self.log.add_log("UserManager: '/', '.' and '-' is banned in account name", 3)
             return False
 
+        if self.mongodb_manipulator.is_collection_exist("user", account) is True:
+            self.log.add_log("UserManager: Sign up fail, this user had already exists. sign up account: " + account, 3)
+            return False
+
         self.user_group_manager.add_user_in(account, user_group)
 
         if self.mongodb_manipulator.add_collection("user", account) is False:
-            self.log.add_log("UserManager: Sign up failed, this user had already exists. sign up account: " + account, 3)
+            self.log.add_log("UserManager: Sign up failed, something wrong while add account. sign up account: " + account, 3)
             return False
         else:
             self.log.add_log("UserManager: Account add to the collection: user successfully", 1)
@@ -48,7 +52,7 @@ class UserManager:
         user_info[2]["email"].append(email)
         user_info[4]["userGroup"] = user_group
         if self.mongodb_manipulator.add_many_documents("user", account, user_info) is False:
-            self.log.add_log("UserManager: Sign up failed, something went wrong. sign up account: " + account, 3)
+            self.log.add_log("UserManager: Sign up failed, something wrong while add user info. sign up account: " + account, 3)
             return False
         else:
             self.log.add_log("UserManager: Sign up success", 1)
@@ -62,6 +66,9 @@ class UserManager:
         :return:
         """
         self.log.add_log("UserManager: Delete user: " + account, 1)
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("UserManager: delete fail, this user is not exists. sign up account: " + account, 3)
+            return False
         return self.mongodb_manipulator.delete_collection("user", account)
 
     def login(self, account, password):
