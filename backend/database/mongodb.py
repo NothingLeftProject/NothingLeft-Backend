@@ -196,7 +196,7 @@ class MongoDBManipulator:
                     self.log.add_log("MongoDB: add many document success", 1)
                     return result
 
-    def get_document(self, db_name, coll_name, query=None, find_type=0):
+    def get_document(self, db_name, coll_name, query=None, mode=0):
 
         """
         获取某集合中的数据
@@ -204,7 +204,7 @@ class MongoDBManipulator:
         :param db_name: 数据库名
         :param coll_name: 集合名
         :param query: 查找关键词，不指定则返回全部数据
-        :param find_type: 查找模式
+        :param mode: 查找模式 0: 全部 1: key 2: key的值
         :return: False/dict
         """
         self.log.add_log("MongoDB: try to get document from " + db_name + "/" + coll_name, 1)
@@ -219,14 +219,14 @@ class MongoDBManipulator:
                 return False
             else:
                 try:
-                    if find_type == 0:
+                    if mode == 0:
                         result = coll.find()
-                    elif find_type == 1:
+                    elif mode == 1:
                         result = coll.find(query)
-                    elif find_type == 2:
+                    elif mode == 2:
                         result = coll.find({}, query)
                     else:
-                        self.log.add_log("MongoDB: find type error!", 3)
+                        self.log.add_log("MongoDB: mode error!", 3)
                         return False
                 except:
                     self.log.add_log("MongoDB: get fail", 3)
