@@ -38,8 +38,6 @@ class UserManager:
             self.log.add_log("UserManager: Sign up fail, this user had already exists. sign up account: " + account, 3)
             return False
 
-        self.user_group_manager.add_user_in(account, user_group)
-
         if self.mongodb_manipulator.add_collection("user", account) is False:
             self.log.add_log("UserManager: Sign up failed, something wrong while add account. sign up account: " + account, 3)
             return False
@@ -55,6 +53,7 @@ class UserManager:
             self.log.add_log("UserManager: Sign up failed, something wrong while add user info. sign up account: " + account, 3)
             return False
         else:
+            self.user_group_manager.add_user_into_group(account, user_group)
             self.log.add_log("UserManager: Sign up success", 1)
             return True
 
