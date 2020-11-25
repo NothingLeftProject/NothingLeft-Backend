@@ -4,6 +4,7 @@
 # date: 2020/11/1
 
 from backend.database.mongodb import MongoDBManipulator
+from backend.user.permission_manager import PermissionManager
 
 
 class UserGroupManager:
@@ -14,17 +15,29 @@ class UserGroupManager:
         self.setting = setting
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        self.permission_manager = PermissionManager(log, setting)
 
-    def add_user_in(self, account, group_name):
+    def add_user_into_group(self, account, group_name):
 
         """
         添加用户到用户组中
         :param account: 要被添加的用户
         :param group_name: 目标用户组名称
-        :return:
+        :return: bool
         """
+        self.log.add_log("UserGroupManager: try to add " + account + " into " + group_name)
 
-    def remove_user(self, account, group_name):
+        if self.mongodb_manipulator.is_collection_exist("user_group", group_name) is False:
+            self.log.add_log("UserGroupManager: user_group: " + group_name + " is not exists", 3)
+            return False
+        else:
+            user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 1)["userList"].append(account)
+            if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
+                self.log.add_log("UserGroupManager: add " + account + " into " + group_name + " fail", 3)
+            else:
+                self.log.add_log("UserGroupManager: add " + account + " into " + group_name + " success", 3)
+
+    def remove_user_from_group(self, account, group_name):
 
         """
         移除某个用户组的用户
@@ -33,7 +46,7 @@ class UserGroupManager:
         :return:
         """
 
-    def move_user_to(self, account, from_group, to_group):
+    def move_user_to_group(self, account, from_group, to_group):
 
         """
         将某用户从一用户组移到另一用户组
@@ -59,15 +72,7 @@ class UserGroupManager:
         :return:
         """
 
-    def edit_permission(self, param):
-
-        """
-        修改用户组权限组
-        :param param: 参数
-        :return:
-        """
-
-    def update_info(self, name, param):
+    def update_group_info(self, name, param):
 
         """
         更新用户组信息（全部）
@@ -76,7 +81,7 @@ class UserGroupManager:
         :return:
         """
 
-    def set_info(self, name, key, value):
+    def add_group_info(self, name, key, value=None):
 
         """
         设置用户组信息（个别）
@@ -85,5 +90,3 @@ class UserGroupManager:
         :param value: 值
         :return:
         """
-
-
