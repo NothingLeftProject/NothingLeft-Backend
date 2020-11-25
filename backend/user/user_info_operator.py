@@ -109,3 +109,22 @@ class UserInfoManager():
             result[account] = self.get_one_user_multi_info(account, keys[account])
 
         return result
+
+    def set_avatar(self, account, avatar_data, img_type):
+
+        """
+
+        设置头像
+        :param account: 账户名
+        :param avatar_data: 头像二进制数据
+        :param img_type: 头像图片文件类型
+        :return:
+        """
+
+    def load_avatar(self, account):
+
+        """
+        加载头像——返回头像二进制数据和图片类型
+        :param account: 账户名
+        :return: img_data(bytes), img_type(str)
+        """
