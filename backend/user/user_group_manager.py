@@ -31,6 +31,8 @@ class UserGroupManager:
             self.log.add_log("UserGroupManager: user_group: " + group_name + " is not exists", 3)
             return False
         else:
+            self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": group_name})
+
             user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 1)["userList"].append(account)
             if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
                 self.log.add_log("UserGroupManager: add " + account + " into " + group_name + " fail", 3)
@@ -45,6 +47,19 @@ class UserGroupManager:
         :param group_name: 用户组名
         :return:
         """
+        self.log.add_log("UserGroupManager: try to remove " + account + " from " + group_name)
+
+        if self.mongodb_manipulator.is_collection_exist("user_group", group_name) is False:
+            self.log.add_log("UserGroupManager: user_group: " + group_name + " is not exists", 3)
+            return False
+        else:
+            self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": None})
+
+            user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 1)["userList"].remove(account)
+            if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
+                self.log.add_log("UserGroupManager: remove " + account + " from " + group_name + " fail", 3)
+            else:
+                self.log.add_log("UserGroupManager: remove " + account + " from " + group_name + " success", 3)
 
     def move_user_to_group(self, account, from_group, to_group):
 
