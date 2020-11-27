@@ -61,23 +61,30 @@ class UserGroupManager:
             else:
                 self.log.add_log("UserGroupManager: remove " + account + " from " + group_name + " success", 3)
 
-    def move_user_to_group(self, account, from_group, to_group):
+    def move_user_to_another_group(self, account, from_group, to_group):
 
         """
         将某用户从一用户组移到另一用户组
         :param account: 用户名
         :param from_group: 原用户组
         :param to_group: 目标用户组
-        :return:
+        :return: bool
         """
 
-    def create_user_group(self, name):
+    def add_user_group(self, name):
 
         """
         创建用户组
         :param name: 用户组名
         :return:
         """
+        self.log.add_log("UserGroupManager: add user group: " + name, 1)
+
+        if self.mongodb_manipulator.is_collection_exist("user_group", name) is True:
+            self.log.add_log("UserGroupManager: user_group: " + name + " had already exists", 3)
+            return False
+        else:
+            return self.mongodb_manipulator.add_collection("user_group", name)
 
     def delete_user_group(self, name):
 
