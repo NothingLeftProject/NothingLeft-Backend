@@ -6,9 +6,6 @@
 ## Indroduction
 - Getting Things Done is a kind of time management system which was proposed by David Allen.
 - Usually, we abbreviate Getting Things Done as GTD.
-- Choose language version: 
-  - [EnglishVersion](./README_en.md)
-  - [ChineseVersion](./README.md)
 
 ### What is GTD:
 - [Gtd-Introduction](./GTD.md)

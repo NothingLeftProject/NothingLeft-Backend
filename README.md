@@ -5,7 +5,6 @@
 - 而且NothingLeft提供了一套特殊的api以供广大开发者自行开发更多内容，新的交互方式或插件什么的
 - Choose language version: 
   - [EnglishVersion](./README_en.md)
-  - [ChineseVersion](./README.md)
 
 ## Indroduction
 
