@@ -4,7 +4,7 @@
 # date: 2020/11/1
 
 from backend.database.mongodb import MongoDBManipulator
-from backend.user.permission_manager import PermissionManager
+from backend.user.permission_manager import UserPermissionManager
 
 
 class UserGroupManager:
