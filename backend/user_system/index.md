@@ -9,6 +9,6 @@
 ### **1、UserManager**
   - UserManager（用户管理器），最基本的部分，他管理着用户的注册、登录、登出等简单的，不涉及复杂信息修改的操作
   - 位于：/backend/user/user_manager.py 中的 UserManager(class)
-  - 点击[UserManager](/backend/user_system/user_manager.md)查看详细说明
+  - 点击[UserManager](user_manager.md)查看详细说明
   
         
