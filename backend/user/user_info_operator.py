@@ -8,15 +8,13 @@ from backend.user.user_manager import UserManager
 from backend.database.mongodb import MongoDBManipulator
 
 
-class UserInfoManager():
+class UserInfoManager:
 
-    def __init__(self, account, log, setting):
+    def __init__(self, log, setting):
 
         self.log = log
         self.setting = setting
 
-        self.account = account
-        self.account_info = self.get_user_info([account])
         self.gtd_user_manager = UserManager(log, setting)
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
 
