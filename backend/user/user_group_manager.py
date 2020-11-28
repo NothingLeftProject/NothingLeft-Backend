@@ -33,7 +33,7 @@ class UserGroupManager:
         else:
             self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": group_name})
 
-            user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 1)["userList"].append(account)
+            user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2)["userList"].append(account)
             if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
                 self.log.add_log("UserGroupManager: add " + account + " into " + group_name + " fail", 3)
             else:
@@ -55,7 +55,7 @@ class UserGroupManager:
         else:
             self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": None})
 
-            user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 1)["userList"].remove(account)
+            user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2)["userList"].remove(account)
             if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
                 self.log.add_log("UserGroupManager: remove " + account + " from " + group_name + " fail", 3)
             else:
@@ -80,8 +80,8 @@ class UserGroupManager:
                 self.log.add_log("UserGroupManager: move fail! to_group: " + to_group + " is not exists", 3)
                 return False
             else:
-                result_1 = from_group_user_list = self.mongodb_manipulator.get_document("user_group", from_group, {"userList": 1}, 1)["userList"].remove(account)
-                result_2 = to_group_user_list = self.mongodb_manipulator.get_document("user_group", to_group, {"userList": 1}, 1)["userList"].append(account)
+                result_1 = from_group_user_list = self.mongodb_manipulator.get_document("user_group", from_group, {"userList": 1}, 2)["userList"].remove(account)
+                result_2 = to_group_user_list = self.mongodb_manipulator.get_document("user_group", to_group, {"userList": 1}, 2)["userList"].append(account)
                 result_3 = self.mongodb_manipulator.update_many_documents("user_group", from_group, {"_id": 1}, {"userList": from_group_user_list})
                 result_4 = self.mongodb_manipulator.update_many_documents("user_group", to_group, {"_id": 1}, {"userList": to_group_user_list})
 
