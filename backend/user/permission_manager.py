@@ -28,7 +28,25 @@ class UserPermissionManager:
         """
         self.log.add_log("UserPermissionManager: getting the permissions list of " + account, 1)
 
-        user_group = self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2)["userGroup"]
+        group_name = self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2)["userGroup"]
+        if group_name is False:
+            self.log.add_log("UserPermissionManager: can't find the account-" + account + " or something wrong", 3)
+            return False
 
+        permissions_list = self.mongodb_manipulator.get_document("user_group", group_name, {"permissionsList": 1}, 2)["PermissionsList"]
+        different_user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"differentUsers": 1}, 2)["differentUsers"]
 
+        if account in different_user_list:
+            permission_difference = self.mongodb_manipulator.get_document("user_group", group_name, {"permissionDifferences": 1}, 2)["permissionDifferences"][account]
+            try:
+                for permission in permission_difference:
+                    permission_name = permission.keys[0]
+                    if permission[permission_name] is True:
+                        permissions_list.append(permission_name)
+                    else:
+                        permissions_list.remove(permission_name)
+            except TypeError:
+                self.log.add_log("UserPermissionManager: get_user_permission: something went wrong with database", 3)
+                return False
 
+        return permissions_list
