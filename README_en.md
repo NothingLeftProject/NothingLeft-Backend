@@ -1,7 +1,7 @@
 # NothingLeft——A time management platform
--NothingLeft is a time management platform based on GTD concept.
--Through NothingLeft, you can make things drip-proof and arrange events in an orderly manner.
--And NothingLeft allows anyone to use its API to develop his favorite interaction method, of course, our default interaction method is WEB and voice interaction.
+- NothingLeft is a time management platform based on GTD concept.
+- Through NothingLeft, you can make things drip-proof and arrange events in an orderly manner.
+- And NothingLeft allows anyone to use its API to develop his favorite interaction method, of course, our default interaction method is WEB and voice interaction.
 
 ## Indroduction
 - Getting Things Done is a kind of time management system which was proposed by David Allen.
