@@ -70,13 +70,36 @@ class UserGroupManager:
         :param to_group: 目标用户组
         :return: bool
         """
+        self.log.add_log("UserGroupManager: try to move " + account + " from " + from_group + " to " + to_group, 1)
+
+        if self.mongodb_manipulator.is_collection_exist("user_group", from_group) is False:
+            self.log.add_log("UserGroupManager: move fail! from_group: " + from_group + " is not exists", 3)
+            return False
+        else:
+            if self.mongodb_manipulator.is_collection_exist("user_group", to_group) is False:
+                self.log.add_log("UserGroupManager: move fail! to_group: " + to_group + " is not exists", 3)
+                return False
+            else:
+                result_1 = from_group_user_list = self.mongodb_manipulator.get_document("user_group", from_group, {"userList": 1}, 1)["userList"].remove(account)
+                result_2 = to_group_user_list = self.mongodb_manipulator.get_document("user_group", to_group, {"userList": 1}, 1)["userList"].append(account)
+                result_3 = self.mongodb_manipulator.update_many_documents("user_group", from_group, {"_id": 1}, {"userList": from_group_user_list})
+                result_4 = self.mongodb_manipulator.update_many_documents("user_group", to_group, {"_id": 1}, {"userList": to_group_user_list})
+
+        if result_1 is False or result_2 is False:
+            self.log.add_log("UserGroupManager: move account fail because of the problem from the reading of database", 3)
+            return False
+        elif result_3 is False or result_4 is False:
+            self.log.add_log("UserGroupManager: move account fail because of the problem from the writing of database", 3)
+            return False
+        else:
+            return True
 
     def add_user_group(self, name):
 
         """
         创建用户组
         :param name: 用户组名
-        :return:
+        :return: bool
         """
         self.log.add_log("UserGroupManager: add user group: " + name, 1)
 
@@ -91,8 +114,15 @@ class UserGroupManager:
         """
         删除用户组
         :param name: 用户组名
-        :return:
+        :return: bool
         """
+        self.log.add_log("UserGroupManager: add user group: " + name, 1)
+
+        if self.mongodb_manipulator.is_collection_exist("user_group", name) is False:
+            self.log.add_log("UserGroupManager: user_group: " + name + " is not exists", 3)
+            return False
+        else:
+            return self.mongodb_manipulator.delete_collection("user_group", name)
 
     def update_group_info(self, name, param):
 
@@ -103,12 +133,12 @@ class UserGroupManager:
         :return:
         """
 
-    def add_group_info(self, name, key, value=None):
+    def add_group_info(self, name, param):
 
         """
         设置用户组信息（个别）
+        :type param: dict
         :param name: 用户组名
-        :param key: 键
-        :param value: 值
-        :return:
+        :param param: key->value的dict
+        :return: bool
         """
