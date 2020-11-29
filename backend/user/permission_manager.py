@@ -55,6 +55,35 @@ class UserPermissionManager:
                                      3)
                     return False
         else:
-            self.log.add_log("UserPermissionManager: get permissions list from memcached success")
+            self.log.add_log("UserPermissionManager: get permissions list from memcached success", 1)
 
         return permissions_list
+
+    def write_user_permissions(self, account, permissions_list):
+
+        """
+        写入一个用户的权限
+        :param account: 账户名
+        :param permissions_list: 此用户被允许的权限
+        :return: bool
+        """
+        self.log.add_log("UserPermissionManager: try to write " + account + "'s permissions in", 1)
+        # write permissions into user
+        # verify is the user_group this user belong to permissions are different from now
+        # yes->add differences to permissionDifferences and add user to differentUsers
+        # no->do nothing
+
+    def edit_user_permissions(self, account, permissions_to_change):
+
+        """
+        编辑用户权限
+        :param account: 账户名
+        :param permissions_to_change: 要修改的权限 [{"permission_name": bool}]
+        :type permissions_to_change: list[dict]
+        :return: bool
+        """
+        self.log.add_log("UserPermissionManager: editing " + account + "'s permission", 1)
+
+        # get now permissions list
+        # change now_permissions_list as permissions_to_change (for permission in)
+        # write_user_permissions
