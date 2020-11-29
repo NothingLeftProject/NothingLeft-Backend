@@ -19,6 +19,7 @@ class UserPermissionManager:
         self.user_info_manager = UserInfoManager(log, setting)
         self.user_group_manager = UserGroupManager(log, setting)
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        self.memcached_manipulator = MemcachedManipulator(log, setting)
 
     def get_user_permissions(self, account, cache_to_memcached=True):
 
