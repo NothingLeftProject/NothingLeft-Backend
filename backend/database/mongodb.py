@@ -215,7 +215,7 @@ class MongoDBManipulator:
                 db = self.server[db_name]
                 coll = db[coll_name]
             except:
-                self.log.add_log("MongoDB: get one: something wrong", 3)
+                self.log.add_log("MongoDB: get one document: something wrong", 3)
                 return False
             else:
                 try:
@@ -229,12 +229,13 @@ class MongoDBManipulator:
                         self.log.add_log("MongoDB: mode error!", 3)
                         return False
                 except:
-                    self.log.add_log("MongoDB: get fail", 3)
+                    self.log.add_log("MongoDB: get document fail", 3)
                     return False
                 else:
                     return result
         else:
-            self.log.add_log("MongoDB: get one: param query must be a dict")
+            self.log.add_log("MongoDB: get one: param query must be a dict", 3)
+            return False
 
     def generate_finding_query(self, mode, keys, values=None, mode2_mode=None):
 
@@ -274,7 +275,7 @@ class MongoDBManipulator:
         更新记录（文档）（多个）
         :param db_name: 数据库名
         :param coll_name: 集合名
-        :param query: 查找条件
+        :param query: 查找条件 {}
         :param values: 要修改的值（只要是一条以内的都可以） {"key": "value"}
         :return:
         """
