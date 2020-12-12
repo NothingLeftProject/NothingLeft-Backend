@@ -33,13 +33,13 @@ class UserPermissionManager:
 
         permissions_list = self.memcached_manipulator._get("permissions-" + account)
         if permissions_list is None or cache_to_memcached is False:
-            group_name = self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2)["userGroup"]
+            group_name = self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2)["userGroup"] # ATTENTION: error might be here
             if group_name is False:
                 self.log.add_log("UserPermissionManager: can't find the account-" + account + " or something wrong", 3)
                 return False
 
-            permissions_list = self.mongodb_manipulator.get_document("user_group", group_name, {"permissionsList": 1}, 2)["PermissionsList"]
-            different_user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"differentUsers": 1}, 2)["differentUsers"]
+            permissions_list = self.mongodb_manipulator.get_document("user_group", group_name, {"_id": 2}, 2)["PermissionsList"]
+            different_user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"_id": 3}, 2)["differentUsers"]
 
             if account in different_user_list:
                 permission_difference = self.mongodb_manipulator.get_document("user_group", group_name, {"permissionDifferences": 1}, 2)["permissionDifferences"][account]
@@ -51,39 +51,79 @@ class UserPermissionManager:
                         else:
                             permissions_list.remove(permission_name)
                 except TypeError:
-                    self.log.add_log("UserPermissionManager: get_user_permission: something went wrong with database",
-                                     3)
+                    self.log.add_log("UserPermissionManager: get_user_permission: something went wrong with database", 3)
                     return False
         else:
             self.log.add_log("UserPermissionManager: get permissions list from memcached success", 1)
 
         return permissions_list
 
-    def write_user_permissions(self, account, permissions_list):
+    def write_user_permissions(self, account, new_permissions_list):
 
         """
-        写入一个用户的权限
+        写入一个用户的权限(覆盖用户，比较用户组)
+        :type new_permissions_list: list
         :param account: 账户名
-        :param permissions_list: 此用户被允许的权限
+        :param new_permissions_list: 此用户被允许的权限
         :return: bool
         """
         self.log.add_log("UserPermissionManager: try to write " + account + "'s permissions in", 1)
-        # write permissions into user
-        # verify is the user_group this user belong to permissions are different from now
-        # yes->add differences to permissionDifferences and add user to differentUsers
-        # no->do nothing
 
+        # write permissions into user_document
+        self.mongodb_manipulator.update_many_documents("user", account, query={"_id": 12}, values=new_permissions_list)
+
+        group_name = self.mongodb_manipulator.get_document("user", account, query={"userGroup": 1}, mode=2)["userGroup"]
+        group_permissions_list = self.mongodb_manipulator.get_document("user_group", group_name, query={"permissionsList": 1}, mode=2)["permissionsList"]
+        different_list = []
+
+        # verify is the user_group this user belong to permissions are different from now
+        is_different = False
+        for pmis in new_permissions_list:
+            if pmis not in group_permissions_list:
+                is_different = True
+                different_list.append(pmis)
+        
+        # yes->add differences to permissionDifferences and add user to differentUsers
+        if is_different:
+            different_users = self.mongodb_manipulator.get_document("user_group", group_name, query={"_id": 3}, mode=2)["differentUsers"]
+            different_users.append(account)
+            self.mongodb_manipulator.update_many_documents("user_group", group_name, query={"_id": 3}, values=different_users)
+
+            different_permissions_list = self.mongodb_manipulator.get_document("user_group", group_name, query={"_id": 4}, mode=2)["permissionDifferences"]
+            different_permissions_list[account] = different_list
+            self.mongodb_manipulator.update_many_documents("user_group", group_name, query={"_id": 4}, values=different_permissions_list)
+
+        return True
+        # no->do nothing
+    
     def edit_user_permissions(self, account, permissions_to_change):
 
         """
         编辑用户权限
         :param account: 账户名
-        :param permissions_to_change: 要修改的权限 [{"permission_name": bool}]
-        :type permissions_to_change: list[dict]
+        :param permissions_to_change: 要修改的权限 [["permission_name", bool]]
+        :type permissions_to_change: list[list]
         :return: bool
         """
         self.log.add_log("UserPermissionManager: editing " + account + "'s permission", 1)
 
         # get now permissions list
+        raw_permissions_list = self.mongodb_manipulator.get_document("user", account, query={"_id": 12}, mode=2)
+
         # change now_permissions_list as permissions_to_change (for permission in)
+        for permission in permissions_to_change:
+            try:
+                if permission[1]:
+                    raw_permissions_list.append(permission[0])
+                else:
+                    raw_permissions_list.remove(permission[0])
+            except IndexError:
+                self.log.add_log("UserPermissionManager: wrong param for permission_to_change", 3)
+                return False
+            except KeyError:
+                self.log.add_log("UserPermissionManager: permission: " + permission[0] + " is not exists", 3)
+                return False
+        
         # write_user_permissions
+        self.mongodb_manipulator.update_many_documents("user", account, query={"_id": 12}, values=raw_permissions_list)
+        return True
