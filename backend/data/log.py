@@ -6,6 +6,7 @@
 import time
 import datetime
 import os
+import sys
 
 
 class GtdLog():
@@ -80,5 +81,5 @@ class GtdLog():
             print("[WARNING] " + self.get_formatted_time() + " Can't write into the log file!")
         else:
             if level > 3:
-                raise Exception("")
+                sys.exit()
             return 0
