@@ -15,7 +15,7 @@ class UserGroupManager:
         self.setting = setting
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
-        self.permission_manager = PermissionManager(log, setting)
+        self.permission_manager = UserPermissionManager(log, setting)
 
     def add_user_into_group(self, account, group_name):
 
@@ -33,11 +33,17 @@ class UserGroupManager:
         else:
             self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": group_name})
 
-            user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2)["userList"].append(account)
+            user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2)["userList"]
+            if account in user_list:
+                self.log.add_log("UserGroupManager: the account you want to add in had already exists!", 2)
+                return False
+            user_list.append(account)
             if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
                 self.log.add_log("UserGroupManager: add " + account + " into " + group_name + " fail", 3)
+                return False
             else:
-                self.log.add_log("UserGroupManager: add " + account + " into " + group_name + " success", 3)
+                self.log.add_log("UserGroupManager: add " + account + " into " + group_name + " success", 1)
+                return True
 
     def remove_user_from_group(self, account, group_name):
 
