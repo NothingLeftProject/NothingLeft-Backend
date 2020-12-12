@@ -5,7 +5,7 @@
 
 from flask import Flask
 from flask import request
-from api.http.http_handler import HttpHandler
+from bakend.api.http.http_handler import HttpHandler
 import json
 import socket
 
@@ -49,3 +49,19 @@ def route_api():
     """
     achhc.set_request_data(request.get_json(force=True))
     return json.dumps(achhc.handle_request())
+
+
+class HttpServer:
+
+    def __init__(self, log, setting):
+
+        self.log = log
+        self.setting = setting
+
+    def run_server(self):
+
+        """
+        启动服务器
+        :return
+        """
+        run_server(self.log, self.setting)
