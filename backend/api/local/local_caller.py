@@ -46,7 +46,7 @@ class LocalCaller:
         :return: 
         """
         self.log.add_log("LocalCaller: start user_sign_up", 1)
-        
+
         result = {}
         try:
             account = param["account"]
