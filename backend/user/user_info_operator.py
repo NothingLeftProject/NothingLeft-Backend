@@ -4,7 +4,8 @@
 # date: 2020/10/17
 
 import json
-from backend.user.user_manager import UserManager
+import time
+
 from backend.database.mongodb import MongoDBManipulator
 
 
@@ -15,7 +16,6 @@ class UserInfoManager:
         self.log = log
         self.setting = setting
 
-        self.gtd_user_manager = UserManager(log, setting)
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
 
         self.user_info_template = json.load(open("./data/json/user_info_template.json", "r", encoding="utf-8"))
@@ -29,22 +29,26 @@ class UserInfoManager:
         :type info: dict
         :return bool
         """
-        result = True
+        res, err = True, ""
         if type(info) != dict:
             self.log.add_log("UserInfoManager: Failed to update user info: info must be a dict", 3)
-            return False
+            return False, "the type of info is wrong"
 
         key_list = info.keys()
         for event in self.user_info_template:
             if event.keys[1] in key_list:  # needs to verify
                 try:
                     if self.mongodb_manipulator.update_many_documents("user", account, {"_id": event["_id"]}, info[event.keys[1]]) is False:
-                        self.log.add_log("UserInfoManager: meet database error while updating " + event.keys[1] + ", skip", 3)
-                        result = False
+                        self.log.add_log("UserInfoManager: meet database error while updating " + event.keys[1] + ", skip and wait", 3)
+                        res, err = False, "database error"
+                        time.sleep(2)
+                        continue
                 except KeyError:
                     self.log.add_log("UserInfoManager: can not find " + event.keys[1] + ", in your info list", 3)
-                    result = False
-        return result
+                    res, err = False, "key '" + event.keys[1] + "' does not exists or '_id' is not exists"
+                    continue
+        
+        return res, err
 
     def get_users_all_info(self, accounts):
 
@@ -56,21 +60,20 @@ class UserInfoManager:
         """
         if type(accounts) != list:
             self.log.add_log("UserInfoManager: Param 'account' must be a list!", 3)
-            return False
+            return False, "the type of param is wrong"
 
-        users_info = []
+        users_info = {}
 
         for account in accounts:
-            self.log.add_log("UserManager: Getting " + str(account).replace("user-", "") + "'s info", 1)
-            user_info = self.mongodb_manipulator.get_document("user", account, {"_id": 0}, 2)
+            self.log.add_log("UserInfoManager: Getting " + str(account) + "'s info", 1)
+            raw_user_info = self.mongodb_manipulator.get_document("user", account, {"_id": 0}, 2)
 
-            for i in user_info:
+            user_info = {}
+            for i in raw_user_info:
                 key = i.keys[0]
                 user_info[key] = i[key]
 
-            users_info.append(user_info)
-            if users_info[account] is None:
-                self.log.add_log("UserManager: Can't find " + str(account).replace("user-", ""), 3)
+            users_info[account] = user_info
 
         return users_info
 
@@ -87,7 +90,7 @@ class UserInfoManager:
 
         for key in keys:
             self.log.add_log("UserInfoManager: try to get user- " + account + "'s " + key, 1)
-            result[key] = self.mongodb_manipulator.get_document("user", account, {key: 1}, 2)[key]
+            result[key] = self.mongodb_manipulator.get_document("user", account, {key: 1}, 2)[0][key]
 
         return result
 

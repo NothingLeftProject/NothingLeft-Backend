@@ -6,6 +6,7 @@
 import json
 from backend.data.encryption import Encryption
 from backend.database.mongodb import MongoDBManipulator
+from backend.user.user_info_operator import UserInfoManager
 from backend.user.user_group_manager import UserGroupManager
 
 
@@ -19,6 +20,7 @@ class UserManager:
         self.encryption = Encryption(log, setting)
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
         self.user_group_manager = UserGroupManager(log, setting)
+        self.user_info_manager = UserInfoManager(log, setting)
 
     def sign_up(self, account, password, email, user_group="user"):
 
@@ -66,9 +68,13 @@ class UserManager:
         """
         self.log.add_log("UserManager: Delete user: " + account, 1)
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
-            self.log.add_log("UserManager: delete fail, this user is not exists. sign up account: " + account, 3)
-            return False
-        return self.mongodb_manipulator.delete_collection("user", account)
+            self.log.add_log("UserManager: delete fail, this user does not exists. sign up account: " + account, 3)
+            return False, "user does not exists"
+        
+        if self.mongodb_manipulator.delete_collection("user", account) is False:
+            return False, "database error"
+        else:
+            return True
 
     def login(self, account, password):
 
@@ -80,7 +86,7 @@ class UserManager:
         """
         self.log.add_log("UserManager: Try login " + account)
 
-        user_info = self.mongodb_manipulator.get_document("user", account, {"password": 1, "avatar": 1}, 2)
+        user_info = self.user_info_manager.get_one_user_multi_info(account, ["password", "avatar"])
         if user_info is False:
             self.log.add_log("UserManager: login: Can't find your account or something wrong in the mongodb.", 3)
             return False, "database error"
