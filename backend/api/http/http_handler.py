@@ -20,7 +20,7 @@ class HttpHandler:
         self.mongodb_mainpulator = MongoDBManipulator(log, setting)
         self.permission_manager = UserPermissionManager(log, setting)
         self.command_finder = CommandFinder(log, setting)
-
+        
         self.request_data = {}
         self.permission_list = []
         self.response_data = json.load(open("./backend/data/json/response_template.json", "r", encoidng="utf-8"))

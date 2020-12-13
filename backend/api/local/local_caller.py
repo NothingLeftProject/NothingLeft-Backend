@@ -160,4 +160,43 @@ class LocalCaller:
             else:
                 result["usersInfo"] = res
                 return result
+                
+    def user_info_get_one_multi(self, param):
 
+        """
+        获取一个用户的多个信息
+        :return:
+        """
+        self.log.add_log("LocalCaller: start user_info_get_one_multi", 1)
+
+        result = {}
+        try:
+            account = param["account"]
+            keys = param["keys"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_info_get_one_multi: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res = self.user_info_manager.get_one_user_multi_info(account, keys)
+            result["userInfo"] = res
+            return result
+
+    def user_info_get_multi_multi(self, param):
+
+        """
+        获取多个用户的多个信息
+        :return:
+        """
+        self.log.add_log("LocalCaller: start user_info_get_multi_multi", 1)
+
+        result = {}
+        try:
+            accounts = param["accounts"]
+            keys = param["keys"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_info_get_multi_multi: Your param is incomplete", 3)
+            return False, "param incomplete, caution! it's 'accounts'"
+        else:
+            res = self.user_info_manager.get_multi_users_multi_info(accounts, keys)
+            result["usersInfo"] = res
+            return result
