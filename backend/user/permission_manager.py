@@ -21,17 +21,20 @@ class UserPermissionManager:
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
         self.memcached_manipulator = MemcachedManipulator(log, setting)
 
-    def get_user_permissions(self, account, cache_to_memcached=True):
+    def get_user_permissions(self, account, cache_to_memcached=True, ask_update=True):
 
         """
         获取一个用户的权限组
         :param account: 账户名
         :param cache_to_memcached: 是否缓存到memcached
+        :param ask_update: 是否从缓存中获取
         :return: list/False
         """
         self.log.add_log("UserPermissionManager: getting the permissions list of " + account, 1)
 
-        permissions_list = self.memcached_manipulator._get("permissions-" + account)
+        permissions_list = None
+        if ask_update is False:
+            permissions_list = self.memcached_manipulator._get("permissions-" + account)
         if permissions_list is None or cache_to_memcached is False:
             group_name = self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2)["userGroup"] # ATTENTION: error might be here
             if group_name is False:
@@ -56,7 +59,8 @@ class UserPermissionManager:
         else:
             self.log.add_log("UserPermissionManager: get permissions list from memcached success", 1)
 
-        return permissions_list
+        self.log.add_log("UserPermissionManager: " + account + "'s perms: " + str(list(permissions_list)), 0, is_print=False)
+        return list(permissions_list)
 
     def write_user_permissions(self, account, new_permissions_list):
 
