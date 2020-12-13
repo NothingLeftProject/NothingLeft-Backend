@@ -13,5 +13,6 @@ class CommandFinder:
         self.local_caller = LocalCaller(log, setting)
 
         self.all_command_list = {
-
+            "sign_up": self.local_caller.user_sign_up,
+            "login": self.local_caller.user_login
         }
