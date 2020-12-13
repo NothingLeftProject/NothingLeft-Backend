@@ -17,4 +17,6 @@ class Maintainer:
         启动自动维护
         :return
         """
+        self.log.add_log("Maintainer: start the auto maintain system", 1)
+        self.log.add_log("Maintainer: maintainer still not finished", 1)
         
