@@ -32,15 +32,15 @@ class UserManager:
         """
         if "/" in account or "." in account or "-" in account:
             self.log.add_log("UserManager: '/', '.' and '-' is banned in account name", 3)
-            return False
+            return False, "account not in law"
 
         if self.mongodb_manipulator.is_collection_exist("user", account) is True:
             self.log.add_log("UserManager: Sign up fail, this user had already exists. sign up account: " + account, 3)
-            return False
+            return False, "user had already exists"
 
         if self.mongodb_manipulator.add_collection("user", account) is False:
             self.log.add_log("UserManager: Sign up failed, something wrong while add account. sign up account: " + account, 3)
-            return False
+            return False, "add user went wrong"
         else:
             self.log.add_log("UserManager: Account add to the collection: user successfully", 1)
 
@@ -51,7 +51,7 @@ class UserManager:
         user_info[4]["userGroup"] = user_group
         if self.mongodb_manipulator.add_many_documents("user", account, user_info) is False:
             self.log.add_log("UserManager: Sign up failed, something wrong while add user info. sign up account: " + account, 3)
-            return False
+            return False, "add info went wrong"
         else:
             self.user_group_manager.add_user_into_group(account, user_group)
             self.log.add_log("UserManager: Sign up success", 1)
@@ -83,7 +83,7 @@ class UserManager:
         user_info = self.mongodb_manipulator.get_document("user", account, {"password": 1, "avatar": 1}, 2)
         if user_info is False:
             self.log.add_log("UserManager: login: Can't find your account or something wrong in the mongodb.", 3)
-            return False
+            return False, "database error"
         else:
             if password == user_info["password"]:
                 token = self.encryption.md5(self.log.get_time_stamp() + account)
@@ -98,4 +98,4 @@ class UserManager:
                 return token
             else:
                 self.log.add_log("UserManager: Your password is wrong", 3)
-                return False
+                return False, "passwordWrong"
