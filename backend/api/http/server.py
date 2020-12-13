@@ -5,7 +5,7 @@
 
 from flask import Flask
 from flask import request
-from bakend.api.http.http_handler import HttpHandler
+from backend.api.http.http_handler import HttpHandler
 import json
 import socket
 
