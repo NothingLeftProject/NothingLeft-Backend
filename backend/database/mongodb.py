@@ -210,7 +210,7 @@ class MongoDBManipulator:
         self.log.add_log("MongoDB: try to get document from " + db_name + "/" + coll_name, 1)
         if query is None:
             query = {}
-        if query is dict:
+        if type(query) is dict:
             try:
                 db = self.server[db_name]
                 coll = db[coll_name]
