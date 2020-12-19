@@ -40,12 +40,12 @@ class HttpHandler:
             time_loss = int(now_time_stamp) - int(gave_time_stamp)
 
             # is time stamp in law
-            if time_loss > 0 and time_loss < 60:
+            if 0 < time_loss < 120:
                 last_login_time_stamp = \
                     self.mongodb_mainpulator.get_document("user", account, query={"_id": 13}, mode=2)[
                         "lastLoginTimeStamp"]
                 login_time_loss = gave_time_stamp - last_login_time_stamp
-                if login_time_loss > 0 and login_time_loss < 3600 * 24:
+                if 0 < login_time_loss < 3600 * 24:
                     self.log.add_log("HttpHandler: time stamp is in law", 1)
 
                     # is token same
@@ -65,8 +65,8 @@ class HttpHandler:
                     self.log.add_log("HttpHandler: login outdate", 1)
                     self.response_data["header"]["errorMsg"] = "login outdate, please login"  # login outdate error
             else:
-                self.log.add_log("HttpHandler: time stamp not in law", 1)
-                self.response_data["header"]["errorMsg"] = "time stamp is not in law"  # timestamp error
+                self.log.add_log("HttpHandler: time stamp not in law, time_loss > 120", 1)
+                self.response_data["header"]["errorMsg"] = "time stamp is not in law, time_loss > 120"  # timestamp error
                 return False
         else:
             self.log.add_log("HttpHandler: account not exists or format error", 1)
