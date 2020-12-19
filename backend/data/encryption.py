@@ -5,6 +5,8 @@
 
 import hashlib
 import hmac
+import string
+import random
 
 
 class Encryption():
@@ -46,3 +48,14 @@ class Encryption():
         hmca = hmac.new(bytes(string))
         hmca.update("nothing left is wonderful")
         return hmca.hexdigest()
+
+    def generate_random_key(self):
+
+        """
+        生成随机钥匙
+        :return:
+        """
+        maka = string.digits + string.ascii_letters
+        maka_list = list(maka)
+        x = [random.choice(maka_list) for i in range(6)]
+        return ''.join(x)
