@@ -29,6 +29,7 @@ class HttpHandler:
 
         """
         进行认证
+        ATTENTION: the development of "root"
         :return bool
         """
         self.log.add_log("HttpHandler: start auth", 1)
@@ -36,14 +37,21 @@ class HttpHandler:
         account = self.request_data["header"]["account"]
         if "@" in account or str(account) == account:  # ATTENTION: error might be here
             now_time_stamp = self.log.get_time_stamp()
-            gave_time_stamp = self.request_data["header"]["timeStamp"]
+            try:
+                gave_time_stamp = self.request_data["header"]["timeStamp"]
+            except KeyError:
+                self.log.add_log("HttpHandler: param is not complete", 1)
+                self.response_data["header"]["errorMsg"] = "param is not complete"
+                return False
+
             time_loss = int(now_time_stamp) - int(gave_time_stamp)
 
             # is time stamp in law
-            if 0 < time_loss < 120:
+            if 0 < time_loss < 600:
                 last_login_time_stamp = \
                     self.mongodb_mainpulator.get_document("user", account, query={"_id": 13}, mode=2)[
                         "lastLoginTimeStamp"]
+                print(last_login_time_stamp)
                 login_time_loss = gave_time_stamp - last_login_time_stamp
                 if 0 < login_time_loss < 3600 * 24:
                     self.log.add_log("HttpHandler: time stamp is in law", 1)
@@ -81,6 +89,7 @@ class HttpHandler:
         :return bool
         """
         self.log.add_log("HttpHandler: recevied http request, start handle...", 1)
+        print(request_data)
         self.request_data = request_data
 
         self.response_data["header"]["timeStamp"] = self.log.get_time_stamp()
