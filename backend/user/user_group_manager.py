@@ -23,7 +23,7 @@ class UserGroupManager:
         :param group_name: 目标用户组名称
         :return: bool
         """
-        self.log.add_log("UserGroupManager: try to add " + account + " into " + group_name)
+        self.log.add_log("UserGroupManager: try to add " + account + " into " + group_name, 1)
 
         if self.mongodb_manipulator.is_collection_exist("user_group", group_name) is False:
             self.log.add_log("UserGroupManager: user_group: " + group_name + " is not exists", 3)
@@ -51,7 +51,7 @@ class UserGroupManager:
         :param group_name: 用户组名
         :return:
         """
-        self.log.add_log("UserGroupManager: try to remove " + account + " from " + group_name)
+        self.log.add_log("UserGroupManager: try to remove " + account + " from " + group_name, 1)
 
         if self.mongodb_manipulator.is_collection_exist("user_group", group_name) is False:
             self.log.add_log("UserGroupManager: user_group: " + group_name + " is not exists", 3)
