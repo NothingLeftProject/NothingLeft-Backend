@@ -56,10 +56,10 @@ class MongoDBManipulator:
             db = self.server[db_name]
             coll = db[coll_name]
         except:
-            self.log.add_log("MongoDB: add coll: " + coll_name + "to db: " + db_name + " fail", 3)
+            self.log.add_log("MongoDB: add coll: " + coll_name + " to db: " + db_name + " fail", 3)
             return False
         else:
-            self.log.add_log("MongoDB: add coll: " + coll_name + "to db: " + db_name + " success", 1)
+            self.log.add_log("MongoDB: add coll: " + coll_name + " to db: " + db_name + " success", 1)
             return True
 
     def delete_collection(self, db_name, coll_name):
@@ -232,7 +232,8 @@ class MongoDBManipulator:
                     self.log.add_log("MongoDB: get document fail", 3)
                     return False
                 else:
-                    return result
+                    # print(result)
+                    return result[0]
         else:
             self.log.add_log("MongoDB: get one: param query must be a dict", 3)
             return False
