@@ -1,3 +1,1 @@
-{
-    "httpPort": 6000
-}
+{"httpPort": 6000, "hostIp": null, "HostIp": "192.168.3.119"}
