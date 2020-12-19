@@ -46,7 +46,7 @@ class UserManager:
         else:
             self.log.add_log("UserManager: Account add to the collection: user successfully", 1)
 
-        user_info = json.load(open("./data/json/user_info_template.json", "r", encoding="utf-8"))
+        user_info = json.load(open("./backend/data/json/user_info_template.json", "r", encoding="utf-8"))
         user_info[0]["account"] = account
         user_info[1]["password"] = password
         user_info[2]["email"].append(email)
