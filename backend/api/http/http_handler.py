@@ -6,7 +6,7 @@
 import json
 
 from backend.database.mongodb import MongoDBManipulator
-from backend.user.user_group_manager import UserPermissionManager
+from backend.user.user_permission_mamanger import UserPermissionManager
 from backend.api.http.command_finder import CommandFinder
 
 
@@ -23,7 +23,7 @@ class HttpHandler:
         
         self.request_data = {}
         self.permission_list = []
-        self.response_data = json.load(open("./backend/data/json/response_template.json", "r", encoidng="utf-8"))
+        self.response_data = json.load(open("./backend/data/json/response_template.json", "r", encoding="utf-8"))
 
     def auth(self):
 

@@ -5,7 +5,7 @@
 
 from backend.user.user_manager import UserManager
 from backend.user.user_info_operator import UserInfoManager
-from backend.user.user_group_manager import UserPermissionManager
+from backend.user.user_permission_mamanger import UserPermissionManager
 
 
 class LocalCaller:

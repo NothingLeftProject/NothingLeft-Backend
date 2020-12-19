@@ -18,7 +18,7 @@ class UserInfoManager:
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
 
-        self.user_info_template = json.load(open("./data/json/user_info_template.json", "r", encoding="utf-8"))
+        self.user_info_template = json.load(open("./backend/data/json/user_info_template.json", "r", encoding="utf-8"))
 
     def update_user_info(self, account, info):
 
