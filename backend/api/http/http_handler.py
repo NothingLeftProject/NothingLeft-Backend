@@ -6,7 +6,7 @@
 import json
 
 from backend.database.mongodb import MongoDBManipulator
-from backend.user.permission_manager import UserPermissionManager
+from backend.user.user_group_manager import UserPermissionManager
 from backend.api.http.command_finder import CommandFinder
 
 

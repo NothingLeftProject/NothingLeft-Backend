@@ -5,7 +5,7 @@
 
 from backend.user.user_manager import UserManager
 from backend.user.user_info_operator import UserInfoManager
-from backend.user.permission_manager import UserPermissionManager
+from backend.user.user_group_manager import UserPermissionManager
 
 
 class LocalCaller:
@@ -65,35 +65,6 @@ class LocalCaller:
             if res is False:
                 return False, err
             else:
-                return result
-        
-    def user_get_permissions(self, param):
-
-        """
-        获取用户权限
-        :return:
-        """
-        self.log.add_log("LocalCaller: start user_get_permission", 1)
-
-        result = {}
-        try:
-            account = param["account"]
-        except KeyError:
-            self.log.add_log("LocalCaller: user_get_permission: Your param is incomplete", 3)
-            return False, "param incomplete"
-        else:
-            try:
-                is_cache = param["isCache"]
-                is_update = param["isUpdate"]
-            except KeyError:
-                is_cache = True
-                is_update = False
-            
-            res, err = self.user_permission_manager.get_user_permissions(account, cache_to_memcached=is_cache, ask_update=is_update)
-            if res is False:
-                return False, err
-            else:
-                result["permissionList"] = res
                 return result
     
     def user_delete(self, param):
@@ -200,3 +171,78 @@ class LocalCaller:
             res = self.user_info_manager.get_multi_users_multi_info(accounts, keys)
             result["usersInfo"] = res
             return result
+
+    def user_get_permissions(self, param):
+
+        """
+        获取用户权限
+        :return:
+        """
+        self.log.add_log("LocalCaller: start user_get_permission", 1)
+
+        result = {}
+        try:
+            account = param["account"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_get_permission: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            try:
+                is_cache = param["isCache"]
+                is_update = param["isUpdate"]
+            except KeyError:
+                is_cache = True
+                is_update = False
+
+            res, err = self.user_permission_manager.get_user_permissions(account, cache_to_memcached=is_cache,
+                                                                         ask_update=is_update)
+            if res is False:
+                return False, err
+            else:
+                result["permissionList"] = res
+                return result
+
+    def user_write_permissions(self, param):
+
+        """
+        写入一个用户的权限(覆盖用户，比较用户组)
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: start user_write_permissions", 1)
+
+        try:
+            account = param["account"]
+            new_permission_list = param["newPermissionList"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_write_permissions: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_permission_manager.write_user_permissions(account, new_permission_list)
+            if res is False:
+                return False, err
+            else:
+                return res
+
+    def user_edit_permissions(self, param):
+
+        """
+        写入一个用户的权限(覆盖用户，比较用户组)
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: start user_edit_permissions", 1)
+
+        try:
+            account = param["account"]
+            permissions_to_change = param["permissionToChange"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_edit_permissions: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_permission_manager.edit_user_permissions(account, permissions_to_change)
+            if res is False:
+                return False, err
+            else:
+                return res
+
