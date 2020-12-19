@@ -3,14 +3,14 @@
 # description: http server (build by flask)
 # date: 2020/12/12
 
-from flask import Flask
-from flask import request
+from flask import Flask, request
 from backend.api.http.http_handler import HttpHandler
 import json
 import socket
 
 setting = json.load(open("./backend/data/json/setting.json", "r", encoding="utf-8"))
 flask_app = Flask(__name__)
+achhc = 0
 
 
 def get_ip():
