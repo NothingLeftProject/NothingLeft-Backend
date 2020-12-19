@@ -11,7 +11,7 @@ import socket
 
 setting = json.load(open("./backend/data/json/setting.json", "r", encoding="utf-8"))
 flask_app = Flask(__name__)
-achhc = 0
+
 
 def get_ip():
 
@@ -25,7 +25,7 @@ def get_ip():
     return ip
 
 
-def run_server(class_log, setting, achhc_):
+def run_server(class_log, setting):
 
     """
     启动服务器
@@ -40,10 +40,11 @@ def run_server(class_log, setting, achhc_):
         setting["HostIp"] = str(get_ip())
         json.dump(setting, open("./backend/data/json/setting.json", "w", encoding="utf-8"))
 
+    global achhc
+    achhc = HttpHandler(class_log, setting)
+
     flask_app.run(host=setting["hostIp"], port=setting["httpPort"])
     class_log.add_log("HttpServer: ServerAddr: " + setting["hostIp"] + str(setting["httpPort"]), 1)
-    global achhc
-    achhc = achhc_
 
 
 @flask_app.route('/api', methods=["POST", "GET"])
@@ -58,11 +59,10 @@ def route_api():
 
 class HttpServer:
 
-    def __init__(self, log, setting, achhc):
+    def __init__(self, log, setting):
 
         self.log = log
         self.setting = setting
-        self.achhc = achhc
 
     def run_server(self):
 
@@ -70,4 +70,4 @@ class HttpServer:
         启动服务器
         :return
         """
-        run_server(self.log, self.setting, self.achhc)
+        run_server(self.log, self.setting)
