@@ -9,7 +9,7 @@ from backend.api.http.http_handler import HttpHandler
 import json
 import socket
 
-setting = json.load(open("./backend/data/json/setting.json", encoding="utf-8"))
+setting = json.load(open("./backend/data/json/setting.json", "r", encoding="utf-8"))
 flask_app = Flask(__name__)
 achhc = 0
 
@@ -33,9 +33,16 @@ def run_server(class_log, setting):
     :return:
     """
     class_log.add_log("HttpServer: Start http server...", 1)
-    class_log.add_log("HttpServer: ServerAddr: " + setting["hostIp"] + str(setting["httpPort"]), 1)
 
-    flask_app.run(host=get_ip(), port=setting["httpPort"])
+    try:
+        if type(setting["hostIp"]) is not str:
+            raise KeyError
+    except KeyError:
+        setting["HostIp"] = str(get_ip())
+        json.dump(setting, open("./backend/data/json/setting.json", "w", encoding="utf-8"))
+
+    flask_app.run(host=setting["hostIp"], port=setting["httpPort"])
+    class_log.add_log("HttpServer: ServerAddr: " + setting["hostIp"] + str(setting["httpPort"]), 1)
     global achhc
     achhc = HttpHandler(class_log, setting)
 
@@ -47,7 +54,6 @@ def route_api():
     处理请求到/api路径下的请求
     :return:
     """
-    achhc.set_request_data(request.get_json(force=True))
     return json.dumps(achhc.handle_request())
 
 
