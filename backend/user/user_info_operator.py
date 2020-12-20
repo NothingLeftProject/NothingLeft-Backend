@@ -90,7 +90,7 @@ class UserInfoManager:
 
         for key in keys:
             self.log.add_log("UserInfoManager: try to get user- " + account + "'s " + key, 1)
-            result[key] = self.mongodb_manipulator.get_document("user", account, {key: 1}, 2)[0][key]
+            result[key] = print(self.mongodb_manipulator.get_document("user", account, {key: 1}, 2)) # [key]
 
         return result
 

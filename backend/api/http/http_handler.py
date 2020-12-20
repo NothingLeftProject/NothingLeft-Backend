@@ -114,6 +114,7 @@ class HttpHandler:
                         param = self.request_data["command"][0]["param"]
                         function_response = self.command_finder.all_command_list[command_name](param)
 
+                        command_response["commandName"] = command_name
                         command_response["status"] = 0
                         command_response["errorMsg"] = None
                         command_response["result"] = function_response
@@ -137,7 +138,7 @@ class HttpHandler:
                             self.response_data["response"].append(command_response)
                             break
 
-                        command_response = {"commandName": command_name}
+                        command_response["commandName"] = command_name
 
                         if command_name in self.permission_list:
                             self.log.add_log("HttpHandler: " + command_name + " is allowed, start handle", 1)
