@@ -44,7 +44,8 @@ class HttpHandler:
                 self.response_data["header"]["errorMsg"] = "param is not complete"
                 return False
 
-            time_loss = int(now_time_stamp) - int(gave_time_stamp)
+            time_loss = abs(int(now_time_stamp) - int(gave_time_stamp))
+            print(time_loss)
 
             # is time stamp in law
             if 0 < time_loss < 600:
@@ -52,7 +53,7 @@ class HttpHandler:
                     self.mongodb_mainpulator.get_document("user", account, query={"_id": 13}, mode=2)[
                         "lastLoginTimeStamp"]
                 print(last_login_time_stamp)
-                login_time_loss = gave_time_stamp - last_login_time_stamp
+                login_time_loss = abs(gave_time_stamp - last_login_time_stamp)
                 if 0 < login_time_loss < 3600 * 24:
                     self.log.add_log("HttpHandler: time stamp is in law", 1)
 
