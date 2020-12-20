@@ -42,7 +42,6 @@ class LocalCaller:
             else:
                 result["token"] = res
 
-
     def user_sign_up(self, param):
 
         """
