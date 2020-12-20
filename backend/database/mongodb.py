@@ -232,8 +232,7 @@ class MongoDBManipulator:
                     self.log.add_log("MongoDB: get document fail", 3)
                     return False
                 else:
-                    # print(result)
-                    return result[0]
+                    return result
         else:
             self.log.add_log("MongoDB: get one: param query must be a dict", 3)
             return False
