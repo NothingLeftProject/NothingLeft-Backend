@@ -101,18 +101,23 @@ class HttpHandler:
 
             # the handle of login command
             if self.request_data["header"]["loginRequest"]:
-                command_name = self.request_data["command"][0]["commandName"]
-                if command_name != "login":
+                try:
+                    command_name = self.request_data["command"][0]["commandName"]
+                except IndexError:
                     self.response_data["header"]["status"] = 1
                     self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
                 else:
-                    param = self.request_data["command"][0]["param"]
-                    function_response = self.command_finder.all_command_list[command_name](param)
+                    if command_name != "login":
+                        self.response_data["header"]["status"] = 1
+                        self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
+                    else:
+                        param = self.request_data["command"][0]["param"]
+                        function_response = self.command_finder.all_command_list[command_name](param)
 
-                    command_response["status"] = 0
-                    command_response["errorMsg"] = None
-                    command_response["result"] = function_response
-                self.response_data["response"].append(command_response)
+                        command_response["status"] = 0
+                        command_response["errorMsg"] = None
+                        command_response["result"] = function_response
+                    self.response_data["response"].append(command_response)
             else:
                 # the handle of normal command
                 try:
