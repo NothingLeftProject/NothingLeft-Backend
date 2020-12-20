@@ -46,6 +46,8 @@ class UserManager:
         else:
             self.log.add_log("UserManager: Account add to the collection: user successfully", 1)
 
+        password = self.encryption.md5(password)
+
         user_info = json.load(open("./backend/data/json/user_info_template.json", "r", encoding="utf-8"))
         user_info[0]["account"] = account
         user_info[1]["password"] = password

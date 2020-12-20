@@ -36,6 +36,7 @@ class LocalCaller:
             self.log.add_log("LocalCaller: user_login: Your param is incomplete!", 3)
             return False, "param incomplete"
         else:
+            password = self.user_manager.encryption.md5(password)
             res, err = self.user_manager.login(account, password)
             if res is False:
                 return False, err
