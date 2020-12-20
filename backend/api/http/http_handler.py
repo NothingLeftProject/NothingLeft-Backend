@@ -33,6 +33,7 @@ class HttpHandler:
         :return bool
         """
         self.log.add_log("HttpHandler: start auth", 1)
+
         # is the user exists
         account = self.request_data["header"]["account"]
         if "@" in account or str(account) == account:  # ATTENTION: error might be here
@@ -44,16 +45,18 @@ class HttpHandler:
                 self.response_data["header"]["errorMsg"] = "param is not complete"
                 return False
 
-            time_loss = abs(int(now_time_stamp) - int(gave_time_stamp))
-            print(time_loss)
+            time_loss = abs(int(now_time_stamp) - int(gave_time_stamp)) # might not safe here
 
             # is time stamp in law
             if 0 < time_loss < 600:
-                last_login_time_stamp = \
-                    self.mongodb_mainpulator.get_document("user", account, query={"_id": 13}, mode=2)[
-                        "lastLoginTimeStamp"]
+
+                if self.request_data["header"]["loginRequest"]:
+                    return True
+
+                last_login_time_stamp = self.mongodb_mainpulator.get_document("user", account, query={"_id": 13}, mode=2)[13]
                 print(last_login_time_stamp)
-                login_time_loss = abs(gave_time_stamp - last_login_time_stamp)
+
+                login_time_loss = abs(int(gave_time_stamp) - int(last_login_time_stamp))
                 if 0 < login_time_loss < 3600 * 24:
                     self.log.add_log("HttpHandler: time stamp is in law", 1)
 
@@ -74,8 +77,8 @@ class HttpHandler:
                     self.log.add_log("HttpHandler: login outdate", 1)
                     self.response_data["header"]["errorMsg"] = "login outdate, please login"  # login outdate error
             else:
-                self.log.add_log("HttpHandler: time stamp not in law, time_loss > 120", 1)
-                self.response_data["header"]["errorMsg"] = "time stamp is not in law, time_loss > 120"  # timestamp error
+                self.log.add_log("HttpHandler: time stamp not in law, time_loss > 600", 1)
+                self.response_data["header"]["errorMsg"] = "time stamp is not in law, time_loss > 600"  # timestamp error
                 return False
         else:
             self.log.add_log("HttpHandler: account not exists or format error", 1)
@@ -90,52 +93,68 @@ class HttpHandler:
         :return bool
         """
         self.log.add_log("HttpHandler: recevied http request, start handle...", 1)
-        # print(request_data)
         self.request_data = request_data
 
         if self.auth():
             self.log.add_log("HttpHandler: auth completed", 1)
+            command_response = {}
 
-            try:
-                request_commands = self.request_data["command"]
-            except KeyError:
-                self.response_data["header"]["errorMsg"] = "can't find command in your request"
-                self.response_data["header"]["status"] = 1
+            # the handle of login command
+            if self.request_data["header"]["loginRequest"]:
+                command_name = self.request_data["command"][0]["commandName"]
+                if command_name != "login":
+                    self.response_data["header"]["status"] = 1
+                    self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
+                else:
+                    param = self.request_data["command"][0]["param"]
+                    function_response = self.command_finder.all_command_list[command_name](param)
+
+                    command_response["status"] = 0
+                    command_response["errorMsg"] = None
+                    command_response["result"] = function_response
+                self.response_data["response"].append(command_response)
             else:
-                for command in request_commands:
-                    try:
-                        command_name = command["commandName"]
-                        command_param = command["param"]
-                    except KeyError:
-                        self.log.add_log("HttpHandler: the command info is wrong", 1)
-                        command_response["status"] = 3
-                        command_response["errorMsg"] = "command info wrong"
-                        self.response_data["response"].append(command_response)
-                        break
-
-                    command_response = {"commandName": command_name}
-
-                    if command_name in self.permission_list:
-                        self.log.add_log("HttpHandler: " + command_name + " is allowed, start handle", 1)
+                # the handle of normal command
+                try:
+                    request_commands = self.request_data["command"]
+                except KeyError:
+                    self.response_data["header"]["errorMsg"] = "can't find command in your request"
+                    self.response_data["header"]["status"] = 1
+                else:
+                    for command in request_commands:
                         try:
-                            command_handle_function = self.command_finder.all_command_list[command_name]
+                            command_name = command["commandName"]
+                            command_param = command["param"]
                         except KeyError:
-                            self.log.add_log(
-                                "HttpHandler: can't find command: " + command_name + " in command finder, skip", 3)
-                            command_response["status"] = 1
-                            command_response["errorMsg"] = "can't find command in command_finder"
+                            self.log.add_log("HttpHandler: the command info is wrong", 1)
+                            command_response["status"] = 3
+                            command_response["errorMsg"] = "command info wrong"
                             self.response_data["response"].append(command_response)
                             break
-                        else:
-                            function_response, err = command_handle_function(command_param)
-                            if function_response is False:
+
+                        command_response = {"commandName": command_name}
+
+                        if command_name in self.permission_list:
+                            self.log.add_log("HttpHandler: " + command_name + " is allowed, start handle", 1)
+                            try:
+                                command_handle_function = self.command_finder.all_command_list[command_name]
+                            except KeyError:
+                                self.log.add_log(
+                                    "HttpHandler: can't find command: " + command_name + " in command finder, skip", 3)
                                 command_response["status"] = 1
-                                command_response["errorMsg"] = err
+                                command_response["errorMsg"] = "can't find command in command_finder"
+                                self.response_data["response"].append(command_response)
+                                break
                             else:
-                                command_response["status"] = 0
-                                command_response["errorMsg"] = None
-                                command_response["result"] = function_response
-                            self.response_data["response"].append(command_response)
+                                function_response, err = command_handle_function(command_param)
+                                if function_response is False:
+                                    command_response["status"] = 1
+                                    command_response["errorMsg"] = err
+                                else:
+                                    command_response["status"] = 0
+                                    command_response["errorMsg"] = None
+                                    command_response["result"] = function_response
+                                self.response_data["response"].append(command_response)
         else:
             self.log.add_log("HttpHandler: auth fail", 1)
             self.response_data["header"]["status"] = 1
