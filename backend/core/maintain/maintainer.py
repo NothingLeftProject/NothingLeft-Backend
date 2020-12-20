@@ -43,8 +43,10 @@ class Maintainer:
             self.user_group_manager.add_user_group("superuser")
 
         if "root" not in self.mongodb_manipulator.collection_names_list["user"]:
-            root_key = self.encryption.generate_random_key()
+            root_key = self.encryption.generate_random_key() + self.encryption.generate_random_key()
             self.user_manager.sign_up("root", root_key,
                                       "root@root.com", "superuser")
 
-            self.log.add_log("Maintainer: add superuser success, token: " + root_key)
+            self.log.add_log("Maintainer: add root success", 1)
+
+
