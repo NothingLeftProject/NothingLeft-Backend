@@ -3,6 +3,7 @@
 # description: 用户组管理器
 # date: 2020/11/1
 
+import json
 from backend.database.mongodb import MongoDBManipulator
 
 
@@ -111,7 +112,9 @@ class UserGroupManager:
             self.log.add_log("UserGroupManager: user_group: " + name + " had already exists", 3)
             return False
         else:
-            return self.mongodb_manipulator.add_collection("user_group", name)
+            user_group_info = json.load(open("./data/json/user_group_info_template.json", "r", encoding="utf-8"))
+            self.mongodb_manipulator.add_collection("user_group", name)
+            self.mongodb_manipulator.add_many_documents("user_group", name, user_group_info)
 
     def delete_user_group(self, name):
 
