@@ -42,7 +42,7 @@ def run_server(class_log, setting):
     global achhc
     achhc = HttpHandler(class_log, setting)
 
-    class_log.add_log("HttpServer: ServerAddr: " + setting["hostIp"] + str(setting["httpPort"]), 1)
+    class_log.add_log("HttpServer: ServerAddr: " + setting["hostIp"] + ":" +  str(setting["httpPort"]), 1)
     flask_app.run(host=setting["hostIp"], port=setting["httpPort"])
 
 
