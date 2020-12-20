@@ -86,7 +86,7 @@ class UserManager:
         :param password: 密码
         :return: bool(fail) str(success)
         """
-        self.log.add_log("UserManager: Try login " + account)
+        self.log.add_log("UserManager: Try login " + account, 1)
 
         user_info = self.user_info_manager.get_one_user_multi_info(account, ["password", "avatar"])
         if user_info is False:
