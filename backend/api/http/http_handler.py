@@ -89,51 +89,56 @@ class HttpHandler:
         :return bool
         """
         self.log.add_log("HttpHandler: recevied http request, start handle...", 1)
-        print(request_data)
+        # print(request_data)
         self.request_data = request_data
-
-        self.response_data["header"]["timeStamp"] = self.log.get_time_stamp()
 
         if self.auth():
             self.log.add_log("HttpHandler: auth completed", 1)
 
-            request_commands = self.request_data["command"]
-            for command in request_commands:
-                try:
-                    command_name = command["commandName"]
-                    command_param = command["param"]
-                except KeyError:
-                    self.log.add_log("HttpHandler: the command info is wrong", 1)
-                    command_response["status"] = 3
-                    command_response["errorMsg"] = "command info wrong"
-                    self.response_data["response"].append(command_response)
-                    break
-                
-                command_response = {"commandName": command_name}
-
-                if command_name in self.permission_list:
-                    self.log.add_log("HttpHandler: " + command_name + " is allowed, start handle", 1)
+            try:
+                request_commands = self.request_data["command"]
+            except KeyError:
+                self.response_data["header"]["errorMsg"] = "can't find command in your request"
+                self.response_data["header"]["status"] = 1
+            else:
+                for command in request_commands:
                     try:
-                        command_handle_function = self.command_finder.all_command_list[command_name]
+                        command_name = command["commandName"]
+                        command_param = command["param"]
                     except KeyError:
-                        self.log.add_log("HttpHandler: can't find command: " + command_name + " in command finder, skip", 3)
-                        command_response["status"] = 1
-                        command_response["errorMsg"] = "can't find command in command_finder"
+                        self.log.add_log("HttpHandler: the command info is wrong", 1)
+                        command_response["status"] = 3
+                        command_response["errorMsg"] = "command info wrong"
                         self.response_data["response"].append(command_response)
                         break
-                    else:
-                        function_response, err = command_handle_function(command_param)
-                        if function_response is False:
+
+                    command_response = {"commandName": command_name}
+
+                    if command_name in self.permission_list:
+                        self.log.add_log("HttpHandler: " + command_name + " is allowed, start handle", 1)
+                        try:
+                            command_handle_function = self.command_finder.all_command_list[command_name]
+                        except KeyError:
+                            self.log.add_log(
+                                "HttpHandler: can't find command: " + command_name + " in command finder, skip", 3)
                             command_response["status"] = 1
-                            command_response["errorMsg"] = err
+                            command_response["errorMsg"] = "can't find command in command_finder"
+                            self.response_data["response"].append(command_response)
+                            break
                         else:
-                            command_response["status"] = 0
-                            command_response["errorMsg"] = None
-                            command_response["result"] = function_response
-                        self.response_data["response"].append(command_response)
-                    
+                            function_response, err = command_handle_function(command_param)
+                            if function_response is False:
+                                command_response["status"] = 1
+                                command_response["errorMsg"] = err
+                            else:
+                                command_response["status"] = 0
+                                command_response["errorMsg"] = None
+                                command_response["result"] = function_response
+                            self.response_data["response"].append(command_response)
         else:
             self.log.add_log("HttpHandler: auth fail", 1)
             self.response_data["header"]["status"] = 1
+
+        self.response_data["header"]["timeStamp"] = self.log.get_time_stamp()
 
         return self.response_data
