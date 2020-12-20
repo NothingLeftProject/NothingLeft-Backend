@@ -112,7 +112,9 @@ class UserGroupManager:
             self.log.add_log("UserGroupManager: user_group: " + name + " had already exists", 3)
             return False
         else:
-            user_group_info = json.load(open("./data/json/user_group_info_template.json", "r", encoding="utf-8"))
+            user_group_info = json.load(open("./backend/data/json/user_group_info_template.json", "r", encoding="utf-8"))
+            user_group_info["name"] = name
+
             self.mongodb_manipulator.add_collection("user_group", name)
             self.mongodb_manipulator.add_many_documents("user_group", name, user_group_info)
 
