@@ -8,7 +8,6 @@ from backend.api.http.http_handler import HttpHandler
 import json
 import socket
 
-setting = json.load(open("./backend/data/json/setting.json", "r", encoding="utf-8"))
 flask_app = Flask(__name__)
 achhc = 0
 
@@ -37,14 +36,14 @@ def run_server(class_log, setting):
         if type(setting["hostIp"]) is not str:
             raise KeyError
     except KeyError:
-        setting["HostIp"] = str(get_ip())
+        setting["hostIp"] = str(get_ip())
         json.dump(setting, open("./backend/data/json/setting.json", "w", encoding="utf-8"))
 
     global achhc
     achhc = HttpHandler(class_log, setting)
 
-    flask_app.run(host=setting["hostIp"], port=setting["httpPort"])
     class_log.add_log("HttpServer: ServerAddr: " + setting["hostIp"] + str(setting["httpPort"]), 1)
+    flask_app.run(host=setting["hostIp"], port=setting["httpPort"])
 
 
 @flask_app.route('/api', methods=["POST", "GET"])
