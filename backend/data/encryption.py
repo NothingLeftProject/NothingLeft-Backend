@@ -19,7 +19,7 @@ class Encryption():
     def md5(self, string):
 
         """
-        进行md5加密
+        进行md5加密 32位！
         :param string:
         :return:
         """
