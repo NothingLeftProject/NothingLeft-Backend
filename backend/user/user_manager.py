@@ -59,7 +59,7 @@ class UserManager:
         else:
             self.user_group_manager.add_user_into_group(account, user_group)
             self.log.add_log("UserManager: Sign up success", 1)
-            return True
+            return True, "success"
 
     def delete_user(self, account):
 
@@ -76,7 +76,7 @@ class UserManager:
         if self.mongodb_manipulator.delete_collection("user", account) is False:
             return False, "database error"
         else:
-            return True
+            return True, "success"
 
     def login(self, account, password):
 
@@ -88,7 +88,7 @@ class UserManager:
         """
         self.log.add_log("UserManager: Try login " + account, 1)
 
-        user_info = self.user_info_manager.get_one_user_multi_info(account, ["password", "avatar"])
+        user_info, res = self.user_info_manager.get_one_user_multi_info(account, ["password", "avatar"])
         if user_info is False:
             self.log.add_log("UserManager: login: Can't find your account or something wrong in the mongodb.", 3)
             return False, "database error"
@@ -103,7 +103,7 @@ class UserManager:
                 # add user group manager to get permission
 
                 self.log.add_log("UserManager: login success", 1)
-                return token
+                return token, "success"
             else:
-                self.log.add_log("UserManager: Your password is wrong", 3)
+                self.log.add_log("UserManager: Your password is wrong", 1)
                 return False, "passwordWrong"

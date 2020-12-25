@@ -75,7 +75,7 @@ class UserInfoManager:
 
             users_info[account] = user_info
 
-        return users_info
+        return users_info, "success"
 
     def get_one_user_multi_info(self, account, keys):
 
@@ -90,9 +90,12 @@ class UserInfoManager:
 
         for key in keys:
             self.log.add_log("UserInfoManager: try to get user- " + account + "'s " + key, 1)
-            result[key] = print(self.mongodb_manipulator.get_document("user", account, {key: 1}, 2)) # [key]
+            result_ = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("user", account, {key: 1}, 2), [key]
+            )
+            result[key] = result_[0][key]
 
-        return result
+        return result, "success"
 
     def get_multi_users_multi_info(self, accounts, keys):
 
@@ -109,7 +112,7 @@ class UserInfoManager:
             self.log.add_log("UserInfoManager: try to get " + account + "'s multi info", 1)
             result[account] = self.get_one_user_multi_info(account, keys[account])
 
-        return result
+        return result, "success"
 
     def set_avatar(self, account, avatar_data, img_type):
 

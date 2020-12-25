@@ -148,7 +148,7 @@ class LocalCaller:
             self.log.add_log("LocalCaller: user_info_get_one_multi: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
-            res = self.user_info_manager.get_one_user_multi_info(account, keys)
+            res, err = self.user_info_manager.get_one_user_multi_info(account, keys)
             result["userInfo"] = res
             return result
 
@@ -168,7 +168,7 @@ class LocalCaller:
             self.log.add_log("LocalCaller: user_info_get_multi_multi: Your param is incomplete", 3)
             return False, "param incomplete, caution! it's 'accounts'"
         else:
-            res = self.user_info_manager.get_multi_users_multi_info(accounts, keys)
+            res, err = self.user_info_manager.get_multi_users_multi_info(accounts, keys)
             result["usersInfo"] = res
             return result
 
