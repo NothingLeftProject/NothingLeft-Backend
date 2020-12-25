@@ -39,3 +39,11 @@
 
 ### Usage
 - 请查看本项目的[Wiki](https://nothingleftproject.github.io/NothingLeft/)
+
+### 重大更新事项
+- 基本完成了user的全部内容，配合数据库
+- 基本完成了http服务器，接入了user的一部分内容
+- 第一次测试后端，开始第一次调试——user部分
+  - 添加了启动检查数据库
+  - 修复了各种各样的bug
+- 调试成功，完整的http实现，测试成功了login功能
