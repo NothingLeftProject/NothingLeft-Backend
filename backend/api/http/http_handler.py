@@ -92,6 +92,7 @@ class HttpHandler:
         :param request_data: 请求数据
         :return bool
         """
+        # ATTENTION: 防压测任务！
         self.log.add_log("HttpHandler: recevied http request, start handle...", 1)
         self.request_data = request_data
 
