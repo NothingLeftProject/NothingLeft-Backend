@@ -232,10 +232,29 @@ class MongoDBManipulator:
                     self.log.add_log("MongoDB: get document fail", 3)
                     return False
                 else:
-                    return result
+                    return list(result)
         else:
             self.log.add_log("MongoDB: get one: param query must be a dict", 3)
             return False
+
+    def parse_document_result(self, documents, targets):
+
+        """
+        解析搜索到的文档结果
+        :param documents: 查找结果
+        :param targets: 查找目标
+        :type documents: list
+        :type target: list
+        :return:
+        """
+        self.log.add_log("MongoDB: parsing the documents... target: " + str(targets), 1)
+        result = []
+        for document in documents:
+            for target in targets:
+                if target in document:
+                    result.append(document)
+
+        return result
 
     def generate_finding_query(self, mode, keys, values=None, mode2_mode=None):
 
