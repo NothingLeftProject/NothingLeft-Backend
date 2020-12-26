@@ -13,6 +13,14 @@ class CommandFinder:
         self.local_caller = LocalCaller(log, setting)
 
         self.all_command_list = {
-            "sign_up": self.local_caller.user_sign_up,
-            "login": self.local_caller.user_login
+            "user_sign_up": self.local_caller.user_sign_up,
+            "user_login": self.local_caller.user_login,
+            "user_delete": self.local_caller.user_delete,
+            "user_info_update": self.local_caller.user_info_update,
+            "user_info_get_all": self.local_caller.user_info_get_all,
+            "user_info_get_one_multi": self.local_caller.user_info_get_one_multi,
+            "user_info_get_multi_multi": self.local_caller.user_info_get_multi_multi,
+            "user_get_permissions": self.local_caller.user_get_permissions,
+            "user_write_permissions": self.local_caller.user_write_permissions,
+            "user_edit_permissions": self.local_caller.user_edit_permissions
         }
