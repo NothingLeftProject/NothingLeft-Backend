@@ -48,16 +48,19 @@ class HttpHandler:
             time_loss = abs(int(now_time_stamp) - int(gave_time_stamp)) # might not safe here
 
             # is time stamp in law
-            if 0 < time_loss < 600:
+            if 0 <= time_loss <= 600:
 
                 if self.request_data["header"]["loginRequest"]:
                     return True
 
-                last_login_time_stamp = self.mongodb_mainpulator.get_document("user", account, query={"_id": 13}, mode=2)[13]
+                last_login_time_stamp = self.mongodb_mainpulator.parse_document_result(
+                    self.mongodb_mainpulator.get_document("user", account, query={"_id": 13}, mode=2),
+                    ["lastLoginTimeStamp"]
+                )["lastLoginTimeStamp"]
                 print(last_login_time_stamp)
 
                 login_time_loss = abs(int(gave_time_stamp) - int(last_login_time_stamp))
-                if 0 < login_time_loss < 3600 * 24:
+                if 0 <= login_time_loss <= 3600 * 24:
                     self.log.add_log("HttpHandler: time stamp is in law", 1)
 
                     # is token same
