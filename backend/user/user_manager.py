@@ -103,8 +103,10 @@ class UserManager:
                 token = self.encryption.md5(self.log.get_time_stamp() + account)
 
                 self.mongodb_manipulator.update_many_documents("user", account, {"_id": 7}, {"token": token})
-                self.setting["user"]["account"] = account
-                self.setting["user"]["avatar"] = user_info["avatar"]  # needs a solution
+                self.setting["loginUsers"][account] = {
+                    "account": account,
+                    "avatar": user_info["avatar"] # needs78 a solution
+                }
 
                 # add user group manager to get permission
 
@@ -121,3 +123,15 @@ class UserManager:
         :param account: 要登出的账户名
         :return:
         """
+        self.log.add_log("UserManager: Try logout " + account, 1)
+
+        if account in self.setting["loginUsers"].keys():
+            del self.setting["loginUsers"][account]
+            self.mongodb_manipulator.update_many_documents("user", account, {"token": 1}, {"token": None})
+
+            self.log.add_log("UserManager: logout success", 1)
+            return True, "success"
+        else:
+            self.log.add_log("UserManager: user: " + account + " have't login yet", 1)
+            return False, "user haven't login yet"
+
