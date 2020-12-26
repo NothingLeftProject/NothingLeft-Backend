@@ -54,9 +54,9 @@ class HttpHandler:
                     return True
 
                 last_login_time_stamp = self.mongodb_mainpulator.parse_document_result(
-                    self.mongodb_mainpulator.get_document("user", account, query={"_id": 13}, mode=2),
+                    self.mongodb_mainpulator.get_document("user", account, {"lastLoginTimeStamp": 1}, 2),
                     ["lastLoginTimeStamp"]
-                )["lastLoginTimeStamp"]
+                )[0]["lastLoginTimeStamp"]
                 print(last_login_time_stamp)
 
                 login_time_loss = abs(int(gave_time_stamp) - int(last_login_time_stamp))
@@ -64,8 +64,10 @@ class HttpHandler:
                     self.log.add_log("HttpHandler: time stamp is in law", 1)
 
                     # is token same
-                    real_token = self.mongodb_mainpulator.get_document("user", account, query={"_id": 7}, mode=2)[
-                        "token"]
+                    real_token = self.mongodb_mainpulator.parse_document_result(
+                        self.mongodb_mainpulator.get_document("user", account, {"token": 1}, 2),
+                        ["token"]
+                    )[0]["token"]
                     need_verify_token = self.response_data["header"]["token"]
                     if real_token == need_verify_token:
                         # auth pass, load permission list
@@ -103,6 +105,7 @@ class HttpHandler:
             self.log.add_log("HttpHandler: auth completed", 1)
             command_response = {}
 
+            handle_next = True
             # the handle of login command
             if self.request_data["header"]["loginRequest"]:
                 try:
@@ -110,20 +113,27 @@ class HttpHandler:
                 except IndexError:
                     self.response_data["header"]["status"] = 1
                     self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
+                    handle_next = False
                 else:
-                    if command_name != "login":
+                    if command_name != "user_login":
                         self.response_data["header"]["status"] = 1
                         self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
-                    else:
-                        param = self.request_data["command"][0]["param"]
-                        function_response = self.command_finder.all_command_list[command_name](param)
-
-                        command_response["commandName"] = command_name
-                        command_response["status"] = 0
-                        command_response["errorMsg"] = None
-                        command_response["result"] = function_response
-                    self.response_data["response"].append(command_response)
-            else:
+                        handle_next = False
+            # the handle of signup request
+            elif self.request_data["header"]["signupRequest"]:
+                try:
+                    command_name = self.request_data["command"][0]["commandName"]
+                except IndexError:
+                    self.response_data["header"]["status"] = 1
+                    self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to signup!"
+                    handle_next = False
+                else:
+                    if command_name != "user_sign_up":
+                        self.response_data["header"]["status"] = 1
+                        self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to signup!"
+                        handle_next = False
+            
+            if handle_next:
                 # the handle of normal command
                 try:
                     request_commands = self.request_data["command"]
