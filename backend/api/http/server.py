@@ -33,7 +33,7 @@ def run_server(class_log, setting):
     class_log.add_log("HttpServer: Start http server...", 1)
 
     try:
-        if type(setting["hostIp"]) is not str:
+        if type(setting["hostIp"]) is not str or setting["hostIp"] == "":
             raise KeyError
     except KeyError:
         setting["hostIp"] = str(get_ip())
