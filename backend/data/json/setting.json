@@ -13,11 +13,8 @@
       }
     }
   },
-  "user": {
-    "account": "",
-    "avatar": "",
-    "email": [],
-    "telephone": []
+  "loginUsers": {
+    
   },
   "allowSimultaneousOnline": true
 }
