@@ -111,7 +111,7 @@ class UserPermissionManager:
             self.mongodb_manipulator.update_many_documents("user_group", group_name, query={"_id": 4},
                                                            values=different_permissions_list)
 
-        return True
+        return True, "success"
         # no->do nothing
 
     def edit_user_permissions(self, account, permissions_to_change):
