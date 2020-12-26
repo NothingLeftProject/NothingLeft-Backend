@@ -98,7 +98,7 @@ class UserManager:
                 if self.setting["user"]["account"] == account:
                     self.log.add_log("UserManager: login fail, not allow user simultaneous online", 1)
                     return False, "not allow user simultaneous online"
-            
+
             if password == user_info["password"]:
                 token = self.encryption.md5(self.log.get_time_stamp() + account)
 
