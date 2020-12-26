@@ -90,9 +90,15 @@ class UserManager:
 
         user_info, res = self.user_info_manager.get_one_user_multi_info(account, ["password", "avatar"])
         if user_info is False:
-            self.log.add_log("UserManager: login: Can't find your account or something wrong in the mongodb or user not exist.", 3)
+            self.log.add_log("UserManager: login: Can't find your account or something wrong in the mongodb "
+                             "or user not exist.", 3)
             return False, "database error or user not exist"
         else:
+            if self.setting["allowSimultaneousOnline"] is False:
+                if self.setting["user"]["account"] == account:
+                    self.log.add_log("UserManager: login fail, not allow user simultaneous online", 1)
+                    return False, "not allow user simultaneous online"
+            
             if password == user_info["password"]:
                 token = self.encryption.md5(self.log.get_time_stamp() + account)
 

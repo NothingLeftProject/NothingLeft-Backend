@@ -18,5 +18,6 @@
     "avatar": "",
     "email": [],
     "telephone": []
-  }
+  },
+  "allowSimultaneousOnline": true
 }
