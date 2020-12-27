@@ -121,17 +121,18 @@ class HttpHandler:
                         handle_next = False
             # the handle of signup request
             elif self.request_data["header"]["signupRequest"]:
-                try:
-                    command_name = self.request_data["command"][0]["commandName"]
-                except IndexError:
-                    self.response_data["header"]["status"] = 1
-                    self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to signup!"
-                    handle_next = False
-                else:
-                    if command_name != "user_sign_up":
+                if self.setting["allowSignup"]:
+                    try:
+                        command_name = self.request_data["command"][0]["commandName"]
+                    except IndexError:
                         self.response_data["header"]["status"] = 1
                         self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to signup!"
                         handle_next = False
+                    else:
+                        if command_name != "user_sign_up":
+                            self.response_data["header"]["status"] = 1
+                            self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to signup!"
+                            handle_next = False
             
             if handle_next:
                 # the handle of normal command

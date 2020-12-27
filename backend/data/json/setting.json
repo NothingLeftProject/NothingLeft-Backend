@@ -16,5 +16,6 @@
   "loginUsers": {
     
   },
-  "allowSimultaneousOnline": true
+  "allowSimultaneousOnline": true,
+  "allowSignup": true
 }
