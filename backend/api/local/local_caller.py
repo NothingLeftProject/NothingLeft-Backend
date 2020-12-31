@@ -42,6 +42,7 @@ class LocalCaller:
                 return False, err
             else:
                 result["token"] = res
+                return result, err
 
     def user_sign_up(self, param):
 
@@ -65,7 +66,7 @@ class LocalCaller:
             if res is False:
                 return False, err
             else:
-                return result
+                return result, err
     
     def user_delete(self, param):
 
@@ -86,7 +87,7 @@ class LocalCaller:
             if res is False:
                 return False, err
             else:
-                return result
+                return result, err
 
     def user_info_update(self, param):
 
@@ -108,7 +109,7 @@ class LocalCaller:
             if res is False:
                 return res, err
             else:
-                return result
+                return result, err
 
     def user_info_get_all(self, param):
 
@@ -130,7 +131,7 @@ class LocalCaller:
                 return res, err
             else:
                 result["usersInfo"] = res
-                return result
+                return result, err
                 
     def user_info_get_one_multi(self, param):
 
@@ -150,7 +151,7 @@ class LocalCaller:
         else:
             res, err = self.user_info_manager.get_one_user_multi_info(account, keys)
             result["userInfo"] = res
-            return result
+            return result, err
 
     def user_info_get_multi_multi(self, param):
 
@@ -170,7 +171,7 @@ class LocalCaller:
         else:
             res, err = self.user_info_manager.get_multi_users_multi_info(accounts, keys)
             result["usersInfo"] = res
-            return result
+            return result, err
 
     def user_get_permissions(self, param):
 
@@ -200,7 +201,7 @@ class LocalCaller:
                 return False, err
             else:
                 result["permissionList"] = res
-                return result
+                return result, err
 
     def user_write_permissions(self, param):
 
@@ -222,7 +223,7 @@ class LocalCaller:
             if res is False:
                 return False, err
             else:
-                return res
+                return res, err
 
     def user_edit_permissions(self, param):
 
@@ -244,5 +245,5 @@ class LocalCaller:
             if res is False:
                 return False, err
             else:
-                return res
+                return res, err
 
