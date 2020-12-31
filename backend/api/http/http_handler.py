@@ -52,6 +52,8 @@ class HttpHandler:
 
                 if self.request_data["header"]["loginRequest"]:
                     return True
+                elif self.request_data["header"]["signupRequest"]:
+                    return True
 
                 last_login_time_stamp = self.mongodb_mainpulator.parse_document_result(
                     self.mongodb_mainpulator.get_document("user", account, {"lastLoginTimeStamp": 1}, 2),
@@ -103,9 +105,7 @@ class HttpHandler:
 
         if self.auth():
             self.log.add_log("HttpHandler: auth completed", 1)
-            command_response = {}
 
-            handle_next = True
             # the handle of login command
             if self.request_data["header"]["loginRequest"]:
                 try:
@@ -113,12 +113,12 @@ class HttpHandler:
                 except IndexError:
                     self.response_data["header"]["status"] = 1
                     self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
-                    handle_next = False
+                    self.log.add_log("HttpHandler: can't find commandName", 1)
                 else:
                     if command_name != "user_login":
                         self.response_data["header"]["status"] = 1
                         self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
-                        handle_next = False
+                        self.log.add_log("HttpHandler: false request to login", 1)
             # the handle of signup request
             elif self.request_data["header"]["signupRequest"]:
                 if self.setting["allowSignup"]:
@@ -126,56 +126,58 @@ class HttpHandler:
                         command_name = self.request_data["command"][0]["commandName"]
                     except IndexError:
                         self.response_data["header"]["status"] = 1
-                        self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to signup!"
-                        handle_next = False
+                        self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to sign up!"
+                        self.log.add_log("HttpHandler: can't find commandName", 1)
                     else:
                         if command_name != "user_sign_up":
                             self.response_data["header"]["status"] = 1
-                            self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to signup!"
-                            handle_next = False
-            
-            if handle_next:
-                # the handle of normal command
-                try:
-                    request_commands = self.request_data["command"]
-                except KeyError:
-                    self.response_data["header"]["errorMsg"] = "can't find command in your request"
-                    self.response_data["header"]["status"] = 1
+                            self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to sign up!"
+                            self.log.add_log("HttpHandler: false request to sign up", 1)
                 else:
-                    for command in request_commands:
+                    self.log.add_log("HttpHandler: not allow sign up free, please contact the admin", 1)
+            
+            # the handle of normal command
+            try:
+                request_commands = self.request_data["command"]
+            except KeyError:
+                self.response_data["header"]["errorMsg"] = "can't find command in your request"
+                self.response_data["header"]["status"] = 1
+            else:
+                for command in request_commands:
+                    command_response = {}
+                    try:
+                        command_name = command["commandName"]
+                        command_param = command["param"]
+                    except KeyError:
+                        self.log.add_log("HttpHandler: the command info is wrong", 1)
+                        command_response["status"] = 3
+                        command_response["errorMsg"] = "command info wrong"
+                        self.response_data["response"].append(command_response)
+                        break
+
+                    command_response["commandName"] = command_name
+
+                    if command_name in self.permission_list:
+                        self.log.add_log("HttpHandler: " + command_name + " is allowed, start handle", 1)
                         try:
-                            command_name = command["commandName"]
-                            command_param = command["param"]
+                            command_handle_function = self.command_finder.all_command_list[command_name]
                         except KeyError:
-                            self.log.add_log("HttpHandler: the command info is wrong", 1)
-                            command_response["status"] = 3
-                            command_response["errorMsg"] = "command info wrong"
+                            self.log.add_log(
+                                "HttpHandler: can't find command: " + command_name + " in command finder, skip", 3)
+                            command_response["status"] = 1
+                            command_response["errorMsg"] = "can't find command in command_finder"
                             self.response_data["response"].append(command_response)
                             break
-
-                        command_response["commandName"] = command_name
-
-                        if command_name in self.permission_list:
-                            self.log.add_log("HttpHandler: " + command_name + " is allowed, start handle", 1)
-                            try:
-                                command_handle_function = self.command_finder.all_command_list[command_name]
-                            except KeyError:
-                                self.log.add_log(
-                                    "HttpHandler: can't find command: " + command_name + " in command finder, skip", 3)
+                        else:
+                            function_response, err = command_handle_function(command_param)
+                            if function_response is False:
                                 command_response["status"] = 1
-                                command_response["errorMsg"] = "can't find command in command_finder"
-                                self.response_data["response"].append(command_response)
-                                break
+                                command_response["errorMsg"] = err
                             else:
-                                function_response, err = command_handle_function(command_param)
-                                if function_response is False:
-                                    command_response["status"] = 1
-                                    command_response["errorMsg"] = err
-                                else:
-                                    command_response["status"] = 0
-                                    command_response["errorMsg"] = None
-                                    command_response["result"] = function_response
-                                self.response_data["response"].append(command_response)
+                                command_response["status"] = 0
+                                command_response["errorMsg"] = None
+                                command_response["result"] = function_response
+                            self.response_data["response"].append(command_response)
         else:
             self.log.add_log("HttpHandler: auth fail", 1)
             self.response_data["header"]["status"] = 1
