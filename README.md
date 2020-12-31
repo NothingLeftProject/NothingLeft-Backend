@@ -1,4 +1,4 @@
-# NothingLeft——A time management platform
+# NothingLeft: A time management platform
 - 自己画的LOGO：![NonthingLeft-Logo](https://github.com/xiaoland/NothingLeft/blob/docs/image/NothingLeft-Logo.png)
 - NothingLeft是一个基于GTD理念的时间管理平台
 - 通过NothingLeft，你可以做到事情滴水不漏，事件安排得有条不紊
