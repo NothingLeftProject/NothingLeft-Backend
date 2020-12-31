@@ -105,6 +105,7 @@ class HttpHandler:
 
         if self.auth():
             self.log.add_log("HttpHandler: auth completed", 1)
+            special_pass = False
 
             # the handle of login command
             if self.request_data["header"]["loginRequest"]:
@@ -119,6 +120,8 @@ class HttpHandler:
                         self.response_data["header"]["status"] = 1
                         self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
                         self.log.add_log("HttpHandler: false request to login", 1)
+                    else:
+                        special_pass = True
             # the handle of signup request
             elif self.request_data["header"]["signupRequest"]:
                 if self.setting["allowSignup"]:
@@ -133,13 +136,16 @@ class HttpHandler:
                             self.response_data["header"]["status"] = 1
                             self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to sign up!"
                             self.log.add_log("HttpHandler: false request to sign up", 1)
+                        else:
+                            special_pass = True
                 else:
                     self.log.add_log("HttpHandler: not allow sign up free, please contact the admin", 1)
-            
+
             # the handle of normal command
             try:
                 request_commands = self.request_data["command"]
             except KeyError:
+                self.log.add_log("HttpHandler: can't find 'command' in the request")
                 self.response_data["header"]["errorMsg"] = "can't find command in your request"
                 self.response_data["header"]["status"] = 1
             else:
@@ -157,13 +163,12 @@ class HttpHandler:
 
                     command_response["commandName"] = command_name
 
-                    if command_name in self.permission_list:
+                    if command_name in self.permission_list or special_pass is True:
                         self.log.add_log("HttpHandler: " + command_name + " is allowed, start handle", 1)
                         try:
                             command_handle_function = self.command_finder.all_command_list[command_name]
                         except KeyError:
-                            self.log.add_log(
-                                "HttpHandler: can't find command: " + command_name + " in command finder, skip", 3)
+                            self.log.add_log("HttpHandler: can't find command: " + command_name + " in command finder, skip", 3)
                             command_response["status"] = 1
                             command_response["errorMsg"] = "can't find command in command_finder"
                             self.response_data["response"].append(command_response)
@@ -178,6 +183,10 @@ class HttpHandler:
                                 command_response["errorMsg"] = None
                                 command_response["result"] = function_response
                             self.response_data["response"].append(command_response)
+                    else:
+                        command_response["status"] = 2
+                        command_response["errorMsg"] = "you have no permission to request command-" + command_name
+                        command_response["result"] = None
         else:
             self.log.add_log("HttpHandler: auth fail", 1)
             self.response_data["header"]["status"] = 1
