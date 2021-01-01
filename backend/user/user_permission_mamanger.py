@@ -34,21 +34,27 @@ class UserPermissionManager:
         if ask_update is False:
             permissions_list = self.memcached_manipulator._get("permissions-" + account)
         if permissions_list is None or cache_to_memcached is False:
-            group_name = self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2)[0][
-                "userGroup"]  # ATTENTION: error might be here
+            group_name = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2),
+                ["userGroup"]
+            )[0]["userGroup"]
             if group_name is False:
-                self.log.add_log("UserPermissionManager: can't find the account-" + account + " or something wrong", 3)
-                return False, "user does not exists"
+                self.log.add_log("UserPermissionManager: can't find the user_group-" + account + " of this user", 3)
+                return False, "user not belong to the group"
 
-            permissions_list = self.mongodb_manipulator.get_document("user_group", group_name, {"_id": 2}, 2)[0][
-                "PermissionList"]
-            different_user_list = self.mongodb_manipulator.get_document("user_group", group_name, {"_id": 3}, 2)[0][
-                "differentUsers"]
-
+            permissions_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("user_group", group_name, {"permissionsList": 1}, 2),
+                ["permissionsList"]
+            )[0]["permissionsList"]
+            different_user_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("user_group", group_name, {"differentUsers": 1}, 2),
+                ["differentUsers"]
+            )[0]["differentUsers"]
             if account in different_user_list:
-                permission_difference = \
-                self.mongodb_manipulator.get_document("user_group", group_name, {"permissionDifferences": 1}, 2)[0][
-                    "permissionDifferences"][account]
+                permission_difference = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user_group", group_name, {"permissionDifferences": 1}, 2),
+                    ["permissionDifferences"]
+                )[0]["permissionDifferences"][account]
                 try:
                     for permission in permission_difference:
                         permission_name = permission.keys[0]
@@ -65,7 +71,7 @@ class UserPermissionManager:
 
         self.log.add_log("UserPermissionManager: " + account + "'s perms: " + str(list(permissions_list)), 0,
                          is_print=False)
-        return list(permissions_list)
+        return list(permissions_list), "success"
 
     def write_user_permissions(self, account, new_permissions_list):
 
@@ -81,11 +87,14 @@ class UserPermissionManager:
         # write permissions into user_document
         self.mongodb_manipulator.update_many_documents("user", account, query={"_id": 12}, values=new_permissions_list)
 
-        group_name = self.mongodb_manipulator.get_document("user", account, query={"userGroup": 1}, mode=2)[0][
-            "userGroup"]
-        group_permissions_list = \
-        self.mongodb_manipulator.get_document("user_group", group_name, query={"permissionList": 1}, mode=2)[0][
-            "permissionList"]
+        group_name = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("user", account, query={"userGroup": 1}, mode=2),
+            ["userGroup"]
+        )[0]["userGroup"]
+        group_permissions_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("user_group", group_name, query={"permissionsList": 1}, mode=2),
+            ["permissionsList"]
+        )[0]["permissionsList"]
         different_list = []
 
         # verify is the user_group this user belong to permissions are different from now
@@ -97,16 +106,18 @@ class UserPermissionManager:
 
         # yes->add differences to permissionDifferences and add user to differentUsers
         if is_different:
-            different_users = \
-            self.mongodb_manipulator.get_document("user_group", group_name, query={"_id": 3}, mode=2)[0][
-                "differentUsers"]
+            different_users = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("user_group", group_name, query={"differentUsers": 1}, mode=2),
+                ["differentUsers"]
+            )[0]["differentUsers"]
             different_users.append(account)
             self.mongodb_manipulator.update_many_documents("user_group", group_name, query={"_id": 3},
                                                            values=different_users)
 
-            different_permissions_list = \
-            self.mongodb_manipulator.get_document("user_group", group_name, query={"_id": 4}, mode=2)[0][
-                "permissionDifferences"]
+            different_permissions_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("user_group", group_name, query={"permissionDifferences": 1}, mode=2),
+                ["permissionDifferences"]
+            )[0]["permissionDifferences"]
             different_permissions_list[account] = different_list
             self.mongodb_manipulator.update_many_documents("user_group", group_name, query={"_id": 4},
                                                            values=different_permissions_list)
@@ -126,8 +137,10 @@ class UserPermissionManager:
         self.log.add_log("UserPermissionManager: editing " + account + "'s permission", 1)
 
         # get now permissions list
-        raw_permissions_list = self.mongodb_manipulator.get_document("user", account, query={"_id": 12}, mode=2)[0][
-            "permissionList"]
+        raw_permissions_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("user", account, query={"permissionsList": 1}, mode=2),
+            ["permissionsList"]
+        )[0]["permissionsList"]
 
         # change now_permissions_list as permissions_to_change (for permission in)
         for permission in permissions_to_change:
