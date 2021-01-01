@@ -42,6 +42,7 @@ class MongoDBManipulator:
         except:
             return False
         else:
+            self.get_database_names_list()
             return True
 
     def add_collection(self, db_name, coll_name):
@@ -59,6 +60,7 @@ class MongoDBManipulator:
             self.log.add_log("MongoDB: add coll: " + coll_name + " to db: " + db_name + " fail", 3)
             return False
         else:
+            self.get_collection_names_list(db_name)
             self.log.add_log("MongoDB: add coll: " + coll_name + " to db: " + db_name + " success", 1)
             return True
 
@@ -77,6 +79,7 @@ class MongoDBManipulator:
             self.log.add_log("MongoDB: delete coll: " + coll_name + "in db: " + db_name + " fail", 3)
             return False
         else:
+            self.get_collection_names_list(db_name)
             self.log.add_log("MongoDB: delete coll: " + coll_name + "in db: " + db_name + " success", 1)
             return True
 
@@ -103,14 +106,16 @@ class MongoDBManipulator:
         self.log.add_log("MongoDB: collection names list had been updated", 1)
         return self.collection_names_list[db_name]
 
-    def is_database_exist(self, name):
+    def is_database_exist(self, name, update=False):
 
         """
         判断某个数据库是否存在
         :param name: 数据表名称
+        :param update: 是否更新
         :return: bool
         """
-        self.get_database_names_list()
+        if update:
+            self.get_database_names_list()
 
         if name in self.collection_names_list:
             self.log.add_log("MongoDB: database " + name + " already exist", 1)
@@ -119,15 +124,17 @@ class MongoDBManipulator:
             self.log.add_log("MongoDB: database " + name + " is not exist", 1)
             return False
 
-    def is_collection_exist(self, db_name, coll_name):
+    def is_collection_exist(self, db_name, coll_name, update=False):
 
         """
         判断某个集合是否存在
         :param db_name: 数据库名称
         :param coll_name: 要查询的集合的名称
+        :param update: 是否更新
         :return:
         """
-        self.get_collection_names_list(db_name)
+        if update:
+            self.get_collection_names_list(db_name)
 
         if coll_name in self.collection_names_list[db_name]:
             self.log.add_log("MongoDB: collection " + coll_name + " already exist", 1)
@@ -237,24 +244,30 @@ class MongoDBManipulator:
             self.log.add_log("MongoDB: get one: param query must be a dict", 3)
             return False
 
-    def parse_document_result(self, documents, targets):
+    def parse_document_result(self, documents, targets, debug=True):
 
         """
         解析搜索到的文档结果
         :param documents: 查找结果
         :param targets: 查找目标
+        :param debug: 是否输出哪些keys没有被找到
         :type documents: list
         :type target: list
         :return:
         """
-        self.log.add_log("MongoDB: parsing the documents... target: " + str(targets), 1)
+        self.log.add_log("MongoDB: parsing the documents, targets: " + str(targets), 1)
         result = []
-        for document in documents:
-            for target in targets:
+        found_targets = []
+        can_not_find_targets = []
+        for target in targets:
+            for document in documents:
                 if target in document:
                     result.append(document)
-                else:
-                    self.log.add_log("MongoDB: parse result: can't find " + target + " in your documents", 1)
+                    found_targets.append(target)
+            if target not in found_targets:
+                can_not_find_targets.append(target)
+
+        self.log.add_log("MongoDB: parse_result: can't find these targets in your documents: " + str(can_not_find_targets), 1)
 
         return result
 
