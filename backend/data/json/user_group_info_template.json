@@ -1,7 +1,7 @@
 [
   {"_id":  0, "name": ""},
   {"_id":  1, "userList":  []},
-  {"_id":  2, "permissionList":  []},
+  {"_id":  2, "permissionsList":  []},
   {"_id":  3, "differentUsers":  []},
   {"_id":  4, "permissionDifferences":  {}}
 ]
