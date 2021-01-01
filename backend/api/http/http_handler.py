@@ -121,6 +121,8 @@ class HttpHandler:
                         self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
                         self.log.add_log("HttpHandler: false request to login", 1)
                     else:
+                        self.response_data["header"]["status"] = 0
+                        self.response_data["header"]["errorMsg"] = None
                         special_pass = True
             # the handle of signup request
             elif self.request_data["header"]["signupRequest"]:
@@ -137,9 +139,13 @@ class HttpHandler:
                             self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to sign up!"
                             self.log.add_log("HttpHandler: false request to sign up", 1)
                         else:
+                            self.response_data["header"]["status"] = 0
+                            self.response_data["header"]["errorMsg"] = None
                             special_pass = True
                 else:
-                    self.log.add_log("HttpHandler: not allow sign up free, please contact the admin", 1)
+                    self.response_data["header"]["status"] = 1
+                    self.response_data["header"]["errorMsg"] = "not allow sign up free, please contact your admin"
+                    self.log.add_log("HttpHandler: not allow sign up free", 1)
 
             # the handle of normal command
             try:
@@ -182,11 +188,11 @@ class HttpHandler:
                                 command_response["status"] = 0
                                 command_response["errorMsg"] = None
                                 command_response["result"] = function_response
-                            self.response_data["response"].append(command_response)
                     else:
                         command_response["status"] = 2
                         command_response["errorMsg"] = "you have no permission to request command-" + command_name
                         command_response["result"] = None
+                    self.response_data["response"].append(command_response)
         else:
             self.log.add_log("HttpHandler: auth fail", 1)
             self.response_data["header"]["status"] = 1
