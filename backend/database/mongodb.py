@@ -253,6 +253,8 @@ class MongoDBManipulator:
             for target in targets:
                 if target in document:
                     result.append(document)
+                else:
+                    self.log.add_log("MongoDB: parse result: can't find " + target + " in your documents", 1)
 
         return result
 
