@@ -9,8 +9,8 @@ import json
 import socket
 
 flask_app = Flask(__name__)
-achhc = 0
-
+log_class = {}
+settings = {}
 
 def get_ip():
 
@@ -39,8 +39,10 @@ def run_server(class_log, setting):
         setting["hostIp"] = str(get_ip())
         json.dump(setting, open("./backend/data/json/setting.json", "w", encoding="utf-8"))
 
-    global achhc
-    achhc = HttpHandler(class_log, setting)
+    global log_class
+    global settings
+    log_class = class_log
+    settings = setting
 
     class_log.add_log("HttpServer: ServerAddr: " + setting["hostIp"] + ":" +  str(setting["httpPort"]), 1)
     flask_app.run(host=setting["hostIp"], port=setting["httpPort"])
@@ -53,7 +55,7 @@ def route_api():
     处理请求到/api路径下的请求
     :return:
     """
-    return json.dumps(achhc.handle_request(request.get_json(force=True)))
+    return json.dumps(HttpHandler(log_class, settings).handle_request(request.get_json(force=True)))
 
 
 class HttpServer:
