@@ -8,6 +8,7 @@ from backend.data.encryption import Encryption
 from backend.database.mongodb import MongoDBManipulator
 from backend.user.user_info_operator import UserInfoManager
 from backend.user.user_group_manager import UserGroupManager
+from backend.user.user_permission_mamanger import UserPermissionManager
 
 
 class UserManager:
@@ -21,6 +22,7 @@ class UserManager:
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
         self.user_group_manager = UserGroupManager(log, setting)
         self.user_info_manager = UserInfoManager(log, setting)
+        self.user_permission_manager = UserPermissionManager(log, setting)
 
     def sign_up(self, account, password, email, user_group="user"):
 
@@ -95,7 +97,7 @@ class UserManager:
             return False, "database error or user not exist"
         else:
             if self.setting["allowSimultaneousOnline"] is False:
-                if self.setting["user"]["account"] == account:
+                if account in self.setting["loginUsers"].keys():
                     self.log.add_log("UserManager: login fail, not allow user simultaneous online", 1)
                     return False, "not allow user simultaneous online"
 
@@ -108,13 +110,17 @@ class UserManager:
                     "avatar": user_info["avatar"] # needs78 a solution
                 }
 
-                # add user group manager to get permission
+                permission_list, err = self.user_permission_manager.get_user_permissions(account, ask_update=True)
+                if permission_list is False:
+                    self.log.add_log("UserManager: can't get user-" + account + "'s permission list cause: " + err, 3)
+                    return False, "permission list can't load"
+                self.setting["loginUsers"][account]["permission"] = permission_list
 
                 self.log.add_log("UserManager: login success", 1)
                 return token, "success"
             else:
                 self.log.add_log("UserManager: Your password is wrong", 1)
-                return False, "passwordWrong"
+                return False, "wrong password"
 
     def logout(self, account):
 
