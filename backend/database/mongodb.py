@@ -29,7 +29,6 @@ class MongoDBManipulator:
                 [self.memcached_server_address]
             )
             self.get_database_names_list()
-            self.get_collection_names_list()
 
     def add_database(self, db_name):
 
@@ -135,13 +134,17 @@ class MongoDBManipulator:
         :param update: 是否更新
         :return:
         """
-        if update:
+        if update or self.collection_names_list is None:
             self.get_collection_names_list(db_name)
 
-        if coll_name in self.collection_names_list[db_name]:
-            self.log.add_log("MongoDB: collection " + coll_name + " already exist", 1)
-            return True
-        else:
+        try:
+            if coll_name in self.collection_names_list[db_name]:
+                self.log.add_log("MongoDB: collection " + coll_name + " already exist", 1)
+                return True
+            else:
+                self.log.add_log("MongoDB: collection " + coll_name + " is not exist", 1)
+                return False
+        except KeyError:
             self.log.add_log("MongoDB: collection " + coll_name + " is not exist", 1)
             return False
 
