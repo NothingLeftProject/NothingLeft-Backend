@@ -105,7 +105,7 @@ class HttpHandler:
                             if self.request_data["header"]["isUpdateLLTS"]:
                                 last_login_time_stamp = self.log.get_time_stamp()
                                 self.setting["loginUsers"][account]["lastLoginTimeStamp"] = last_login_time_stamp
-                                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": lastLoginTimeStamp})
+                                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": last_login_time_stamp})
                         except KeyError:
                             pass
 
