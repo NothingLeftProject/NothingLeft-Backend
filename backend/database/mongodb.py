@@ -119,9 +119,12 @@ class MongoDBManipulator:
             self.get_database_names_list()
 
         if name in self.collection_names_list:
-            self.log.add_log("MongoDB: database " + name + " already exist", 1)
+            self.log.add_log("MongoDB: database " + name + " exist", 1)
             return True
         else:
+            if name in self.collection_names_list:
+                self.log.add_log("MongoDB: database " + name + " exist", 1)
+                return True
             self.log.add_log("MongoDB: database " + name + " is not exist", 1)
             return False
 
@@ -139,9 +142,13 @@ class MongoDBManipulator:
 
         try:
             if coll_name in self.collection_names_list[db_name]:
-                self.log.add_log("MongoDB: collection " + coll_name + " already exist", 1)
+                self.log.add_log("MongoDB: collection " + coll_name + " exist", 1)
                 return True
             else:
+                self.get_collection_names_list(db_name)
+                if coll_name in self.collection_names_list[db_name]:
+                    self.log.add_log("MongoDB: collection " + coll_name + " exist", 1)
+                    return True
                 self.log.add_log("MongoDB: collection " + coll_name + " is not exist", 1)
                 return False
         except KeyError:
