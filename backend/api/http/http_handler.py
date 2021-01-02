@@ -101,11 +101,13 @@ class HttpHandler:
                             self.log.add_log("HttpHandler: can't load permission list", 3)
                             self.response_data["header"]["errorMsg"] = "database or something wrong with the backend"  # inside error
                             return False
-                        
-                        if self.request_data["header"]["isUpdateLLTS"]:
-                            last_login_time_stamp = self.log.get_time_stamp()
-                            self.setting["loginUsers"][account]["lastLoginTimeStamp"] = last_login_time_stamp
-                            self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": lastLoginTimeStamp})
+                        try:
+                            if self.request_data["header"]["isUpdateLLTS"]:
+                                last_login_time_stamp = self.log.get_time_stamp()
+                                self.setting["loginUsers"][account]["lastLoginTimeStamp"] = last_login_time_stamp
+                                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": lastLoginTimeStamp})
+                        except KeyError:
+                            pass
 
                         return True
                 else:
