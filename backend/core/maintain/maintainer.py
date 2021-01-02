@@ -4,6 +4,7 @@
 # date: 2020/12/13 (1937.12.13 勿忘国耻，铭记历史)
 
 from backend.user.user_manager import UserManager
+import json
 
 
 class Maintainer:
@@ -46,6 +47,9 @@ class Maintainer:
             root_key = self.encryption.generate_random_key() + self.encryption.generate_random_key()
             self.user_manager.sign_up("root", root_key,
                                       "root@root.com", "superuser")
+
+            root_permissions = json.load(open("./backend/data/json/root_permissions_list.json", "r", encoding="utf-8"))
+            self.mongodb_manipulator.update_many_documents("user", "root", {"_id": 12}, {"permissionsList": root_permissions})
 
             self.log.add_log("Maintainer: add root success", 1)
 

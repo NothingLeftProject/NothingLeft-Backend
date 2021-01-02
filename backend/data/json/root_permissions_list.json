@@ -1,0 +1,13 @@
+[
+      "user_sign_up",
+      "user_login",
+      "user_logout",
+      "user_delete",
+      "user_info_update",
+      "user_info_get_all",
+      "user_info_get_one_multi",
+      "user_info_get_multi_multi",
+      "user_get_permissions",
+      "user_write_permissions",
+      "user_edit_permissions"
+]
