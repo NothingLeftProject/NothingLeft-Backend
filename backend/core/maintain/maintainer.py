@@ -40,10 +40,10 @@ class Maintainer:
                 self.log.add_log("Maintainer: database-" + event + " exists", 1)
             self.mongodb_manipulator.get_collection_names_list(event)
 
-        if "superuser" not in self.mongodb_manipulator.collection_names_list["user_group"]:
+        if self.mongodb_manipulator.is_collection_exist("user_group", "superuser") is False:
             self.user_group_manager.add_user_group("superuser")
 
-        if "root" not in self.mongodb_manipulator.collection_names_list["user"]:
+        if self.mongodb_manipulator.is_collection_exist("user", "root") is False:
             root_key = self.encryption.generate_random_key() + self.encryption.generate_random_key()
             self.user_manager.sign_up("root", root_key,
                                       "root@root.com", "superuser")
