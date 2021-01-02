@@ -39,38 +39,49 @@ class UserPermissionManager:
                 ["userGroup"]
             )[0]["userGroup"]
             if group_name is False:
-                self.log.add_log("UserPermissionManager: can't find the user_group-" + account + " of this user", 3)
-                return False, "user not belong to the group"
-
-            permissions_list = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("user_group", group_name, {"permissionsList": 1}, 2),
-                ["permissionsList"]
-            )[0]["permissionsList"]
-            different_user_list = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("user_group", group_name, {"differentUsers": 1}, 2),
-                ["differentUsers"]
-            )[0]["differentUsers"]
-            if account in different_user_list:
-                permission_difference = self.mongodb_manipulator.parse_document_result(
-                    self.mongodb_manipulator.get_document("user_group", group_name, {"permissionDifferences": 1}, 2),
-                    ["permissionDifferences"]
-                )[0]["permissionDifferences"][account]
-                try:
-                    for permission in permission_difference:
-                        permission_name = permission.keys[0]
-                        if permission[permission_name] is True:
-                            permissions_list.append(permission_name)
-                        else:
-                            permissions_list.remove(permission_name)
-                except TypeError:
-                    self.log.add_log("UserPermissionManager: get_user_permission: something went wrong with database",
-                                     3)
-                    return False, "database error"
+                self.log.add_log("UserPermissionManager: can't find the user_group-" + account + " of this user", 1)
+                self.log.add_log("UserPermissionManager: get permissions list from user's info", 1)
+                permissions_list = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user", account, {"permissionsList": 1}, 2),
+                    ["permissionsList"]
+                )[0]["permissionsList"]
+            else:
+                permissions_list = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user_group", group_name, {"permissionsList": 1}, 2),
+                    ["permissionsList"]
+                )[0]["permissionsList"]
+                different_user_list = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user_group", group_name, {"differentUsers": 1}, 2),
+                    ["differentUsers"]
+                )[0]["differentUsers"]
+                if account in different_user_list:
+                    permission_difference = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("user_group", group_name, {"permissionDifferences": 1}, 2),
+                        ["permissionDifferences"]
+                    )[0]["permissionDifferences"][account]
+                    try:
+                        for permission in permission_difference:
+                            permission_name = permission.keys[0]
+                            if permission[permission_name] is True:
+                                permissions_list.append(permission_name)
+                            else:
+                                permissions_list.remove(permission_name)
+                    except TypeError:
+                        self.log.add_log(
+                            "UserPermissionManager: get_user_permission: something went wrong with database", 3)
+                        return False, "database error"
         else:
             self.log.add_log("UserPermissionManager: get permissions list from memcached success", 1)
 
         self.log.add_log("UserPermissionManager: " + account + "'s perms: " + str(list(permissions_list)), 0,
                          is_print=False)
+
+        if cache_to_memcached:
+            if self.memcached_manipulator._set("permissions-" + account, permissions_list):
+                self.log.add_log("UserPermissionManager: cache permission list success", 1)
+            else:
+                self.log.add_log("UserPermissionManager: cache permission list fail", 3)
+
         return list(permissions_list), "success"
 
     def write_user_permissions(self, account, new_permissions_list):
