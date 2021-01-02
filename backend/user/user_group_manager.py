@@ -35,7 +35,7 @@ class UserGroupManager:
             user_list = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2),
                 ["userList"]
-            )[0]
+            )[0]["userList"]
             if account in user_list:
                 self.log.add_log("UserGroupManager: the account you want to add had already exists!", 2)
                 return False, "user had already exist in the user_group-" + group_name
@@ -66,7 +66,7 @@ class UserGroupManager:
             user_list = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2),
                 ["userList"]
-            )[0].remove(account)
+            )[0]["userList"].remove(account)
             if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
                 self.log.add_log("UserGroupManager: remove " + account + " from " + group_name + " fail", 3)
             else:
@@ -94,11 +94,11 @@ class UserGroupManager:
                 from_group_user_list = self.mongodb_manipulator.parse_document_result(
                     self.mongodb_manipulator.get_document("user_group", from_group, {"userList": 1}, 2),
                     ["userList"]
-                )[0].remove(account)
+                )[0]["userList"].remove(account)
                 to_group_user_list = self.mongodb_manipulator.parse_document_result(
                     self.mongodb_manipulator.get_document("user_group", to_group, {"userList": 1}, 2),
                     ["userList"]
-                )[0].append(account)
+                )[0]["userList"].append(account)
                 result_3 = self.mongodb_manipulator.update_many_documents("user_group", from_group, {"_id": 1}, {"userList": from_group_user_list})
                 result_4 = self.mongodb_manipulator.update_many_documents("user_group", to_group, {"_id": 1}, {"userList": to_group_user_list})
                 if result_3 is True or result_4 is True:
@@ -122,7 +122,7 @@ class UserGroupManager:
             return False
         else:
             user_group_info = json.load(open("./backend/data/json/user_group_info_template.json", "r", encoding="utf-8"))
-            user_group_info["name"] = name
+            user_group_info[0]["name"] = name
 
             self.mongodb_manipulator.add_collection("user_group", name)
             self.mongodb_manipulator.add_many_documents("user_group", name, user_group_info)
