@@ -138,6 +138,8 @@ class UserManager:
             del self.setting["loginUsers"][account]
             self.mongodb_manipulator.update_many_documents("user", account, {"token": 1}, {"token": None})
 
+            self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": None})
+
             self.log.add_log("UserManager: logout success", 1)
             return True, "success"
         else:
