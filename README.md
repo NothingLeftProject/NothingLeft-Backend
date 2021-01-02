@@ -87,3 +87,4 @@
 - 添加了建议、理念等的信息收集处(./research)
 - 完成了在centos系统上的调试
 - 完成了logout/signup/login功能并且调试没有问题
+- 完成了root初始化的调试，没有问题
