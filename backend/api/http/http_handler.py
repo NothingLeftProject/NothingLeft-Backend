@@ -17,7 +17,7 @@ class HttpHandler:
         self.log = log
         self.setting = setting
 
-        self.mongodb_mainpulator = MongoDBManipulator(log, setting)
+        self.mongodb_manipulator = MongoDBManipulator(log, setting)
         self.permission_manager = UserPermissionManager(log, setting)
         self.command_finder = CommandFinder(log, setting)
         
@@ -61,8 +61,8 @@ class HttpHandler:
                 except KeyError:
                     pass
 
-                last_login_time_stamp = self.mongodb_mainpulator.parse_document_result(
-                    self.mongodb_mainpulator.get_document("user", account, {"lastLoginTimeStamp": 1}, 2),
+                last_login_time_stamp = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user", account, {"lastLoginTimeStamp": 1}, 2),
                     ["lastLoginTimeStamp"]
                 )[0]["lastLoginTimeStamp"]
 
@@ -79,19 +79,26 @@ class HttpHandler:
                     self.log.add_log("HttpHandler: time stamp is in law", 1)
 
                     # is token same
-                    real_token = self.mongodb_mainpulator.parse_document_result(
-                        self.mongodb_mainpulator.get_document("user", account, {"token": 1}, 2),
+                    real_token = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("user", account, {"token": 1}, 2),
                         ["token"]
                     )[0]["token"]
                     need_verify_token = self.request_data["header"]["token"]
                     if real_token == need_verify_token:
                         # auth pass, load permission list
                         self.log.add_log("HttpHandler: token compared. load permissions list", 1)
+                        
                         self.permission_list, err = self.permission_manager.get_user_permissions(account, ask_update=True)
                         if self.permission_list is False:
                             self.log.add_log("HttpHandler: can't load permission list", 3)
                             self.response_data["header"]["errorMsg"] = "database or something wrong with the backend"  # inside error
                             return False
+                        
+                        if self.request_data["header"]["isUpdateLLTS"]:
+                            last_login_time_stamp = self.log.get_time_stamp()
+                            self.setting["loginUsers"][account]["lastLoginTimeStamp"] = last_login_time_stamp
+                            self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": lastLoginTimeStamp})
+
                         return True
                 else:
                     self.log.add_log("HttpHandler: login outdate", 1)
