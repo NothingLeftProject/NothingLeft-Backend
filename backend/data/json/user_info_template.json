@@ -19,5 +19,6 @@
     {"_id": 12, "permissionsList": [
         "user_logout"
     ]},
-    {"_id": 13, "lastLoginTimeStamp": null}
+    {"_id": 13, "lastLoginTimeStamp": null},
+    {"_id": 14, "isOnline": false}
 ]

@@ -74,6 +74,14 @@ class HttpHandler:
                     return False
                 else:
                     self.log.add_log("HttpHandler: user-" + account + "'s LLTS: " + last_login_time_stamp, 1)
+                    is_online = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("user", account, {"isOnline": 1}, 2),
+                        ["isOnline"]
+                    )[0]["isOnline"]
+                    if not is_online:
+                        self.log.add_log("HttpHandler: user-" + account + " haven't login yet", 1)
+                        self.response_data["header"]["errorMsg"] = "user haven't login yet"
+                        return False
 
                 if 0 <= login_time_loss <= 3600 * 24:
                     self.log.add_log("HttpHandler: time stamp is in law", 1)

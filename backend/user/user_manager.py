@@ -102,14 +102,16 @@ class UserManager:
                     return False, "not allow user simultaneous online"
 
             if password == user_info["password"]:
-                token = self.encryption.md5(self.log.get_time_stamp() + account)
-                lastLoginTimeStamp = self.log.get_time_stamp()
+                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 14}, {"isOnline": True})
 
-                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": lastLoginTimeStamp})
+                token = self.encryption.md5(self.log.get_time_stamp() + account)
+                last_login_time_stamp = self.log.get_time_stamp()
+
+                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": last_login_time_stamp})
                 self.mongodb_manipulator.update_many_documents("user", account, {"_id": 7}, {"token": token})
                 self.setting["loginUsers"][account] = {
                     "account": account,
-                    "lastLoginTimeStamp": lastLoginTimeStamp,
+                    "lastLoginTimeStamp": last_login_time_stamp,
                     "avatar": user_info["avatar"] # needs a solution
                 }
 
@@ -138,7 +140,7 @@ class UserManager:
             del self.setting["loginUsers"][account]
             self.mongodb_manipulator.update_many_documents("user", account, {"token": 1}, {"token": None})
 
-            self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": None})
+            self.mongodb_manipulator.update_many_documents("user", account, {"_id": 14}, {"isOnline": False})
 
             self.log.add_log("UserManager: logout success", 1)
             return True, "success"
