@@ -48,6 +48,8 @@ class Maintainer:
             self.user_manager.sign_up("root", root_key,
                                       "root@root.com", "superuser")
 
+            self.log.add_log("Maintainer: Your root account key: " + root_key, 1)
+
             root_permissions = json.load(open("./backend/data/json/root_permissions_list.json", "r", encoding="utf-8"))
             self.mongodb_manipulator.update_many_documents("user", "root", {"_id": 12}, {"permissionsList": root_permissions})
 
