@@ -28,6 +28,8 @@ class MongoDBManipulator:
             self.server = pymongo.MongoClient(
                 [self.memcached_server_address]
             )
+            self.get_database_names_list()
+            self.get_collection_names_list()
 
     def add_database(self, db_name):
 
