@@ -16,6 +16,8 @@
         "school": ""
         }
     },
-    {"_id": 12, "permissionsList": []},
+    {"_id": 12, "permissionsList": [
+        "user_logout"
+    ]},
     {"_id": 13, "lastLoginTimeStamp": null}
 ]
