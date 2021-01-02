@@ -15,7 +15,7 @@ class CommandFinder:
         self.all_command_list = {
             "user_sign_up": self.local_caller.user_sign_up,
             "user_login": self.local_caller.user_login,
-            # "user_logout":
+            "user_logout": self.local_caller.user_logout,
             "user_delete": self.local_caller.user_delete,
             "user_info_update": self.local_caller.user_info_update,
             "user_info_get_all": self.local_caller.user_info_get_all,

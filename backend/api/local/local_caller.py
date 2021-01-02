@@ -44,6 +44,23 @@ class LocalCaller:
                 result["token"] = res
                 return result, err
 
+    def user_logout(self, param):
+
+        """
+        用户登出
+        :return:
+        """
+        self.log.add_log("LocalCaller: start user_logout", 1)
+
+        try:
+            account = param["account"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_sign_up: Your param is incomplete!", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_manager.logout(account)
+            return res, err
+
     def user_sign_up(self, param):
 
         """
@@ -220,10 +237,7 @@ class LocalCaller:
             return False, "param incomplete"
         else:
             res, err = self.user_permission_manager.write_user_permissions(account, new_permission_list)
-            if res is False:
-                return False, err
-            else:
-                return res, err
+            return res, err
 
     def user_edit_permissions(self, param):
 
@@ -242,8 +256,5 @@ class LocalCaller:
             return False, "param incomplete"
         else:
             res, err = self.user_permission_manager.edit_user_permissions(account, permissions_to_change)
-            if res is False:
-                return False, err
-            else:
-                return res, err
+            return res, err
 
