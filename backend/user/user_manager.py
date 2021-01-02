@@ -103,11 +103,14 @@ class UserManager:
 
             if password == user_info["password"]:
                 token = self.encryption.md5(self.log.get_time_stamp() + account)
+                lastLoginTimeStamp = self.log.get_time_stamp()
 
+                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": lastLoginTimeStamp})
                 self.mongodb_manipulator.update_many_documents("user", account, {"_id": 7}, {"token": token})
                 self.setting["loginUsers"][account] = {
                     "account": account,
-                    "avatar": user_info["avatar"] # needs78 a solution
+                    "lastLoginTimeStamp": lastLoginTimeStamp,
+                    "avatar": user_info["avatar"] # needs a solution
                 }
 
                 permission_list, err = self.user_permission_manager.get_user_permissions(account, ask_update=True)
