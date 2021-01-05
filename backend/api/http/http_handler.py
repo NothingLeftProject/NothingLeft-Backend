@@ -136,6 +136,7 @@ class HttpHandler:
         if self.auth():
             self.log.add_log("HttpHandler: auth completed", 1)
             special_handle_pass = False
+            allow_process_command = True
 
             if self.special_auth_pass:
                 # the handle of login request
@@ -145,11 +146,13 @@ class HttpHandler:
                     except IndexError:
                         self.response_data["header"]["status"] = 1
                         self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
+                        allow_process_command = False
                         self.log.add_log("HttpHandler: can't find commandName", 1)
                     else:
                         if command_name != "user_login":
                             self.response_data["header"]["status"] = 1
                             self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
+                            allow_process_command = False
                             self.log.add_log("HttpHandler: false request to login", 1)
                         else:
                             self.response_data["header"]["status"] = 0
@@ -163,11 +166,13 @@ class HttpHandler:
                         except IndexError:
                             self.response_data["header"]["status"] = 1
                             self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to sign up!"
+                            allow_process_command = False
                             self.log.add_log("HttpHandler: can't find commandName", 1)
                         else:
                             if command_name != "user_sign_up":
                                 self.response_data["header"]["status"] = 1
                                 self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to sign up!"
+                                allow_process_command = False
                                 self.log.add_log("HttpHandler: false request to sign up", 1)
                             else:
                                 self.response_data["header"]["status"] = 0
@@ -176,54 +181,57 @@ class HttpHandler:
                     else:
                         self.response_data["header"]["status"] = 1
                         self.response_data["header"]["errorMsg"] = "not allow sign up free, please contact your admin"
+                        allow_process_command = False
                         self.log.add_log("HttpHandler: not allow sign up free", 1)
 
             # the handle of normal command
-            try:
-                request_commands = self.request_data["command"]
-            except KeyError:
-                self.log.add_log("HttpHandler: can't find 'command' in the request")
-                self.response_data["header"]["errorMsg"] = "can't find command in your request"
-                self.response_data["header"]["status"] = 1
-            else:
-                for command in request_commands:
-                    command_response = {}
-                    try:
-                        command_name = command["commandName"]
-                        command_param = command["param"]
-                    except KeyError:
-                        self.log.add_log("HttpHandler: the command info is wrong", 1)
-                        command_response["status"] = 3
-                        command_response["errorMsg"] = "command info wrong"
-                        self.response_data["response"].append(command_response)
-                        break
-
-                    command_response["commandName"] = command_name
-
-                    if command_name in self.permission_list or special_handle_pass is True:
-                        self.log.add_log("HttpHandler: " + command_name + " is allowed, start handle", 1)
+            if allow_process_command:
+                try:
+                    request_commands = self.request_data["command"]
+                except KeyError:
+                    self.log.add_log("HttpHandler: can't find 'command' in the request")
+                    self.response_data["header"]["errorMsg"] = "can't find command in your request"
+                    self.response_data["header"]["status"] = 1
+                else:
+                    for command in request_commands:
+                        command_response = {}
                         try:
-                            command_handle_function = self.command_finder.all_command_list[command_name]
+                            command_name = command["commandName"]
+                            command_param = command["param"]
                         except KeyError:
-                            self.log.add_log("HttpHandler: can't find command: " + command_name + " in command finder, skip", 3)
-                            command_response["status"] = 1
-                            command_response["errorMsg"] = "can't find command in command_finder"
+                            self.log.add_log("HttpHandler: the command info is wrong", 1)
+                            command_response["status"] = 3
+                            command_response["errorMsg"] = "command info wrong"
                             self.response_data["response"].append(command_response)
                             break
-                        else:
-                            function_response, err = command_handle_function(command_param)
-                            if function_response is False:
+
+                        command_response["commandName"] = command_name
+
+                        if command_name in self.permission_list or special_handle_pass is True:
+                            self.log.add_log("HttpHandler: " + command_name + " is allowed, start handle", 1)
+                            try:
+                                command_handle_function = self.command_finder.all_command_list[command_name]
+                            except KeyError:
+                                self.log.add_log(
+                                    "HttpHandler: can't find command: " + command_name + " in command finder, skip", 3)
                                 command_response["status"] = 1
-                                command_response["errorMsg"] = err
+                                command_response["errorMsg"] = "can't find command in command_finder"
+                                self.response_data["response"].append(command_response)
+                                break
                             else:
-                                command_response["status"] = 0
-                                command_response["errorMsg"] = None
-                                command_response["result"] = function_response
-                    else:
-                        command_response["status"] = 2
-                        command_response["errorMsg"] = "you have no permission to request command-" + command_name
-                        command_response["result"] = None
-                    self.response_data["response"].append(command_response)
+                                function_response, err = command_handle_function(command_param)
+                                if function_response is False:
+                                    command_response["status"] = 1
+                                    command_response["errorMsg"] = err
+                                else:
+                                    command_response["status"] = 0
+                                    command_response["errorMsg"] = None
+                                    command_response["result"] = function_response
+                        else:
+                            command_response["status"] = 2
+                            command_response["errorMsg"] = "you have no permission to request command-" + command_name
+                            command_response["result"] = None
+                        self.response_data["response"].append(command_response)
         else:
             self.log.add_log("HttpHandler: auth fail", 1)
             self.response_data["header"]["status"] = 1
