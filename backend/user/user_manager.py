@@ -59,9 +59,12 @@ class UserManager:
             self.log.add_log("UserManager: Sign up failed, something wrong while add user info. sign up account: " + account, 3)
             return False, "add info went wrong"
         else:
-            self.user_group_manager.add_user_into_group(account, user_group)
-            self.log.add_log("UserManager: Sign up success", 1)
-            return True, "success"
+            res, err = self.user_group_manager.add_user_into_group(account, user_group)
+            if res:
+                self.log.add_log("UserManager: Sign up success", 1)
+                return True, "success"
+            else:
+                return res, err
 
     def delete_user(self, account):
 
@@ -72,7 +75,7 @@ class UserManager:
         """
         self.log.add_log("UserManager: Delete user: " + account, 1)
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
-            self.log.add_log("UserManager: delete fail, this user does not exists. sign up account: " + account, 3)
+            self.log.add_log("UserManager: delete fail, this user does not exists. account: " + account, 1)
             return False, "user does not exists"
         
         if self.mongodb_manipulator.delete_collection("user", account) is False:

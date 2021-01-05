@@ -28,7 +28,7 @@ class UserGroupManager:
 
         if self.mongodb_manipulator.is_collection_exist("user_group", group_name) is False:
             self.log.add_log("UserGroupManager: user_group: " + group_name + " is not exist", 3)
-            return False, "user_group-" + group_name + " is not exist"
+            return False, "user_group-" + group_name + " is not exist, add user into group fail"
         else:
             self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": group_name})
 
