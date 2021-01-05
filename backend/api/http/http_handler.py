@@ -111,8 +111,9 @@ class HttpHandler:
 
                         return True
                 else:
-                    self.log.add_log("HttpHandler: login outdate", 1)
-                    self.response_data["header"]["errorMsg"] = "login outdate, please login"  # login outdate error
+                    self.log.add_log("HttpHandler: login outdated", 1)
+                    self.response_data["header"]["errorMsg"] = "login outdated, please login"  # login outdate error
+                    return False
             else:
                 self.log.add_log("HttpHandler: time stamp not in law, time_loss > 600", 1)
                 self.response_data["header"]["errorMsg"] = "time stamp is not in law, time_loss > 600"  # timestamp error
