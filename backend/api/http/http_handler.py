@@ -230,7 +230,7 @@ class HttpHandler:
                                     command_response["result"] = function_response
                         else:
                             command_response["status"] = 2
-                            command_response["errorMsg"] = "you have no permission to request command-" + command_name
+                            command_response["errorMsg"] = "you have no permission to request command-" + command_name + " or wrong command name"
                             command_response["result"] = None
                         self.response_data["response"].append(command_response)
         else:
