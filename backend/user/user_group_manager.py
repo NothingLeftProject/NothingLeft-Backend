@@ -36,9 +36,11 @@ class UserGroupManager:
                 self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2),
                 ["userList"]
             )[0]["userList"]
+
             if account in user_list:
                 self.log.add_log("UserGroupManager: the account you want to add had already exists!", 2)
                 return False, "user had already exist in the user_group-" + group_name
+
             user_list.append(account)
             if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
                 self.log.add_log("UserGroupManager: add " + account + " into user_group-" + group_name + " fail", 3)
@@ -63,10 +65,15 @@ class UserGroupManager:
         else:
             self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": None})
 
-            user_list = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2),
-                ["userList"]
-            )[0]["userList"].remove(account)
+            try:
+                user_list = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2),
+                    ["userList"]
+                )[0]["userList"].remove(account)
+            except ValueError:
+                self.log.add_log("UserGroupManager: fail to delete " + "user-" + account + " from ser_group-" + group_name +
+                                 "because it's not exist", 1)
+                return False, "user-" + account + " not in the user_group-" + group_name
             if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
                 self.log.add_log("UserGroupManager: remove " + account + " from " + group_name + " fail", 3)
             else:
