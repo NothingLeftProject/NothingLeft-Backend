@@ -77,11 +77,11 @@ class MongoDBManipulator:
             db = self.server[db_name]
             db[coll_name].drop()
         except:
-            self.log.add_log("MongoDB: delete coll: " + coll_name + "in db: " + db_name + " fail", 3)
+            self.log.add_log("MongoDB: delete coll: " + coll_name + " is in db: " + db_name + " fail", 3)
             return False
         else:
             self.get_collection_names_list(db_name)
-            self.log.add_log("MongoDB: delete coll: " + coll_name + "in db: " + db_name + " success", 1)
+            self.log.add_log("MongoDB: delete coll: " + coll_name + " is in db: " + db_name + " success", 1)
             return True
 
     def get_database_names_list(self):
