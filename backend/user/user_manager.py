@@ -77,11 +77,38 @@ class UserManager:
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
             self.log.add_log("UserManager: delete fail, this user does not exists. account: " + account, 1)
             return False, "user does not exists"
-        
+
+        group_name = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2),
+            ["userGroup"]
+        )[0]["userGroup"]
+        if self.mongodb_manipulator.is_collection_exist("user_group", group_name) is False:
+            self.log.add_log("UserManager: fail to delete user-" + account + " because its group-" + group_name +
+                             " is not exist", 1)
+            return False, "user_group-" + group_name + " is not exist"
+
         if self.mongodb_manipulator.delete_collection("user", account) is False:
             return False, "database error"
         else:
-            return True, "success"
+            try:
+                group_user_list = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2),
+                    ["userList"]
+                )[0]["userList"]
+                group_user_list.remove(account)
+                print(group_user_list)
+            except ValueError:
+                self.log.add_log("UserManager: success to delete " + "user-" + account + " from user_group-" + group_name +
+                                 "because it's not exist at all", 1)
+                return True, "user-" + account + " not in the user_group-" + group_name + " at all"
+
+            if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": group_user_list}):
+                self.log.add_log("UserManager: delete user-" + account + " success", 1)
+                return True, "success"
+            else:
+                self.log.add_log("UserManager: fail to delete user-" + account + " from user_group-" + group_name +
+                                 " because of database error", 3)
+                return False, "fail to delete user-" + account + " from user_group-" + group_name
 
     def login(self, account, password):
 
