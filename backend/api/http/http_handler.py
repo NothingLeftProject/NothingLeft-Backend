@@ -229,6 +229,7 @@ class HttpHandler:
                                     command_response["errorMsg"] = None
                                     command_response["result"] = function_response
                         else:
+                            print(self.permission_list)
                             command_response["status"] = 2
                             command_response["errorMsg"] = "you have no permission to request command-" + command_name + " or wrong command name"
                             command_response["result"] = None
