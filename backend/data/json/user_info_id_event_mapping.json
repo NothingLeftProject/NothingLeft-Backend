@@ -1,0 +1,17 @@
+{
+    "account": 0,
+    "password": 1,
+    "email": 2,
+    "telephone": 3,
+    "userGroup": 4,
+    "avatar": 5,
+    "nickname": 6,
+    "token": 7,
+    "lang": 8,
+    "gender":  9,
+    "timezone": 10,
+    "placeInfo": 11,
+    "permissionsList": 12,
+    "lastLoginTimeStamp": 13,
+    "isOnline": 14
+}
