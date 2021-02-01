@@ -29,6 +29,7 @@ class UserInfoManager:
         :type info: dict
         :return bool
         """
+        not_found_keys = []
         res, err = True, ""
         if type(info) != dict:
             self.log.add_log("UserInfoManager: Failed to update user info: info must be a dict", 3)
@@ -44,7 +45,8 @@ class UserInfoManager:
                     continue
             except KeyError:
                 self.log.add_log("UserInfoManager: can not find " + key + ", in your info list", 3)
-                res, err = False, "key-" + key + " does not exists or '_id' is not exists"
+                not_found_keys.append(key)
+                res, err = False, "key-" + str(not_found_keys) + " does not exists or '_id' is not exists"
                 continue
         
         return res, err
