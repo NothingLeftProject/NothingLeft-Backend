@@ -90,3 +90,5 @@
 - 完成了root初始化的调试，没有问题
 - 修了一堆关于user操作的bug
 - 调试并完成了user_delete
+- 修复了一堆关于user_info_update的bug
+- 调试pass了user_info_update
