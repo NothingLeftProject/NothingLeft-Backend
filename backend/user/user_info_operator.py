@@ -18,7 +18,7 @@ class UserInfoManager:
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
 
-        self.user_info_template = json.load(open("./backend/data/json/user_info_template.json", "r", encoding="utf-8"))
+        self.user_info_id_event_mapping = json.load(open("./backend/data/json/user_info_id_event_mapping.json", "r", encoding="utf-8"))
 
     def update_user_info(self, account, info):
 
@@ -35,18 +35,17 @@ class UserInfoManager:
             return False, "the type of info is wrong"
 
         key_list = info.keys()
-        for event in self.user_info_template:
-            if event.keys[1] in key_list:  # needs to verify
-                try:
-                    if self.mongodb_manipulator.update_many_documents("user", account, {"_id": event["_id"]}, info[event.keys[1]]) is False:
-                        self.log.add_log("UserInfoManager: meet database error while updating " + event.keys[1] + ", skip and wait", 3)
-                        res, err = False, "database error"
-                        time.sleep(2)
-                        continue
-                except KeyError:
-                    self.log.add_log("UserInfoManager: can not find " + event.keys[1] + ", in your info list", 3)
-                    res, err = False, "key '" + event.keys[1] + "' does not exists or '_id' is not exists"
+        for key in key_list:
+            try:
+                if self.mongodb_manipulator.update_many_documents("user", account, {"_id": self.user_info_id_event_mapping[key]}, {key: info[key]}) is False:
+                    self.log.add_log("UserInfoManager: meet database error while updating " + key + ", skip and wait", 3)
+                    res, err = False, "database error"
+                    time.sleep(0.1)
                     continue
+            except KeyError:
+                self.log.add_log("UserInfoManager: can not find " + key + ", in your info list", 3)
+                res, err = False, "key-" + key + " does not exists or '_id' is not exists"
+                continue
         
         return res, err
 
