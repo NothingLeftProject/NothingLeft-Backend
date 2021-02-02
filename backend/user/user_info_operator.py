@@ -38,6 +38,10 @@ class UserInfoManager:
         key_list = info.keys()
         for key in key_list:
             try:
+                if key == "permissionsList" and account != "root":
+                    self.log.add_log("UserInfoManager: It's not allow normal user to change permissionsList", 1)
+                    raise KeyError
+
                 if self.mongodb_manipulator.update_many_documents("user", account, {"_id": self.user_info_id_event_mapping[key]}, {key: info[key]}) is False:
                     self.log.add_log("UserInfoManager: meet database error while updating " + key + ", skip and wait", 3)
                     res, err = False, "database error"
