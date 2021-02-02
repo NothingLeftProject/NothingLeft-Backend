@@ -19,6 +19,7 @@ class UserInfoManager:
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
 
         self.user_info_id_event_mapping = json.load(open("./backend/data/json/user_info_id_event_mapping.json", "r", encoding="utf-8"))
+        self.all_user_info_keys = list(self.user_info_id_event_mapping.keys())
 
     def update_user_info(self, account, info):
 
@@ -99,15 +100,25 @@ class UserInfoManager:
         :return:
         """
         result = {}
+        not_found_keys = []
+        res = "success"
 
         for key in keys:
             self.log.add_log("UserInfoManager: try to get user- " + account + "'s " + key, 1)
-            result_ = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("user", account, {key: 1}, 2), [key]
-            )
-            result[key] = result_[0][key]
 
-        return result, "success"
+            if key in self.all_user_info_keys:
+                result_ = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user", account, {key: 1}, 2),
+                    [key]
+                )
+                result[key] = result_[0][key]
+            else:
+                not_found_keys.append(key)
+                continue
+
+        if not_found_keys:
+            res = "key-" + str(not_found_keys) + " is not exist"
+        return result, res
 
     def get_multi_users_multi_info(self, accounts, keys):
 
@@ -120,16 +131,37 @@ class UserInfoManager:
         :return:
         """
         result = {}
-        for account in accounts:
-            self.log.add_log("UserInfoManager: try to get " + account + "'s multi info", 1)
-            result[account] = self.get_one_user_multi_info(account, keys[account])
+        info_not_found_users = []
+        res = "success"
 
-        return result, "success"
+        if type(keys) != dict:
+            self.log.add_log("UserInfoManager: In get_multi_multi_info, param-keys must be a dict", 3)
+            return False, "param-keys type error"
+
+        for account in accounts:
+            self.log.add_log("UserInfoManager: try to get user-%s's multi info" % account, 1)
+
+            if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+                self.log.add_log("UserInfoManager: user-%s is not exist" % account, 1)
+                info_not_found_users.append(account)
+                continue
+
+            result_, res_ = self.get_one_user_multi_info(account, keys[account])
+
+            if res_ != "success":
+                self.log.add_log("UserInfoManager: " + res_, 1)
+                info_not_found_users.append(account)
+                continue
+            else:
+                result[account] = result_
+
+        if info_not_found_users:
+            res = "user-" + str(info_not_found_users) + "'s info can't be found or user not exist"
+        return result, res
 
     def set_avatar(self, account, avatar_data, img_type):
 
         """
-
         设置头像
         :param account: 账户名
         :param avatar_data: 头像二进制数据
