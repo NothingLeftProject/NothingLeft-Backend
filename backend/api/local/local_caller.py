@@ -10,10 +10,16 @@ from backend.user.user_permission_mamanger import UserPermissionManager
 
 class LocalCaller:
 
-    def __init__(self, log, setting):
+    def __init__(self, log, setting, caller):
 
         self.log = log
         self.setting = setting
+        self.caller = caller
+
+        if self.caller == "root":
+            self.not_root = False
+        else:
+            self.not_root = True
 
         self.user_manager = UserManager(log, setting)
         self.user_permission_manager = UserPermissionManager(log, setting)
@@ -113,6 +119,7 @@ class LocalCaller:
         :return:
         """
         self.log.add_log("LocalCaller: start user_info_update", 1)
+        res, err = False, ""
 
         result = {}
         try:
@@ -122,7 +129,16 @@ class LocalCaller:
             self.log.add_log("LocalCaller: user_info_update: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allow to change other user's info"
+                elif self.caller == account and "permissionsList" in info:
+                    err = "you are not allow to change your own permissionsList"
+                if err != "":
+                    return res, err
+
             res, err = self.user_info_manager.update_user_info(account, info)
+
             if res is False:
                 return res, err
             else:
@@ -159,6 +175,8 @@ class LocalCaller:
         self.log.add_log("LocalCaller: start user_info_get_one_multi", 1)
 
         result = {}
+        res, err = False, ""
+
         try:
             account = param["account"]
             keys = param["keys"]
@@ -166,14 +184,20 @@ class LocalCaller:
             self.log.add_log("LocalCaller: user_info_get_one_multi: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allow to get other user's info"
+                    return res, err
+
             res, err = self.user_info_manager.get_one_user_multi_info(account, keys)
+
             result["userInfo"] = res
             return result, err
 
     def user_info_get_multi_multi(self, param):
 
         """
-        获取多个用户的多个信息
+        获取多个用户的多个信息(ONLY ROOT CAN OWN)
         :return:
         """
         self.log.add_log("LocalCaller: start user_info_get_multi_multi", 1)
@@ -193,7 +217,7 @@ class LocalCaller:
     def user_get_permissions(self, param):
 
         """
-        获取用户权限
+        获取用户权限  其实吧...这里有个安全漏洞，用户可以获取别的用户的权限...但是吧...你获取了也没什么关系啊...
         :return:
         """
         self.log.add_log("LocalCaller: start user_get_permission", 1)
@@ -223,7 +247,7 @@ class LocalCaller:
     def user_write_permissions(self, param):
 
         """
-        写入一个用户的权限(覆盖用户，比较用户组)
+        写入一个用户的权限(覆盖用户，比较用户组) (ONLY ROOT CAN OWN)
         :param param:
         :return:
         """
@@ -242,7 +266,7 @@ class LocalCaller:
     def user_edit_permissions(self, param):
 
         """
-        写入一个用户的权限(覆盖用户，比较用户组)
+        编辑一个用户的权限(覆盖用户，比较用户组) (ONLY ROOT CAN OWN)
         :param param:
         :return:
         """

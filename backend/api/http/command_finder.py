@@ -8,9 +8,9 @@ from backend.api.local.local_caller import LocalCaller
 
 class CommandFinder:
 
-    def __init__(self, log, setting):
+    def __init__(self, log, setting, caller):
 
-        self.local_caller = LocalCaller(log, setting)
+        self.local_caller = LocalCaller(log, setting, caller)
 
         self.all_command_list = {
             "user_sign_up": self.local_caller.user_sign_up,

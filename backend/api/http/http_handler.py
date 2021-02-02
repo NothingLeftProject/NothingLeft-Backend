@@ -16,15 +16,15 @@ class HttpHandler:
 
         self.log = log
         self.setting = setting
-
-        self.mongodb_manipulator = MongoDBManipulator(log, setting)
-        self.permission_manager = UserPermissionManager(log, setting)
-        self.command_finder = CommandFinder(log, setting)
         
         self.request_data = {}
         self.permission_list = []
         self.response_data = json.load(open("./backend/data/json/response_template.json", "r", encoding="utf-8"))
         self.special_auth_pass = False
+
+        self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        self.permission_manager = UserPermissionManager(log, setting)
+        self.command_finder = ""
 
     def auth(self):
 
@@ -135,6 +135,8 @@ class HttpHandler:
         self.request_data = request_data
 
         if self.auth():
+            self.command_finder = CommandFinder(self.log, self.setting, self.request_data["header"]["account"])
+
             self.log.add_log("HttpHandler: auth completed", 1)
             special_handle_pass = False
             allow_process_command = True
