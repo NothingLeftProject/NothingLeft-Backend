@@ -132,7 +132,7 @@ class UserInfoManager:
         """
         result = {}
         info_not_found_users = []
-        res = "success"
+        err = "success"
 
         if type(keys) != dict:
             self.log.add_log("UserInfoManager: In get_multi_multi_info, param-keys must be a dict", 3)
@@ -146,18 +146,18 @@ class UserInfoManager:
                 info_not_found_users.append(account)
                 continue
 
-            result_, res_ = self.get_one_user_multi_info(account, keys[account])
+            result_, err_ = self.get_one_user_multi_info(account, keys[account])
 
-            if res_ != "success":
-                self.log.add_log("UserInfoManager: " + res_, 1)
+            if err_ != "success":
+                self.log.add_log("UserInfoManager: " + err_, 1)
                 info_not_found_users.append(account)
                 continue
             else:
                 result[account] = result_
 
         if info_not_found_users:
-            res = "user-" + str(info_not_found_users) + "'s info can't be found or user not exist"
-        return result, res
+            err = "user-" + str(info_not_found_users) + "'s info can't be found or user not exist"
+        return result, err
 
     def set_avatar(self, account, avatar_data, img_type):
 
