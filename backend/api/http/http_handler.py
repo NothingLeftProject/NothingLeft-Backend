@@ -234,6 +234,7 @@ class HttpHandler:
                             command_response["errorMsg"] = "you have no permission to request command-" + command_name + " or wrong command name"
                             command_response["result"] = None
                         self.response_data["response"].append(command_response)
+                        self.log.add_log("HttpHandler: command-%s handle completed" % command_name, 1)
         else:
             self.log.add_log("HttpHandler: auth fail", 1)
             self.response_data["header"]["status"] = 1
