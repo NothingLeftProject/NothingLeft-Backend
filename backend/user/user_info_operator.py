@@ -68,10 +68,15 @@ class UserInfoManager:
             return False, "the type of param is wrong"
 
         users_info = {}
+        not_found_users = []
+        res = "success"
 
         for account in accounts:
             self.log.add_log("UserInfoManager: Getting user-" + str(account) + "'s info", 1)
             raw_user_info = self.mongodb_manipulator.get_document("user", account, mode=0)
+            if raw_user_info is False:
+                not_found_users.append(account)
+                self.log.add_log("UserInfoManager: Can't find user-%s" % account, 1)
 
             user_info = {}
             for info in raw_user_info:
@@ -80,7 +85,9 @@ class UserInfoManager:
 
             users_info[account] = user_info
 
-        return users_info, "success"
+        if not_found_users:
+            res = "user-" + str(not_found_users) + " is not exist"
+        return users_info, res
 
     def get_one_user_multi_info(self, account, keys):
 
