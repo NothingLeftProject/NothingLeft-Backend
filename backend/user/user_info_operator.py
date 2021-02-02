@@ -152,8 +152,8 @@ class UserInfoManager:
                 self.log.add_log("UserInfoManager: " + err_, 1)
                 info_not_found_users.append(account)
                 continue
-            else:
-                result[account] = result_
+
+            result[account] = result_
 
         if info_not_found_users:
             err = "user-" + str(info_not_found_users) + "'s info can't be found or user not exist"
