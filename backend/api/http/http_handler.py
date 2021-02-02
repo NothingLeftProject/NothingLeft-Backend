@@ -227,7 +227,10 @@ class HttpHandler:
                                     command_response["status"] = 1
                                     command_response["errorMsg"] = err
                                 else:
-                                    command_response["status"] = 0
+                                    if err != "success":
+                                        command_response["status"] = 2
+                                    else:
+                                        command_response["status"] = 0
                                     command_response["errorMsg"] = err
                                     command_response["result"] = function_response
                         else:
