@@ -71,7 +71,7 @@ class UserInfoManager:
 
             user_info = {}
             for info in raw_user_info:
-                key = info.keys()[-1]
+                key = list(info.keys())[-1]
                 user_info[key] = info[key]
 
             users_info[account] = user_info
