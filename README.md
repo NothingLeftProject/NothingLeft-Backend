@@ -92,4 +92,5 @@
 - 调试并完成了user_delete
 - 修复了一堆关于user_info_update的bug
 - 调试pass了user_info_update
-- 测试pass了user_get_all_info
+- 测试pass了user_info_get_all
+- 测试pass了user_info_get_one_multi
