@@ -131,7 +131,7 @@ class LocalCaller:
     def user_info_get_all(self, param):
 
         """
-        获取用户所有信息
+        获取用户所有信息(WARNING: ONLY ROOT CAN OWN)
         :return:
         """
         self.log.add_log("LocalCaller: start user_info_get_all", 1)

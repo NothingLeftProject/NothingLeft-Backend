@@ -66,13 +66,13 @@ class UserInfoManager:
         users_info = {}
 
         for account in accounts:
-            self.log.add_log("UserInfoManager: Getting " + str(account) + "'s info", 1)
-            raw_user_info = self.mongodb_manipulator.get_document("user", account, {"_id": 0}, 2)
+            self.log.add_log("UserInfoManager: Getting user-" + str(account) + "'s info", 1)
+            raw_user_info = self.mongodb_manipulator.get_document("user", account, mode=0)
 
             user_info = {}
-            for i in raw_user_info:
-                key = i.keys[0]
-                user_info[key] = i[key]
+            for info in raw_user_info:
+                key = info.keys()[-1]
+                user_info[key] = info[key]
 
             users_info[account] = user_info
 
