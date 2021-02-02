@@ -228,7 +228,7 @@ class HttpHandler:
                                     command_response["errorMsg"] = err
                                 else:
                                     command_response["status"] = 0
-                                    command_response["errorMsg"] = None
+                                    command_response["errorMsg"] = err
                                     command_response["result"] = function_response
                         else:
                             print(self.permission_list)
