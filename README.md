@@ -85,10 +85,11 @@
   - 修复了各种各样的bug
 - 调试成功，完整的http实现，测试成功了login功能
 - 添加了建议、理念等的信息收集处(./research)
-- 完成了在centos系统上的调试
+- 完成了在centos系统上的启动调试
 - 完成了logout/signup/login功能并且调试没有问题
 - 完成了root初始化的调试，没有问题
 - 修了一堆关于user操作的bug
 - 调试并完成了user_delete
 - 修复了一堆关于user_info_update的bug
 - 调试pass了user_info_update
+- 测试pass了user_get_all_info
