@@ -165,7 +165,7 @@ class UserPermissionManager:
             return False, "user-%s not exist" % account
 
         # get now permissions list
-        raw_permissions_list = self.mongodb_manipulator.parse_document_result(
+        permissions_list = self.mongodb_manipulator.parse_document_result(
             self.mongodb_manipulator.get_document("user", account, query={"permissionsList": 1}, mode=2),
             ["permissionsList"]
         )[0]["permissionsList"]
@@ -174,9 +174,9 @@ class UserPermissionManager:
         for permission in permissions_to_change:
             try:
                 if permission[1]:
-                    raw_permissions_list.append(permission[0])
+                    permissions_list.append(permission[0])
                 else:
-                    raw_permissions_list.remove(permission[0])
+                    permissions_list.remove(permission[0])
             except IndexError:
                 self.log.add_log("UserPermissionManager: wrong param for permission_to_change", 3)
                 return False, "error format of permission_to_change"
@@ -185,5 +185,6 @@ class UserPermissionManager:
                 return False, "permission " + permission[0] + " is not exists"
 
         # write_user_permissions
-        self.mongodb_manipulator.update_many_documents("user", account, query={"_id": 12}, values=raw_permissions_list)
+        self.mongodb_manipulator.update_many_documents("user", account, {"_id": 12}, {"permissionsList": permissions_list})
+        self.write_user_permissions(account, permissions_list)
         return True, "success"
