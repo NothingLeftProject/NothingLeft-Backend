@@ -110,16 +110,24 @@ class HttpHandler:
                             pass
 
                         return True
+                    else:
+                        # auth fail, wrong token
+                        self.log.add_log("HttpHandler: wrong token, auth fail", 1)
+                        self.response_data["header"]["errorMsg"] = "wrong token"
+                        return False
                 else:
-                    self.log.add_log("HttpHandler: login outdated", 1)
+                    # auth fail, login outdated
+                    self.log.add_log("HttpHandler: login outdated, auth fail", 1)
                     self.response_data["header"]["errorMsg"] = "login outdated, please login"  # login outdate error
                     return False
             else:
-                self.log.add_log("HttpHandler: time stamp not in law, time_loss > 600", 1)
+                # auth fail, time stamp not in law
+                self.log.add_log("HttpHandler: time stamp not in law, time_loss > 600, auth fail", 1)
                 self.response_data["header"]["errorMsg"] = "time stamp is not in law, time_loss > 600"  # timestamp error
                 return False
         else:
-            self.log.add_log("HttpHandler: account not exists or format error", 1)
+            # auth fail, param wrong
+            self.log.add_log("HttpHandler: account not exists or format error, auth fail", 1)
             self.response_data["header"]["errorMsg"] = "user does not exists or format error"  # user not exists error
             return False
 
