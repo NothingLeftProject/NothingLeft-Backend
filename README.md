@@ -98,3 +98,4 @@
 - 测试修复pass新修复的安全bug
 - 修复了一些因账户不存在的bug
 - 测试修复pass了user_write_permissions
+- 测试修复pass了user_edit_permissions
