@@ -91,9 +91,10 @@
 - 修了一堆关于user操作的bug
 - 调试并完成了user_delete
 - 修复了一堆关于user_info_update的bug
-- 调试pass了user_info_update
-- 测试pass了user_info_get_all
-- 测试pass了user_info_get_one_multi
-- 测试pass了user_get_permissions
-- 测试pass新修复的安全bug
+- 调试修复pass了user_info_update
+- 测试修复pass了user_info_get_all
+- 测试修复pass了user_info_get_one_multi
+- 测试修复pass了user_get_permissions
+- 测试修复pass新修复的安全bug
 - 修复了一些因账户不存在的bug
+- 测试修复pass了user_write_permissions
