@@ -28,7 +28,11 @@ class UserPermissionManager:
         :param ask_update: 是否从缓存中获取
         :return: list/False
         """
-        self.log.add_log("UserPermissionManager: getting the permissions list of " + account, 1)
+        self.log.add_log("UserPermissionManager: try to get the permissions list of " + account, 1)
+
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("UserPermissionManager: user-%s not exist" % account, 1)
+            return False, "user-%s not exist" % account
 
         permissions_list = None
         if ask_update is False:
@@ -95,6 +99,10 @@ class UserPermissionManager:
         """
         self.log.add_log("UserPermissionManager: try to write " + account + "'s permissions in", 1)
 
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("UserPermissionManager: user-%s not exist" % account, 1)
+            return False, "user-%s not exist" % account
+
         # write permissions into user_document
         self.mongodb_manipulator.update_many_documents("user", account, query={"_id": 12}, values=new_permissions_list)
 
@@ -146,6 +154,10 @@ class UserPermissionManager:
         :return: bool
         """
         self.log.add_log("UserPermissionManager: editing " + account + "'s permission", 1)
+
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("UserPermissionManager: user-%s not exist" % account, 1)
+            return False, "user-%s not exist" % account
 
         # get now permissions list
         raw_permissions_list = self.mongodb_manipulator.parse_document_result(
