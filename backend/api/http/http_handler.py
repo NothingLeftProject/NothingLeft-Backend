@@ -55,7 +55,7 @@ class HttpHandler:
                     if self.request_data["header"]["loginRequest"]:
                         self.special_auth_pass = True
                         return True
-                    elif self.request_data["header"]["signupRequest"]:
+                    elif self.request_data["header"]["signupRequest"]: # maybe bug here
                         self.special_auth_pass = True
                         return True
                 except KeyError:

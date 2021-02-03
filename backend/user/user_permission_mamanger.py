@@ -97,14 +97,14 @@ class UserPermissionManager:
         :param new_permissions_list: 此用户被允许的权限
         :return: bool
         """
-        self.log.add_log("UserPermissionManager: try to write " + account + "'s permissions in", 1)
+        self.log.add_log("UserPermissionManager: try to write " + account + "'s permissions", 1)
 
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
             self.log.add_log("UserPermissionManager: user-%s not exist" % account, 1)
             return False, "user-%s not exist" % account
 
         # write permissions into user_document
-        self.mongodb_manipulator.update_many_documents("user", account, query={"_id": 12}, values=new_permissions_list)
+        self.mongodb_manipulator.update_many_documents("user", account, {"_id": 12}, {"permissionsList": new_permissions_list})
 
         group_name = self.mongodb_manipulator.parse_document_result(
             self.mongodb_manipulator.get_document("user", account, query={"userGroup": 1}, mode=2),
@@ -114,32 +114,37 @@ class UserPermissionManager:
             self.mongodb_manipulator.get_document("user_group", group_name, query={"permissionsList": 1}, mode=2),
             ["permissionsList"]
         )[0]["permissionsList"]
-        different_list = []
 
         # verify is the user_group this user belong to permissions are different from now
+        different_list = []
         is_different = False
-        for pmis in new_permissions_list:
-            if pmis not in group_permissions_list:
-                is_different = True
-                different_list.append(pmis)
+        if group_permissions_list != new_permissions_list:
+            is_different = True
 
         # yes->add differences to permissionDifferences and add user to differentUsers
         if is_different:
+            for pmis in group_permissions_list:
+                if pmis not in new_permissions_list:
+                    different_list.append({pmis: False})
+            for pmis in new_permissions_list:
+                if pmis not in group_permissions_list:
+                    different_list.append({pmis: True})
+
             different_users = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("user_group", group_name, query={"differentUsers": 1}, mode=2),
                 ["differentUsers"]
             )[0]["differentUsers"]
             different_users.append(account)
-            self.mongodb_manipulator.update_many_documents("user_group", group_name, query={"_id": 3},
-                                                           values=different_users)
+            self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 3},
+                                                           {"differentUsers": different_users})
 
             different_permissions_list = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("user_group", group_name, query={"permissionDifferences": 1}, mode=2),
                 ["permissionDifferences"]
             )[0]["permissionDifferences"]
             different_permissions_list[account] = different_list
-            self.mongodb_manipulator.update_many_documents("user_group", group_name, query={"_id": 4},
-                                                           values=different_permissions_list)
+            self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 4},
+                                                           {"permissionDifferences": different_permissions_list})
 
         return True, "success"
         # no->do nothing
