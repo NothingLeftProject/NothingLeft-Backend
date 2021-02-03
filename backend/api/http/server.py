@@ -12,6 +12,7 @@ flask_app = Flask(__name__)
 log_class = {}
 settings = {}
 
+
 def get_ip():
 
     try:

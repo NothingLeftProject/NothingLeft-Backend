@@ -37,7 +37,9 @@ class UserPermissionManager:
         permissions_list = None
         if ask_update is False:
             permissions_list = self.memcached_manipulator._get("permissions-" + account)
-        if permissions_list is None or cache_to_memcached is False:
+            if permissions_list != False:
+                self.log.add_log("UserPermissionManager: get permissions list from memcached success", 1)
+        if ask_update:
             group_name = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2),
                 ["userGroup"]
@@ -74,14 +76,12 @@ class UserPermissionManager:
                         self.log.add_log(
                             "UserPermissionManager: get_user_permission: something went wrong with database", 3)
                         return False, "database error"
-        else:
-            self.log.add_log("UserPermissionManager: get permissions list from memcached success", 1)
 
-        self.log.add_log("UserPermissionManager: " + account + "'s perms: " + str(list(permissions_list)), 0,
+        self.log.add_log("UserPermissionManager: user-%s's perms: " % account + str(list(permissions_list)), 0,
                          is_print=False)
 
         if cache_to_memcached:
-            if self.memcached_manipulator._set("permissions-" + account, permissions_list):
+            if self.memcached_manipulator._set("permissions-%s" % account, permissions_list):
                 self.log.add_log("UserPermissionManager: cache permission list success", 1)
             else:
                 self.log.add_log("UserPermissionManager: cache permission list fail", 3)
