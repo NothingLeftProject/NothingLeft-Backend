@@ -240,6 +240,7 @@ class HttpHandler:
                             command_response["result"] = None
                         self.response_data["response"].append(command_response)
                         self.log.add_log("HttpHandler: command-%s handle completed" % command_name, 1)
+                        special_handle_pass = False
         else:
             self.log.add_log("HttpHandler: auth fail", 1)
             self.response_data["header"]["status"] = 1
