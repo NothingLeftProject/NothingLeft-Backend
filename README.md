@@ -4,13 +4,13 @@
 - Other languages: 
   - [English](./README_en.md)
 
-## Introduction-简介
+## 简介-Introduction
 
-### About GTD:
+### 关于GTD-About GTD:
 - - Getting Things Done is a kind of time management system which was proposed by David Allen. Usually, we abbreviate Getting Things Done as GTD.
 - [Gtd-Introduction](./GTD.md)
 
-### The way this system works
+### 设计-How it works
 - 那么，这个项目是如何使用，或者说工作的呢
 - **交互（前端）**
   - 首先，我们需要一个可视化的交互口以便用户操作，而这种可视化的交互口是可以有很多种实现方式的。在这里，我就对一些初级阶段需要实现的交互方式进行列举和说明
@@ -25,7 +25,7 @@
     - 而基本业务就是最底层的部分了。基本业务其实就是完全配合GTD，再加上一些创新的实现
 - 到这里，相信你已经对本项目有了一定的认识，如果您想要了解更多，请查看我们的[Wiki](https://nothingleftproject.github.io/NothingLeft/)
 
-### More-更多
+### 更多-More
 - 其实，我们所拥有的只有空间和时间，有了他们，我们什么都可以做到。而这个系统就是为了更好地利用时间而诞生的。
 - 这么多年来，这么多的GTD工具，有哪个是真正可以的呢？做到GTD，靠的不仅仅是工具，还有使用者的习惯，这才是最重要的
 - 因此，帮助使用者养成习惯，才能实现这个目的。
@@ -65,7 +65,7 @@
 
 ## About
 
-### Contributors-作者
+### 贡献者-Contributors
 - Lan_zhijiang(我)
 
 - 当然也欢迎大家来一起开发
@@ -74,10 +74,10 @@
   - Wechat：18680171381
   - QQ: 1481605673
 
-### Usage-如何使用
+### 使用-Usage
 - 请查看本项目的[Wiki](https://nothingleftproject.github.io/NothingLeft/)
 
-### Update-重大更新
+### 提交记录-Commit Log
 - 基本完成了user的全部内容，配合数据库
 - 基本完成了http服务器，接入了user的一部分内容
 - 第一次测试后端，开始第一次调试——user部分
