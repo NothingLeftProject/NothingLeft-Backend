@@ -134,7 +134,8 @@ class UserPermissionManager:
                 self.mongodb_manipulator.get_document("user_group", group_name, query={"differentUsers": 1}, mode=2),
                 ["differentUsers"]
             )[0]["differentUsers"]
-            different_users.append(account)
+            if account not in different_users:
+                different_users.append(account)
             self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 3},
                                                            {"differentUsers": different_users})
 
@@ -158,7 +159,7 @@ class UserPermissionManager:
         :type permissions_to_change: list[list]
         :return: bool
         """
-        self.log.add_log("UserPermissionManager: editing " + account + "'s permission", 1)
+        self.log.add_log("UserPermissionManager: try to edit " + account + "'s permission", 1)
 
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
             self.log.add_log("UserPermissionManager: user-%s not exist" % account, 1)
@@ -176,7 +177,10 @@ class UserPermissionManager:
                 if permission[1]:
                     permissions_list.append(permission[0])
                 else:
-                    permissions_list.remove(permission[0])
+                    if permission[0] in permissions_list:
+                        permissions_list.remove(permission[0])
+                    else:
+                        self.log.add_log("UserPermissionManager: skip remove pmis-%s because not exist" % permission[0], 1)
             except IndexError:
                 self.log.add_log("UserPermissionManager: wrong param for permission_to_change", 3)
                 return False, "error format of permission_to_change"
