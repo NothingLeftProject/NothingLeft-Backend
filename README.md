@@ -94,3 +94,6 @@
 - 调试pass了user_info_update
 - 测试pass了user_info_get_all
 - 测试pass了user_info_get_one_multi
+- 测试pass了user_get_permissions
+- 测试pass新修复的安全bug
+- 修复了一些因账户不存在的bug
