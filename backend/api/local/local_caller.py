@@ -274,11 +274,11 @@ class LocalCaller:
 
         try:
             account = param["account"]
-            permissions_to_change = param["permissionToChange"]
+            permissions_to_edit = param["permissionToEdit"]
         except KeyError:
             self.log.add_log("LocalCaller: user_edit_permissions: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
-            res, err = self.user_permission_manager.edit_user_permissions(account, permissions_to_change)
+            res, err = self.user_permission_manager.edit_user_permissions(account, permissions_to_edit)
             return res, err
 
