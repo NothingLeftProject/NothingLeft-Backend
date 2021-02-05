@@ -39,12 +39,12 @@ class UserPermissionManager:
             permissions_list = self.memcached_manipulator._get("permissions-" + account)
             if permissions_list != False:
                 self.log.add_log("UserPermissionManager: get permissions list from memcached success", 1)
-        if ask_update:
+        else:
             group_name = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2),
                 ["userGroup"]
             )[0]["userGroup"]
-            if group_name is False:
+            if group_name is False or group_name is None:
                 self.log.add_log("UserPermissionManager: can't find the user_group-" + account + " of this user", 1)
                 self.log.add_log("UserPermissionManager: get permissions list from user's info", 1)
                 permissions_list = self.mongodb_manipulator.parse_document_result(
@@ -76,6 +76,10 @@ class UserPermissionManager:
                         self.log.add_log(
                             "UserPermissionManager: get_user_permission: something went wrong with database", 3)
                         return False, "database error"
+
+        if permissions_list is None:
+            self.log.add_log("UserPermissionManager: permission list is empty", 1)
+            return False, "it is empty, you might should try enable 'isUpdate'"
 
         self.log.add_log("UserPermissionManager: user-%s's perms: " % account + str(list(permissions_list)), 0,
                          is_print=False)

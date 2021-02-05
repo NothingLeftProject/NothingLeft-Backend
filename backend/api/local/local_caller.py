@@ -231,9 +231,11 @@ class LocalCaller:
         else:
             try:
                 is_cache = param["isCache"]
-                is_update = param["isUpdate"]
             except KeyError:
                 is_cache = True
+            try:
+                is_update = param["isUpdate"]
+            except KeyError:
                 is_update = False
 
             res, err = self.user_permission_manager.get_user_permissions(account, cache_to_memcached=is_cache,
