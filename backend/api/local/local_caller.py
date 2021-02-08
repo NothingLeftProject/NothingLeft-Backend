@@ -6,6 +6,7 @@
 from backend.user.user_manager import UserManager
 from backend.user.user_info_operator import UserInfoManager
 from backend.user.user_permission_mamanger import UserPermissionManager
+from backend.user.user_group_manager import UserGroupManager
 
 
 class LocalCaller:
@@ -24,6 +25,7 @@ class LocalCaller:
         self.user_manager = UserManager(log, setting)
         self.user_permission_manager = UserPermissionManager(log, setting)
         self.user_info_manager = UserInfoManager(log, setting)
+        self.user_group_manager = UserGroupManager(log, setting)
 
     def user_login(self, param):
 
@@ -282,5 +284,24 @@ class LocalCaller:
             return False, "param incomplete"
         else:
             res, err = self.user_permission_manager.edit_user_permissions(account, permissions_to_edit)
+            return res, err
+
+    def user_group_add_user(self, param):
+
+        """
+        添加一个用户到用户组里
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_add_user", 1)
+
+        try:
+            accounts = param["accounts"]
+            target_group = param["targetGroup"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_add_user: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_group_manager.add_users_into_group(accounts, target_group)
             return res, err
 

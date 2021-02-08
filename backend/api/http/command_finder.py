@@ -23,5 +23,6 @@ class CommandFinder:
             "user_info_get_multi_multi": self.local_caller.user_info_get_multi_multi,
             "user_get_permissions": self.local_caller.user_get_permissions,
             "user_write_permissions": self.local_caller.user_write_permissions,
-            "user_edit_permissions": self.local_caller.user_edit_permissions
+            "user_edit_permissions": self.local_caller.user_edit_permissions,
+            "user_group_add_user":self.local_caller.user_group_add_user
         }
