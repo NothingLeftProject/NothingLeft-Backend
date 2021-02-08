@@ -289,7 +289,7 @@ class LocalCaller:
     def user_group_add_users(self, param):
 
         """
-        添加一个用户到用户组里
+        添加多个用户到用户组里
         :param param:
         :return:
         """
@@ -303,5 +303,43 @@ class LocalCaller:
             return False, "param incomplete"
         else:
             res, err = self.user_group_manager.add_users_into_group(accounts, target_group)
+            return res, err
+
+    def user_group_remove_users(self, param):
+
+        """
+        从用户组里移除多个用户
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_remove_users", 1)
+
+        try:
+            accounts = param["accounts"]
+            target_group = param["targetGroup"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_remove_users: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_group_manager.remove_users_from_group(accounts, target_group)
+            return res, err
+
+    def user_group_move_one_to_one(self, param):
+
+        """
+        将某用户从一用户组移到另一用户组
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_move_one_to_one", 1)
+
+        try:
+            account = param["account"]
+            target_group = param["targetGroup"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_move_one_to_one: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_group_manager.move_user_to_another_group(accounts, target_group)
             return res, err
 
