@@ -286,20 +286,20 @@ class LocalCaller:
             res, err = self.user_permission_manager.edit_user_permissions(account, permissions_to_edit)
             return res, err
 
-    def user_group_add_user(self, param):
+    def user_group_add_users(self, param):
 
         """
         添加一个用户到用户组里
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: user_group_add_user", 1)
+        self.log.add_log("LocalCaller: user_group_add_users", 1)
 
         try:
             accounts = param["accounts"]
             target_group = param["targetGroup"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_group_add_user: Your param is incomplete", 3)
+            self.log.add_log("LocalCaller: user_group_add_users: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             res, err = self.user_group_manager.add_users_into_group(accounts, target_group)
