@@ -16,48 +16,68 @@ class UserGroupManager:
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
 
-    def add_user_into_group(self, account, group_name):
+    def add_users_into_group(self, accounts, group_name):
 
         """
         添加用户到用户组中
-        :param account: 要被添加的用户
+        :param accounts: 要被添加的用户
         :param group_name: 目标用户组名称
+        :type accounts: list
         :return: bool
         """
-        self.log.add_log("UserGroupManager: try to add " + account + " into user_group-" + group_name, 1)
+        self.log.add_log("UserGroupManager: try to add %s" % accounts + " into user_group-%s" % group_name, 1)
+        err_add_users = []
+
+        if type(accounts) != list:
+            self.log.add_log("UserGroupManager: wrong type of the param-accounts, it should be a list", 3)
+            return False, "param-accounts wrong type"
 
         if self.mongodb_manipulator.is_collection_exist("user_group", group_name) is False:
             self.log.add_log("UserGroupManager: user_group: " + group_name + " is not exist", 3)
-            return False, "user_group-" + group_name + " is not exist, add user into group fail"
+            return False, "user_group-%s" % group_name + " is not exist, add user into group fail"
         else:
-            self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": group_name})
+            for account in accounts:
+                if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+                    err_add_users.append(account)
+                    self.log.add_log("UserGroupManager: user-%s" % account + " not exist, skip")
+                    continue
 
-            user_list = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2),
-                ["userList"]
-            )[0]["userList"]
+                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": group_name})
 
-            if account in user_list:
-                self.log.add_log("UserGroupManager: the account you want to add had already exists!", 2)
-                return False, "user had already exist in the user_group-" + group_name
+                user_list = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2),
+                    ["userList"]
+                )[0]["userList"]
 
-            user_list.append(account)
-            if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
-                self.log.add_log("UserGroupManager: add " + account + " into user_group-" + group_name + " fail", 3)
-                return False, "add fail"
-            else:
-                self.log.add_log("UserGroupManager: add " + account + " into user_group-" + group_name + " success", 1)
-                return True, "success"
+                if account in user_list:
+                    self.log.add_log("UserGroupManager: user-%s had already exists!" % account, 2)
+                    err_add_users.append(account)
 
-    def remove_user_from_group(self, account, group_name):
+                user_list.append(account)
+                if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
+                    err_add_users.append(account)
+                    self.log.add_log("UserGroupManager: add user-%s" % account + " into user_group-%s" % group_name + " fail, skip", 3)
+                    continue
+                else:
+                    self.log.add_log("UserGroupManager: add user-%s" % account + " into user_group-%s" % group_name + " success", 1)
+
+        if err_add_users is False:
+            err = str(err_add_users) + " add fail"
+        else:
+            err = "success"
+
+        return True, err
+
+    def remove_users_from_group(self, accounts, group_name):
 
         """
         移除某个用户组的用户
-        :param account: 用户名
+        :param accounts: 用户名
         :param group_name: 用户组名
+        :type accounts: list
         :return:
         """
-        self.log.add_log("UserGroupManager: try to remove " + account + " from " + group_name, 1)
+        self.log.add_log("UserGroupManager: try to remove %s" % accounts + " from " + group_name, 1)
 
         if self.mongodb_manipulator.is_collection_exist("user_group", group_name) is False:
             self.log.add_log("UserGroupManager: user_group: " + group_name + " is not exists", 3)
