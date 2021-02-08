@@ -25,7 +25,7 @@ class UserGroupManager:
         :type accounts: list
         :return: bool
         """
-        self.log.add_log("UserGroupManager: try to add %s" % accounts + " into user_group-%s" % group_name, 1)
+        self.log.add_log("UserGroupManager: try to add users-%s" % accounts + " into user_group-%s" % group_name, 1)
         err_add_users = []
 
         if type(accounts) != list:
@@ -34,7 +34,7 @@ class UserGroupManager:
 
         if self.mongodb_manipulator.is_collection_exist("user_group", group_name) is False:
             self.log.add_log("UserGroupManager: user_group: " + group_name + " is not exist", 3)
-            return False, "user_group-%s" % group_name + " is not exist, add user into group fail"
+            return False, "user_group-%s" % group_name + " is not exist, add users into group fail"
         else:
             for account in accounts:
                 if self.mongodb_manipulator.is_collection_exist("user", account) is False:
@@ -62,7 +62,7 @@ class UserGroupManager:
                     self.log.add_log("UserGroupManager: add user-%s" % account + " into user_group-%s" % group_name + " success", 1)
 
         if err_add_users is False:
-            err = str(err_add_users) + " add fail"
+            err = "users-%s" % err_add_users + " add fail"
         else:
             err = "success"
 
@@ -77,27 +77,47 @@ class UserGroupManager:
         :type accounts: list
         :return:
         """
-        self.log.add_log("UserGroupManager: try to remove %s" % accounts + " from " + group_name, 1)
+        self.log.add_log("UserGroupManager: try to remove users-%s" % accounts + " from user-group-%s" % group_name, 1)
+        err_remove_users = []
+
+        if type(accounts) != list:
+            self.log.add_log("UserGroupManager: wrong type of the param-accounts, it should be a list", 3)
+            return False, "param-accounts wrong type"
 
         if self.mongodb_manipulator.is_collection_exist("user_group", group_name) is False:
-            self.log.add_log("UserGroupManager: user_group: " + group_name + " is not exists", 3)
-            return False
+            self.log.add_log("UserGroupManager: user_group-%s" % group_name + " is not exist", 3)
+            return False, "user_group-%s" % group_name + " is not exist, remove users from group fail"
         else:
-            self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": None})
+            for account in accounts:
+                if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+                    err_remove_users.append(account)
+                    self.log.add_log("UserGroupManager: user-%s" % account + " not exist, skip")
+                    continue
 
-            try:
-                user_list = self.mongodb_manipulator.parse_document_result(
-                    self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2),
-                    ["userList"]
-                )[0]["userList"].remove(account)
-            except ValueError:
-                self.log.add_log("UserGroupManager: fail to delete " + "user-" + account + " from ser_group-" + group_name +
-                                 "because it's not exist", 1)
-                return False, "user-" + account + " not in the user_group-" + group_name
-            if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
-                self.log.add_log("UserGroupManager: remove " + account + " from " + group_name + " fail", 3)
-            else:
-                self.log.add_log("UserGroupManager: remove " + account + " from " + group_name + " success", 3)
+                self.mongodb_manipulator.update_many_documents("user", account, {"_id": 4}, {"userGroup": None})
+
+                try:
+                    user_list = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("user_group", group_name, {"userList": 1}, 2),
+                        ["userList"]
+                    )[0]["userList"].remove(account)
+                except ValueError:
+                    err_remove_users.append(account)
+                    self.log.add_log("UserGroupManager: fail to remove user-%s" % account + " from user_group-%s" % group_name
+                                     + "because it's not exist", 1)
+                    continue
+                if self.mongodb_manipulator.update_many_documents("user_group", group_name, {"_id": 1}, {"userList": user_list}) is False:
+                    err_remove_users.append(account)
+                    self.log.add_log("UserGroupManager: database error, remove user-%s" % account + " from user-group-%s" % group_name + " fail", 3)
+                else:
+                    self.log.add_log("UserGroupManager: remove user-%s" % account + " from user_group-%s" % group_name + " success", 1)
+
+        if err_remove_users is False:
+            err = "users-%s" % err_remove_users + " remove fail"
+        else:
+            err = "success"
+
+        return True, err
 
     def move_user_to_another_group(self, account, from_group, to_group):
 
