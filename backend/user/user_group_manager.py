@@ -164,59 +164,59 @@ class UserGroupManager:
                     self.log.add_log("UserGroupManager: move user fail", 3)
                     return False, "database error"
 
-    def add_user_group(self, name, permissions_list=[]):
+    def add_user_group(self, user_group, permissions_list=None):
 
         """
         创建用户组
-        :param name: 用户组名
+        :param user_group: 用户组名
         :param permissions_list: 初始化的权限组
         :return: bool
         """
         if permissions_list is None:
             permissions_list = []
-        self.log.add_log("UserGroupManager: add user group: " + name, 1)
+        self.log.add_log("UserGroupManager: add user group-%s" % user_group, 1)
 
-        if self.mongodb_manipulator.is_collection_exist("user_group", name) is True:
-            self.log.add_log("UserGroupManager: user_group: " + name + " had already exists", 3)
+        if self.mongodb_manipulator.is_collection_exist("user_group", user_group) is True:
+            self.log.add_log("UserGroupManager: user_group-%s" % user_group + " had already exists", 3)
             return False
         else:
             user_group_info = json.load(open("./backend/data/json/user_group_info_template.json", "r", encoding="utf-8"))
-            user_group_info[0]["name"] = name
+            user_group_info[0]["user_group"] = user_group
             user_group_info[2]["permissionsList"] = permissions_list
 
-            self.mongodb_manipulator.add_collection("user_group", name)
-            self.mongodb_manipulator.add_many_documents("user_group", name, user_group_info)
+            self.mongodb_manipulator.add_collection("user_group", user_group)
+            self.mongodb_manipulator.add_many_documents("user_group", user_group, user_group_info)
 
-    def delete_user_group(self, name):
+    def remove_user_group(self, user_group):
 
         """
         删除用户组
-        :param name: 用户组名
+        :param user_group: 用户组名
         :return: bool
         """
-        self.log.add_log("UserGroupManager: add user group: " + name, 1)
+        self.log.add_log("UserGroupManager: remove user_group-%s" % user_group, 1)
 
-        if self.mongodb_manipulator.is_collection_exist("user_group", name) is False:
-            self.log.add_log("UserGroupManager: user_group: " + name + " is not exists", 3)
+        if self.mongodb_manipulator.is_collection_exist("user_group", user_group) is False:
+            self.log.add_log("UserGroupManager: user_group-%s" % user_group + " is not exists", 3)
             return False
         else:
-            return self.mongodb_manipulator.delete_collection("user_group", name)
+            return self.mongodb_manipulator.delete_collection("user_group", user_group)
 
-    def update_group_info(self, name, param):
+    def update_group_info(self, user_group, param):
 
         """
         更新用户组信息（全部）
-        :param name: 用户组名
+        :param user_group: 用户组名
         :param param: 用户组信息
         :return:
         """
 
-    def add_group_info(self, name, param):
+    def add_group_info(self, user_group, param):
 
         """
         设置用户组信息（个别）
         :type param: dict
-        :param name: 用户组名
+        :param user_group: 用户组名
         :param param: key->value的dict
         :return: bool
         """
