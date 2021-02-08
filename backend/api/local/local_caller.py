@@ -343,3 +343,35 @@ class LocalCaller:
             res, err = self.user_group_manager.move_user_to_another_group(account, target_group)
             return res, err
 
+    def user_group_add(self, param):
+
+        """
+        添加用户组
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_add", 1)
+
+        try:
+            group_name = param["groupName"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_add: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            # 支持permissionsList和fromTemple来加载，任何一个有了不能有第二个，优先permissionsList
+            err_ = ""
+            try:
+                permissions_list = param["permissionsList"]
+            except KeyError:
+                try:
+                    permissions_list = self.user_permission_manager.get_user_permissions("", from_temple=param["fromTemple"])
+                except KeyError:
+                    permissions_list = None
+                else:
+                    if type(permissions_list) != list:
+                        err_ = ", but got wrong fromTemple"
+                        permissions_list = None
+
+            res, err = self.user_group_manager.add_user_group(group_name, permissions_list=permissions_list)
+            return res, err + err_
+
