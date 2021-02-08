@@ -49,7 +49,7 @@ class UserInfoManager:
                     time.sleep(0.1)
                     continue
             except KeyError:
-                self.log.add_log("UserInfoManager: can not find " + key + ", in your info list", 3)
+                self.log.add_log("UserInfoManager: cannot find " + key + ", in your info list", 3)
                 not_found_keys.append(key)
                 res, err = False, "key-" + str(not_found_keys) + " does not exists or '_id' is not exists"
                 continue
