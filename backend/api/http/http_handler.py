@@ -83,7 +83,7 @@ class HttpHandler:
                         self.response_data["header"]["errorMsg"] = "user haven't login yet"
                         return False
 
-                if 0 <= login_time_loss <= 3600 * 24:
+                if 0 <= login_time_loss <= 3600 * self.setting["loginValidTime"]:
                     self.log.add_log("HttpHandler: time stamp is in law", 1)
 
                     # is token same
