@@ -119,36 +119,45 @@ class UserGroupManager:
 
         return True, err
 
-    def move_user_to_another_group(self, account, from_group, target_group):
+    def move_user_to_another_group(self, account, target_group):
 
         """
         将某用户从一用户组移到另一用户组
         :param account: 用户名
-        :param from_group: 原用户组
         :param target_group: 目标用户组
-        :return: bool
+        :return: bool, str
         """
-        self.log.add_log("UserGroupManager: try to move " + account + " from " + from_group + " to " + target_group, 1)
+        self.log.add_log("UserGroupManager: move user-%s" % account + " to user_group-%s" % target_group, 1)
 
-        if self.mongodb_manipulator.is_collection_exist("user_group", from_group) is False:
-            self.log.add_log("UserGroupManager: move fail! from_group: " + from_group + " is not exists", 3)
-            return False
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("UserGroupManager: move fail, user-%s" % account + " not exist", 3)
+            return False, "user-%s" % account + " not exist"
         else:
             if self.mongodb_manipulator.is_collection_exist("user_group", target_group) is False:
-                self.log.add_log("UserGroupManager: move fail! to_group: " + target_group + " is not exists", 3)
-                return False
+                self.log.add_log("UserGroupManager: move fail! target_group-%s" % target_group + " not exist", 3)
+                return False, "target_group-%s" % target_group + " not exist"
             else:
-                from_group_user_list = self.mongodb_manipulator.parse_document_result(
-                    self.mongodb_manipulator.get_document("user_group", from_group, {"userList": 1}, 2),
-                    ["userList"]
-                )[0]["userList"].remove(account)
-                to_group_user_list = self.mongodb_manipulator.parse_document_result(
+                from_group = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user", account, {"userGroup": 1}, 2),
+                    ["userGroup"]
+                )[0]["userGroup"]
+
+                try:
+                    from_group_user_list = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("user_group", from_group, {"userList": 1}, 2),
+                        ["userList"]
+                    )[0]["userList"].remove(account)
+                except ValueError:
+                    self.log.add_log("UserGroupManager: user-group-%s" % from_group + " does not exist, wrong record", 3)
+                    return False, "wrong record of user's userGroup, cannot be found"
+
+                target_group_user_list = self.mongodb_manipulator.parse_document_result(
                     self.mongodb_manipulator.get_document("user_group", target_group, {"userList": 1}, 2),
                     ["userList"]
                 )[0]["userList"].append(account)
                 result_3 = self.mongodb_manipulator.update_many_documents("user_group", from_group, {"_id": 1}, {"userList": from_group_user_list})
-                result_4 = self.mongodb_manipulator.update_many_documents("user_group", target_group, {"_id": 1}, {"userList": to_group_user_list})
-                if result_3 is True or result_4 is True:
+                result_4 = self.mongodb_manipulator.update_many_documents("user_group", target_group, {"_id": 1}, {"userList": target_group_user_list})
+                if result_3 is True and result_4 is True:
                     self.log.add_log("UserGroupManager: move user success", 1)
                     return True, "success"
                 else:
