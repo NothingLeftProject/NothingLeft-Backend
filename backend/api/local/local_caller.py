@@ -340,6 +340,6 @@ class LocalCaller:
             self.log.add_log("LocalCaller: user_group_move_one_to_one: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
-            res, err = self.user_group_manager.move_user_to_another_group(accounts, target_group)
+            res, err = self.user_group_manager.move_user_to_another_group(account, target_group)
             return res, err
 
