@@ -178,14 +178,18 @@ class UserGroupManager:
 
         if self.mongodb_manipulator.is_collection_exist("user_group", user_group) is True:
             self.log.add_log("UserGroupManager: user_group-%s" % user_group + " had already exists", 3)
-            return False
+            return False, "user_group-%s" % user_group + " had already exists"
         else:
             user_group_info = json.load(open("./backend/data/json/user_group_info_template.json", "r", encoding="utf-8"))
             user_group_info[0]["user_group"] = user_group
             user_group_info[2]["permissionsList"] = permissions_list
 
-            self.mongodb_manipulator.add_collection("user_group", user_group)
-            self.mongodb_manipulator.add_many_documents("user_group", user_group, user_group_info)
+            result_1 = self.mongodb_manipulator.add_collection("user_group", user_group)
+            result_2 = self.mongodb_manipulator.add_many_documents("user_group", user_group, user_group_info)
+            if result_1 and result_2:
+                return True, "success"
+            else:
+                return False, "database error"
 
     def remove_user_group(self, user_group):
 
@@ -198,9 +202,12 @@ class UserGroupManager:
 
         if self.mongodb_manipulator.is_collection_exist("user_group", user_group) is False:
             self.log.add_log("UserGroupManager: user_group-%s" % user_group + " is not exists", 3)
-            return False
+            return False, "user_group-%s" % user_group + " is not exists"
         else:
-            return self.mongodb_manipulator.delete_collection("user_group", user_group)
+            if self.mongodb_manipulator.delete_collection("user_group", user_group):
+                return True, "success"
+            else:
+                return False, "database error"
 
     def update_group_info(self, user_group, param):
 
