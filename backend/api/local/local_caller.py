@@ -375,3 +375,20 @@ class LocalCaller:
             res, err = self.user_group_manager.add_user_group(group_name, permissions_list=permissions_list)
             return res, err + err_
 
+    def user_group_remove(self, param):
+
+        """
+        删除用户组
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_remove", 1)
+
+        try:
+            target_group = param["targetGroup"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_remove: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_group_manager.remove_user_group(target_group)
+            return res, err
