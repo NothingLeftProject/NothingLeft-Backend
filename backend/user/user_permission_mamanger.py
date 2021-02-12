@@ -231,7 +231,7 @@ class UserPermissionManager:
                 continue
             else:
                 group_permissions_list = self.mongodb_manipulator.parse_document_result(
-                    self.mongodb_manipulator.get_document("user_group", user_group, {"_id": 2}, 2),
+                    self.mongodb_manipulator.get_document("user_group", user_group, {"permissionsList": 1}, 2),
                     ["permissionsList"]
                 )[0]["permissionsList"]
                 result[user_group] = group_permissions_list
