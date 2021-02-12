@@ -161,8 +161,8 @@ class UserManager:
                 self.log.add_log("UserManager: login success", 1)
                 return token, "success"
             else:
-                self.log.add_log("UserManager: Your password is wrong", 1)
-                return False, "wrong password"
+                self.log.add_log("UserManager: Your password or username is wrong", 1)
+                return False, "wrong password or username"
 
     def logout(self, account):
 
