@@ -364,7 +364,7 @@ class LocalCaller:
                 permissions_list = param["permissionsList"]
             except KeyError:
                 try:
-                    permissions_list = self.user_permission_manager.get_user_permissions("", from_temple=param["fromTemple"])
+                    permissions_list, _ = self.user_permission_manager.get_user_permissions("", from_temple=param["fromTemple"])
                 except KeyError:
                     permissions_list = None
                 else:
