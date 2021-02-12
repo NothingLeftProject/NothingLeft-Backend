@@ -208,3 +208,37 @@ class UserPermissionManager:
         self.mongodb_manipulator.update_many_documents("user", account, {"_id": 12}, {"permissionsList": permissions_list})
         self.write_user_permissions(account, permissions_list)
         return True, "success"
+
+    def get_user_groups_permissions(self, user_groups):
+
+        """
+        获取多个用户组的权限信息
+        :param user_groups: 要查询的用户组
+        :type user_groups: list
+        :return:
+        """
+        self.log.add_log("UserPermissionManager: get user_groups-%s 's info" % user_groups, 1)
+        if type(user_groups) != type:
+            self.log.add_log("UserPermissionManager: wrong type of param-user_groups", 3)
+            return False, "wrong type of param-user_groups"
+
+        fail_groups = []
+        result = {}
+        for user_group in user_groups:
+            if self.mongodb_manipulator.is_collection_exist("user_group", user_group) is False:
+                self.log.add_log("UserPermissionManager: user-group-%s does not exist, skip" % user_group, 1)
+                fail_groups.append(user_group)
+                continue
+            else:
+                group_permissions_list = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user_group", user_group, {"_id": 2}, 2),
+                    ["permissionsList"]
+                )[0]["permissionsList"]
+                result[user_group] = group_permissions_list
+
+        if fail_groups:
+            self.log.add_log("UserPermissionManager: get_groups_permission: success but user-groups-%s fail" % fail_groups, 2)
+            return result, "but user-groups-%s fail" % fail_groups
+        else:
+            self.log.add_log("UserPermissionManager: get_groups_permission: success", 1)
+            return result, "success"
