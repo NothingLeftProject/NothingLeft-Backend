@@ -3,7 +3,8 @@
     "timeStamp": "",
     "account": "",
     "token": "",
-    "loginRequest": false
+    "loginRequest": false,
+    "signupRequest": false
   },
   "command": []
 }
