@@ -98,7 +98,7 @@ class UserPermissionManager:
                 try:
                     permissions_list = json.load(open("./backend/data/json/permissions_list_temples/%s" % from_temple + ".json", "r", encoding="utf-8"))
                 except IOError:
-                    return False, "temple-%s does not exist" % from_temple
+                    return False, "template-%s does not exist" % from_temple
             else:
                 return False, "wrong type of param-from_temple"
 
