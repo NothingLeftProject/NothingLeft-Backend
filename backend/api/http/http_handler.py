@@ -212,11 +212,11 @@ class HttpHandler:
                             command_name = command["commandName"]
                             command_param = command["param"]
                         except KeyError:
-                            self.log.add_log("HttpHandler: the command info is wrong", 1)
+                            self.log.add_log("HttpHandler: the command info is wrong, 'commandName' or 'param' lost", 1)
                             command_response["status"] = 3
-                            command_response["errorMsg"] = "command info wrong"
+                            command_response["errorMsg"] = "command info wrong, 'commandName' or 'param' lost"
                             self.response_data["response"].append(command_response)
-                            break
+                            continue
 
                         command_response["commandName"] = command_name
 
@@ -230,7 +230,7 @@ class HttpHandler:
                                 command_response["status"] = 1
                                 command_response["errorMsg"] = "can't find command in command_finder"
                                 self.response_data["response"].append(command_response)
-                                break
+                                continue
                             else:
                                 function_response, err = command_handle_function(command_param)
                                 if function_response is False:
