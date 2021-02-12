@@ -61,8 +61,14 @@ class UserManager:
         else:
             res, err = self.user_group_manager.add_users_into_group(account, user_group)
             if res:
-                self.log.add_log("UserManager: Sign up success", 1)
-                return True, "success"
+                user_permissions_list = self.user_permission_manager.get_user_permissions(account, ask_update=True)
+                result, _ = self.user_info_manager.update_user_info(account, {"permissionsList": user_permissions_list})
+                if result:
+                    self.log.add_log("UserManager: Sign up success", 1)
+                    return True, "success"
+                else:
+                    self.log.add_log("UserManager: Sign up success but fail to update permissions list", 2)
+                    return True, "but fail to update permissions list"
             else:
                 return res, err
 
