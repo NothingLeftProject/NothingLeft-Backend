@@ -13,6 +13,8 @@ class UserGroupManager:
 
         self.log = log
         self.setting = setting
+        self.user_group_info_template = json.load(open("./backend/data/json/user_group_info_template.json", "r", encoding="utf-8"))
+        self.user_group_info_id_event_mapping = json.load(open("./backend/data/json/user_group_info_id_event_mapping.json", "r", encoding="utf-8"))
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
 
@@ -180,7 +182,8 @@ class UserGroupManager:
             self.log.add_log("UserGroupManager: user_group-%s" % user_group + " had already exists", 3)
             return False, "user_group-%s" % user_group + " had already exists"
         else:
-            user_group_info = json.load(open("./backend/data/json/user_group_info_template.json", "r", encoding="utf-8"))
+
+            user_group_info = self.user_group_info_template   # WARNING: must use like this to make sure it won't change raw data
             user_group_info[0]["user_group"] = user_group
             user_group_info[2]["permissionsList"] = permissions_list
 
@@ -189,6 +192,7 @@ class UserGroupManager:
             if result_1 and result_2:
                 return True, "success"
             else:
+                self.log.add_log("UserGroupManager: add user_group-%s fail because of database error" % user_group, 3)
                 return False, "database error"
 
     def remove_user_group(self, user_group):
@@ -207,6 +211,7 @@ class UserGroupManager:
             if self.mongodb_manipulator.delete_collection("user_group", user_group):
                 return True, "success"
             else:
+                self.log.add_log("UserGroupManager: remove user_group-%s fail because of database error" % user_group, 3)
                 return False, "database error"
 
     def update_group_info(self, user_group, param):
@@ -217,6 +222,30 @@ class UserGroupManager:
         :param param: 用户组信息
         :return:
         """
+        self.log.add_log("UserGroupManager: update user-group-%s's info" % user_group, 1)
+        if self.mongodb_manipulator.is_collection_exist("user_group", user_group) is False:
+            self.log.add_log("UserGroupManager: user_group-%s does not exist" % user_group, 1)
+            return False, "user_group-%s not exist" % user_group
+        else:
+            fail_update_keys = []
+            need_updated_ids = []   # update's = updated + n.
+            for key in param:
+                try:
+                    id = self.user_group_info_id_event_mapping[key]
+                except KeyError:
+                    self.log.add_log("UserGroupManager: Can't find key-%s in user_group_info_template, skip", 2)
+                    fail_update_keys.append(key)
+                    del param[key]
+                    continue
+                else:
+                    need_updated_ids.append(id)
+
+            result = self.mongodb_manipulator.update_many_documents("user_group", user_group, {"_id": need_updated_ids}, param)
+            if result is False:
+                self.log.add_log("UserGroupManager: update user_group-%s fail because of database error" % user_group, 3)
+                return False, "database error"
+            else:
+                return True, "success"
 
     def add_group_info(self, user_group, param):
 
