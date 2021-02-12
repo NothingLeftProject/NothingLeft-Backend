@@ -19,7 +19,8 @@ class HttpHandler:
         
         self.request_data = {}
         self.permission_list = []
-        self.response_data = json.load(open("./backend/data/json/response_template.json", "r", encoding="utf-8"))
+        self.response_data_raw = json.load(open("./backend/data/json/response_template.json", "r", encoding="utf-8"))
+        self.response_data = {}
         self.special_auth_pass = False
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
@@ -140,6 +141,7 @@ class HttpHandler:
         """
         # ATTENTION: 防压测任务！
         self.log.add_log("HttpHandler: recevied http request, start handle...", 1)
+        self.response_data = self.response_data_raw
         self.request_data = request_data
 
         if self.auth():
