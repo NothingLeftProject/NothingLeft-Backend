@@ -47,8 +47,7 @@ class Maintainer:
         if self.mongodb_manipulator.is_collection_exist("user", "root") is False:
             root_key = self.encryption.generate_random_key() + self.encryption.generate_random_key()
             root_key = self.encryption.md5(root_key)
-            self.user_manager.sign_up("root", root_key,
-                                      "root@root.com", "superuser")
+            self.user_manager.sign_up("root", root_key, "root@root.com", "superuser")
 
             self.log.add_log("Maintainer: Your root account key: " + root_key, 1)
 
