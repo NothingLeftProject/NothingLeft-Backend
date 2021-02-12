@@ -27,6 +27,7 @@ class BackendInit:
         启动后端
         :return 
         """
+        self.log.add_log("######## NL-BACKEND RUN NOW ########", 1)
         self.log.add_log("BackendInit: now start backend", 1)
         
         thread_server = threading.Thread(target=self.http_server.run_server, args=())
