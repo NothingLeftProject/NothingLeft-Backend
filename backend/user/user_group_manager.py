@@ -245,7 +245,10 @@ class UserGroupManager:
                 self.log.add_log("UserGroupManager: update user_group-%s fail because of database error" % user_group, 3)
                 return False, "database error"
             else:
-                return True, "success"
+                if fail_update_keys:
+                    return True, "fail to update this key(s)-%s" % fail_update_keys
+                else:
+                    return True, "success"
 
     def add_group_info(self, user_group, param):
 
