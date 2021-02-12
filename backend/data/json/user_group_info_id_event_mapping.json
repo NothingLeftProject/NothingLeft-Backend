@@ -1,5 +1,6 @@
 {
-  "name": 1,
+  "name": 0,
+  "userList": 1,
   "permissionsList": 2,
   "differentUsers": 3,
   "permissionDifferences": 4
