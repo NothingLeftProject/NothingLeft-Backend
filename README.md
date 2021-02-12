@@ -99,3 +99,4 @@
 - 修复了一些因账户不存在的bug
 - 测试修复pass了user_write_permissions
 - 测试修复pass了user_edit_permissions
+- 再修复pass了在全初始下的数据库建立及setup
