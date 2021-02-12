@@ -147,15 +147,15 @@ class MongoDBManipulator:
             if coll_name in self.collection_names_list[db_name]:
                 self.log.add_log("MongoDB: collection%s" % coll_name + " exist", 1)
                 return True
-        except KeyError:
+        finally:
             self.log.add_log("MongoDB: coll_exist?: second time search start", 1)
             self.get_collection_names_list(db_name)
             if coll_name in self.collection_names_list[db_name]:
-                self.log.add_log("MongoDB: collection-" % coll_name + " exist", 1)
+                self.log.add_log("MongoDB: collection-%s" % coll_name + " exist", 1)
                 return True
-        else:
-            self.log.add_log("MongoDB: collection-%s" % coll_name + " is not exist", 1)
-            return False
+            else:
+                self.log.add_log("MongoDB: collection-%s" % coll_name + " is not exist", 1)
+                return False
 
     def add_one_document(self, db_name, coll_name, docu):
 
