@@ -59,7 +59,7 @@ class UserManager:
             self.log.add_log("UserManager: Sign up failed, something wrong while add user info. sign up account: " + account, 3)
             return False, "add info went wrong"
         else:
-            res, err = self.user_group_manager.add_user_into_group(account, user_group)
+            res, err = self.user_group_manager.add_users_into_group(account, user_group)
             if res:
                 self.log.add_log("UserManager: Sign up success", 1)
                 return True, "success"
@@ -88,6 +88,7 @@ class UserManager:
             return False, "user_group-" + group_name + " is not exist"
 
         if self.mongodb_manipulator.delete_collection("user", account) is False:
+            self.log.add_log("UserGroupManager: delete user-%s fail because of database error" % account, 3)
             return False, "database error"
         else:
             try:
