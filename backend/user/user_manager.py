@@ -134,7 +134,11 @@ class UserManager:
             return False, "database error or user not exist"
         else:
             if self.setting["allowSimultaneousOnline"] is False:
-                if account in self.setting["loginUsers"].keys():
+                is_online = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("user", account, {"isOnline": 1}, 2),
+                    ["isOnline"]
+                )[0]["isOnline"]
+                if is_online:
                     self.log.add_log("UserManager: login fail, not allow user simultaneous online", 1)
                     return False, "not allow user simultaneous online"
 
@@ -146,17 +150,17 @@ class UserManager:
 
                 self.mongodb_manipulator.update_many_documents("user", account, {"_id": 13}, {"lastLoginTimeStamp": last_login_time_stamp})
                 self.mongodb_manipulator.update_many_documents("user", account, {"_id": 7}, {"token": token})
-                self.setting["loginUsers"][account] = {
-                    "account": account,
-                    "lastLoginTimeStamp": last_login_time_stamp,
-                    "avatar": user_info["avatar"] # needs a solution
-                }
+                # self.setting["loginUsers"][account] = {
+                #     "account": account,
+                #     "lastLoginTimeStamp": last_login_time_stamp,
+                #     "avatar": user_info["avatar"] # needs a solution
+                # }
 
                 permission_list, err = self.user_permission_manager.get_user_permissions(account, ask_update=True)
                 if permission_list is False:
                     self.log.add_log("UserManager: can't get user-" + account + "'s permission list cause: " + err, 3)
                     return False, "permission list can't load"
-                self.setting["loginUsers"][account]["permission"] = permission_list
+                # self.setting["loginUsers"][account]["permission"] = permission_list
 
                 self.log.add_log("UserManager: login success", 1)
                 return token, "success"
@@ -178,7 +182,7 @@ class UserManager:
             ["isOnline"]
         )[0]["isOnline"]
         if is_online:
-            del self.setting["loginUsers"][account]
+            # del self.setting["loginUsers"][account]
             self.mongodb_manipulator.update_many_documents("user", account, {"token": 1}, {"token": None})
 
             self.mongodb_manipulator.update_many_documents("user", account, {"_id": 14}, {"isOnline": False})
