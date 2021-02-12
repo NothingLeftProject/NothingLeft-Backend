@@ -115,19 +115,21 @@ class MongoDBManipulator:
         :param update: 是否更新
         :return: bool
         """
-        if update:
+        if update or self.database_names_list is None:
             self.get_database_names_list()
 
         if name in self.database_names_list:
-            self.log.add_log("MongoDB: database " + name + " exist", 1)
+            self.log.add_log("MongoDB: database-%s" % name + " exist", 1)
             return True
         else:
+            self.log.add_log("MongoDB: db_exist?: second time search start", 1)
             self.get_database_names_list()
             if name in self.database_names_list:
-                self.log.add_log("MongoDB: database " + name + " exist", 1)
+                self.log.add_log("MongoDB: database-%s" % name + " exist", 1)
                 return True
-            self.log.add_log("MongoDB: database " + name + " is not exist", 1)
-            return False
+            else:
+                self.log.add_log("MongoDB: database-%s" % name + " is not exist", 1)
+                return False
 
     def is_collection_exist(self, db_name, coll_name, update=False):
 
@@ -143,14 +145,16 @@ class MongoDBManipulator:
 
         try:
             if coll_name in self.collection_names_list[db_name]:
-                self.log.add_log("MongoDB: collection " + coll_name + " exist", 1)
+                self.log.add_log("MongoDB: collection%s" % coll_name + " exist", 1)
                 return True
         except KeyError:
+            self.log.add_log("MongoDB: coll_exist?: second time search start", 1)
             self.get_collection_names_list(db_name)
             if coll_name in self.collection_names_list[db_name]:
-                self.log.add_log("MongoDB: collection " + coll_name + " exist", 1)
+                self.log.add_log("MongoDB: collection-" % coll_name + " exist", 1)
                 return True
-            self.log.add_log("MongoDB: collection " + coll_name + " is not exist", 1)
+        else:
+            self.log.add_log("MongoDB: collection-%s" % coll_name + " is not exist", 1)
             return False
 
     def add_one_document(self, db_name, coll_name, docu):
