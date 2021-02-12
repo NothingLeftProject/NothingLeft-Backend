@@ -100,3 +100,4 @@
 - 测试修复pass了user_write_permissions
 - 测试修复pass了user_edit_permissions
 - 再修复pass了在全初始下的数据库建立及setup
+- 废弃user_manager中的loginUsers判断法，以isOnline为准，修了一堆bug
