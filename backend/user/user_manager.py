@@ -173,7 +173,11 @@ class UserManager:
         """
         self.log.add_log("UserManager: Try logout " + account, 1)
 
-        if account in self.setting["loginUsers"].keys():
+        is_online = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("user", account, {"isOnline": 1}, 2),
+            ["isOnline"]
+        )[0]["isOnline"]
+        if is_online:
             del self.setting["loginUsers"][account]
             self.mongodb_manipulator.update_many_documents("user", account, {"token": 1}, {"token": None})
 
