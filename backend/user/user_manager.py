@@ -59,7 +59,7 @@ class UserManager:
             self.log.add_log("UserManager: Sign up failed, something wrong while add user info. sign up account: " + account, 3)
             return False, "add info went wrong"
         else:
-            res, err = self.user_group_manager.add_users_into_group(account, user_group)
+            res, err = self.user_group_manager.add_users_into_group([account], user_group)
             if res:
                 user_permissions_list = self.user_permission_manager.get_user_permissions(account, ask_update=True)
                 result, _ = self.user_info_manager.update_user_info(account, {"permissionsList": user_permissions_list})
