@@ -1,10 +1,16 @@
-# NothingLeft: A time management system
-- 自己画的LOGO：![NonthingLeft-Logo](https://github.com/xiaoland/NothingLeft/blob/docs/image/NothingLeft-Logo.png)
-- NothingLeft是一个基于GTD理念的时间管理系统
-- Other languages: 
-  - [English](./README_en.md)
+<p align="center">
+    <a href="https://nothingleftproject.github.io/NothingLeft">
+      <img alt="NothingLeft" src="https://github.com/xiaoland/NothingLeft/blob/docs/image/NothingLeft-Logo.png">
+    </a>
+  </p>
+  
+<p align="center">
+    A time management system based on GTD.
+  </p>
 
 ## 简介-Introduction
+- Other languages: 
+  - [English](./README_en.md)
 
 ### 关于GTD-About GTD:
 - - Getting Things Done is a kind of time management system which was proposed by David Allen. Usually, we abbreviate Getting Things Done as GTD.
