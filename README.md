@@ -1,11 +1,11 @@
 <p align="center">
     <a href="https://nothingleftproject.github.io/NothingLeft">
-      <img alt="NothingLeft" src="https://github.com/xiaoland/NothingLeft/blob/docs/image/NothingLeft-Logo.png">
+      <img alt="NothingLeftWiki" src="https://github.com/xiaoland/NothingLeft/blob/docs/image/NothingLeft-Logo.png">
     </a>
   </p>
   
 <p align="center">
-    A time management system based on GTD.
+    <b>A time management system based on GTD.</b>
   </p>
 
 ## 简介-Introduction
