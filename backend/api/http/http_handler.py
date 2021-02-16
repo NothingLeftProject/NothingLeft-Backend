@@ -19,7 +19,8 @@ class HttpHandler:
         
         self.request_data = {}
         self.permission_list = []
-        self.response_data = json.load(open("./backend/data/json/response_template.json", "r", encoding="utf-8"))
+        self.response_data_raw = json.load(open("./backend/data/json/response_template.json", "r", encoding="utf-8"))
+        self.response_data = {}
         self.special_auth_pass = False
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
@@ -83,7 +84,7 @@ class HttpHandler:
                         self.response_data["header"]["errorMsg"] = "user haven't login yet"
                         return False
 
-                if 0 <= login_time_loss <= 3600 * 24:
+                if 0 <= login_time_loss <= 3600 * self.setting["loginValidTime"]:
                     self.log.add_log("HttpHandler: time stamp is in law", 1)
 
                     # is token same
@@ -140,6 +141,7 @@ class HttpHandler:
         """
         # ATTENTION: 防压测任务！
         self.log.add_log("HttpHandler: recevied http request, start handle...", 1)
+        self.response_data = self.response_data_raw
         self.request_data = request_data
 
         if self.auth():
@@ -210,11 +212,11 @@ class HttpHandler:
                             command_name = command["commandName"]
                             command_param = command["param"]
                         except KeyError:
-                            self.log.add_log("HttpHandler: the command info is wrong", 1)
+                            self.log.add_log("HttpHandler: the command info is wrong, 'commandName' or 'param' lost", 1)
                             command_response["status"] = 3
-                            command_response["errorMsg"] = "command info wrong"
+                            command_response["errorMsg"] = "command info wrong, 'commandName' or 'param' lost"
                             self.response_data["response"].append(command_response)
-                            break
+                            continue
 
                         command_response["commandName"] = command_name
 
@@ -228,7 +230,7 @@ class HttpHandler:
                                 command_response["status"] = 1
                                 command_response["errorMsg"] = "can't find command in command_finder"
                                 self.response_data["response"].append(command_response)
-                                break
+                                continue
                             else:
                                 function_response, err = command_handle_function(command_param)
                                 if function_response is False:

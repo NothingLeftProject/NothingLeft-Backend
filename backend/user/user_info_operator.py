@@ -21,14 +21,15 @@ class UserInfoManager:
         self.user_info_id_event_mapping = json.load(open("./backend/data/json/user_info_id_event_mapping.json", "r", encoding="utf-8"))
         self.all_user_info_keys = list(self.user_info_id_event_mapping.keys())
 
-    def update_user_info(self, account, info):
+    def update_user_info(self, account, info, special_allow=False):
 
         """
         更新用户信息
         :param account: 账户名
         :param info: 要更新的信息
+        :param special_allow: 特别允许：用于sign_up
         :type info: dict
-        :return bool
+        :return bool, str
         """
         not_found_keys = []
         res, err = True, ""
@@ -40,8 +41,9 @@ class UserInfoManager:
         for key in key_list:
             try:
                 if key == "permissionsList" and account != "root":
-                    self.log.add_log("UserInfoManager: It's not allow normal user to change permissionsList", 1)
-                    raise KeyError
+                    if special_allow is False:
+                        self.log.add_log("UserInfoManager: It's not allow normal user to change permissionsList", 1)
+                        raise KeyError
 
                 if self.mongodb_manipulator.update_many_documents("user", account, {"_id": self.user_info_id_event_mapping[key]}, {key: info[key]}) is False:
                     self.log.add_log("UserInfoManager: meet database error while updating " + key + ", skip and wait", 3)
@@ -49,9 +51,9 @@ class UserInfoManager:
                     time.sleep(0.1)
                     continue
             except KeyError:
-                self.log.add_log("UserInfoManager: can not find " + key + ", in your info list", 3)
+                self.log.add_log("UserInfoManager: cannot find " + key + ", in your info list", 3)
                 not_found_keys.append(key)
-                res, err = False, "key-" + str(not_found_keys) + " does not exists or '_id' is not exists"
+                res, err = False, "key-%s" % not_found_keys + " does not exists or '_id' is not exists"
                 continue
         
         return res, err

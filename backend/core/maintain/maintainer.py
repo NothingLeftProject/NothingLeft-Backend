@@ -40,22 +40,19 @@ class Maintainer:
                 self.log.add_log("Maintainer: database-" + event + " exists", 1)
             self.mongodb_manipulator.get_collection_names_list(event)
 
-        if self.mongodb_manipulator.is_collection_exist("user_group", "superuser") is False:
-            self.user_group_manager.add_user_group("superuser")
-
+        if self.mongodb_manipulator.is_collection_exist("user_group", "superuser", update=True) is False:
             root_permissions = json.load(open("./backend/data/json/root_permissions_list.json", "r", encoding="utf-8"))
-            self.user_group_manager.update_group_info("user_group", "root", {"_id": 2}, {"permissionsList": root_permissions})
+            self.user_group_manager.add_user_group("superuser", permissions_list=root_permissions)
 
         if self.mongodb_manipulator.is_collection_exist("user", "root") is False:
             root_key = self.encryption.generate_random_key() + self.encryption.generate_random_key()
             root_key = self.encryption.md5(root_key)
-            self.user_manager.sign_up("root", root_key,
-                                      "root@root.com", "superuser")
+            self.user_manager.sign_up("root", root_key, "root@root.com", "superuser")
 
             self.log.add_log("Maintainer: Your root account key: " + root_key, 1)
 
-            root_permissions = json.load(open("./backend/data/json/root_permissions_list.json", "r", encoding="utf-8"))
-            self.mongodb_manipulator.update_many_documents("user", "root", {"_id": 12}, {"permissionsList": root_permissions})
+            # root_permissions = json.load(open("./backend/data/json/root_permissions_list.json", "r", encoding="utf-8"))
+            # self.mongodb_manipulator.update_many_documents("user", "root", {"_id": 12}, {"permissionsList": root_permissions})
 
             self.log.add_log("Maintainer: add root success", 1)
 

@@ -6,6 +6,7 @@
 from backend.user.user_manager import UserManager
 from backend.user.user_info_operator import UserInfoManager
 from backend.user.user_permission_mamanger import UserPermissionManager
+from backend.user.user_group_manager import UserGroupManager
 
 
 class LocalCaller:
@@ -24,6 +25,7 @@ class LocalCaller:
         self.user_manager = UserManager(log, setting)
         self.user_permission_manager = UserPermissionManager(log, setting)
         self.user_info_manager = UserInfoManager(log, setting)
+        self.user_group_manager = UserGroupManager(log, setting)
 
     def user_login(self, param):
 
@@ -284,3 +286,109 @@ class LocalCaller:
             res, err = self.user_permission_manager.edit_user_permissions(account, permissions_to_edit)
             return res, err
 
+    def user_group_add_users(self, param):
+
+        """
+        添加多个用户到用户组里
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_add_users", 1)
+
+        try:
+            accounts = param["accounts"]
+            target_group = param["targetGroup"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_add_users: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_group_manager.add_users_into_group(accounts, target_group)
+            return res, err
+
+    def user_group_remove_users(self, param):
+
+        """
+        从用户组里移除多个用户
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_remove_users", 1)
+
+        try:
+            accounts = param["accounts"]
+            target_group = param["targetGroup"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_remove_users: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_group_manager.remove_users_from_group(accounts, target_group)
+            return res, err
+
+    def user_group_move_one_to_one(self, param):
+
+        """
+        将某用户从一用户组移到另一用户组
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_move_one_to_one", 1)
+
+        try:
+            account = param["account"]
+            target_group = param["targetGroup"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_move_one_to_one: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_group_manager.move_user_to_another_group(account, target_group)
+            return res, err
+
+    def user_group_add(self, param):
+
+        """
+        添加用户组
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_add", 1)
+
+        try:
+            group_name = param["groupName"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_add: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            # 支持permissionsList和fromTemple来加载，任何一个有了不能有第二个，优先permissionsList
+            err_ = ""
+            try:
+                permissions_list = param["permissionsList"]
+            except KeyError:
+                try:
+                    permissions_list, _ = self.user_permission_manager.get_user_permissions("", from_temple=param["fromTemple"])
+                except KeyError:
+                    permissions_list = None
+                else:
+                    if type(permissions_list) != list:
+                        err_ = ", but got wrong fromTemple"
+                        permissions_list = None
+
+            res, err = self.user_group_manager.add_user_group(group_name, permissions_list=permissions_list)
+            return res, err + err_
+
+    def user_group_remove(self, param):
+
+        """
+        删除用户组
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_remove", 1)
+
+        try:
+            target_group = param["targetGroup"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_remove: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_group_manager.remove_user_group(target_group)
+            return res, err

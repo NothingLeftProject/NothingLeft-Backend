@@ -13,9 +13,7 @@
       }
     }
   },
-  "loginUsers": {
-    
-  },
   "allowSimultaneousOnline": true,
-  "allowSignup": true
+  "allowSignup": true,
+  "loginValidTime": 24
 }
