@@ -1,0 +1,10 @@
+{
+  "header": {
+    "timeStamp": "",
+    "account": "",
+    "token": "",
+    "loginRequest": false,
+    "signupRequest": false
+  },
+  "command": []
+}
