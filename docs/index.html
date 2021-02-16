@@ -1,12 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-  <script>
-    window.$docsify = {
-      coverpage: true,
-      loadNavbar: true
-    }
-  </script>
-  <script src="//unpkg.com/docsify"></script>
 <head>
   <meta charset="UTF-8">
   <title>Document</title>
@@ -16,13 +9,15 @@
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
 </head>
 <body>
-  <div id="app"></div>
+  <div data-app id="main">Loading... Don't worry, It will be quick♂</div>
   <script>
     window.$docsify = {
-      name: '',
-      repo: ''
+      coverpage: true,
+      loadSidebar: true,
+      el: '$main'
     }
   </script>
+  <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
 </body>
