@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://nothingleftproject.github.io/NothingLeft">
+    <a href="https://nothingleftproject.github.io/ProjectDocs">
       <img alt="NothingLeftWiki" src="./backend/data/image/NothingLeftLogo2.jpg">
     </a>
   </p>
