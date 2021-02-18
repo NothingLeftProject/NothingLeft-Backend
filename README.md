@@ -42,7 +42,6 @@
 
 ### 贡献者-Contributors
 - Lan_zhijiang(我)
-
 - 当然也欢迎大家来一起开发
   - DingTalk: 18680171381
   - Email: lanzhijiang@foxmail.com
