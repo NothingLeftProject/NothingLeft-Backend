@@ -4,7 +4,7 @@
 # date: 2020/10/25
 
 
-class ClassificationManager():
+class ClassifyManager():
 
     def __init__(self, log, setting):
 
