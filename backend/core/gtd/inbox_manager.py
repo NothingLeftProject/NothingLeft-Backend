@@ -59,7 +59,7 @@ class InboxManager:
             stuff_id = self.encryption.md5(content + self.encryption.generate_random_key())
 
         # update stuff_id to database
-        stuff_id_list.append(stuff_id)
+        stuff_id_list.insert(0, stuff_id)
         if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 0}, {"stuffIdList": stuff_id_list}) is False:
             self.log.add_log("InboxManager: add stuff_id into stuffIdList fail, database error", 3)
             err = "add stuff_id into stuffIdList fail, database error, "
