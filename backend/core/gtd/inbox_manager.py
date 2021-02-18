@@ -65,18 +65,18 @@ class InboxManager:
             err = "add stuff_id into allIdList fail, database error, "
 
         # load template
-        stuff_info = json.load(open("./backend/data/json/inbox_stuff_template.json", "r", encoding="utf-8"))
+        stuff_info = json.load(open("./backend/data/json/inbox_stuff_info_template.json", "r", encoding="utf-8"))
+        stuff_info["_id"] = stuff_id
         stuff_info["content"] = content
         stuff_info["description"] = desc
         stuff_info["createDate"] = self.log.get_date() + "/" + self.log.get_formatted_time()
-        stuff_info["stuff_id"] = stuff_id
+        stuff_info["stuffId"] = stuff_id
         stuff_info["tags"] = tags
         stuff_info["links"] = links
         stuff_info["time"] = time
         stuff_info["place"] = place
         stuff_info["level"] = level
         stuff_info["status"] = status
-        stuff_info["_id"] = stuff_id
 
         # add to nlu understand mission
         # NLU理解stuff-content的设计：
@@ -90,4 +90,58 @@ class InboxManager:
         else:
             self.log.add_log("InboxManager: add stuff-%s complete" % stuff_id, 1)
             return True, err + "success"
+
+    def modify_stuff(self, account, stuff_id, info):
+
+        """
+        修改某个stuff的信息
+        :param account: 被操作的用户
+        :param stuff_id: stuff的id
+        :param info: 要更改的信息， key:value
+        :type info: dict
+        :return:
+        """
+        self.log.add_log("InboxManager: modify user-%s 's stuff-%s info start" % account, stuff_id, 1)
+        skip_keys = []
+
+        # is param in law
+        if type(info) != dict:
+            self.log.add_log("InboxManager: param-info must be a dict, type error", 2)
+            return False, "param-info must be a dict, type error"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 2)
+            return False, "user-%s does not exist" % account
+
+        # is stuff_id exist
+        stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"_id": 0}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
+        if stuff_id not in stuff_id_list:
+            self.log.add_log("InboxManager: stuff-%s does not exist in user-%s 's inbox" % stuff_id, account, 2)
+            return False, "stuff-%s does not exist" % stuff_id
+
+        # update info to database
+        stuff_info = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 2),
+            ["content", "description", "createDate", "tags", "links", "time", "place", "level", "status"]
+        )[0]
+        need_updated_keys = list(info.keys())
+        stuff_info_keys = list(info.keys())
+        for key in need_updated_keys:
+            if key not in stuff_info_keys:
+                self.log.add_log("InboxManager: key-%s does not allow or not exist to operate, skip" % key, 2)
+                skip_keys.append(key)
+                continue
+            stuff_info[key] = info[key]
+
+        if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, stuff_info) is False:
+            self.log.add_log("InboxManager: modify stuff info fail because of database error", 3)
+            return False, "database error"
+        else:
+            self.log.add_log("InboxManager: modify stuff info success", 1)
+            return True, "success"
+
 
