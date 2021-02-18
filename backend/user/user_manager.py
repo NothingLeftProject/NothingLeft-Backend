@@ -48,6 +48,7 @@ class UserManager:
         else:
             self.log.add_log("UserManager: Account add to the collection: user successfully", 1)
 
+        # fill user info
         password = self.encryption.md5(password)
 
         user_info = json.load(open("./backend/data/json/user_info_template.json", "r", encoding="utf-8"))
@@ -55,22 +56,36 @@ class UserManager:
         user_info[1]["password"] = password
         user_info[2]["email"].append(email)
         user_info[4]["userGroup"] = user_group
+
+        # update user info into database
         if self.mongodb_manipulator.add_many_documents("user", account, user_info) is False:
-            self.log.add_log("UserManager: Sign up failed, something wrong while add user info. sign up account: " + account, 3)
-            return False, "add info went wrong"
+            self.log.add_log("UserManager: Sign up failed, something wrong with database, user-%s" % account, 3)
+            return False, "database error"
         else:
+            # add user into user_group
             res, err = self.user_group_manager.add_users_into_group([account], user_group)
             if res:
+                # set user permissions
                 user_permissions_list, _ = self.user_permission_manager.get_user_permissions(account, ask_update=True)
                 result, _ = self.user_info_manager.update_user_info(account, {"permissionsList": user_permissions_list})
-                if result:
-                    self.log.add_log("UserManager: Sign up success", 1)
-                    return True, "success"
-                else:
+                if result is False:
                     self.log.add_log("UserManager: Sign up success but fail to update permissions list", 2)
-                    return True, "but fail to update permissions list"
+                    res, err = True, "but fail to update permissions list"
             else:
-                return res, err
+                self.log.add_log("UserManager: user-%s permissions List load fail because fail to add user into user_group", 3)
+                res, err = res, err + ", which means permissions list did not load success"
+
+            # init user's coll-stuff/account
+            if self.mongodb_manipulator.add_collection("stuff", account) is False:
+                self.log.add_log("UserManager: fail to initialize coll-stuff/%s" % account, 3)
+                res, err = False, "fail to init coll-stuff/%s" % account
+            else:
+                self.log.add_log("UserManager: Initialize coll-stuff/%s success" % account, 1)
+                preset_stuff_id_list = json.load(open("./backend/data/json/preset_stuff_id_list.json"))
+                self.mongodb_manipulator.add_many_documents("stuff", account, preset_stuff_id_list)
+
+            self.log.add_log("UserManager: Sign up user-%s done" % account, 1)
+            return res, err
 
     def delete_user(self, account):
 
