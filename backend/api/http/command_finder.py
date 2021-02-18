@@ -28,5 +28,6 @@ class CommandFinder:
             "user_group_remove_users": self.local_caller.user_group_remove_users,
             "user_group_move_one_to_one": self.local_caller.user_group_move_one_to_one,
             "user_group_add": self.local_caller.user_group_add,
-            "user_group_remove": self.local_caller.user_group_remove
+            "user_group_remove": self.local_caller.user_group_remove,
+            "user_group_get_permissions": self.local_caller.user_group_get_permissions
         }

@@ -392,3 +392,22 @@ class LocalCaller:
         else:
             res, err = self.user_group_manager.remove_user_group(target_group)
             return res, err
+
+    def user_group_get_permissions(self, param):
+
+        """
+        获取用户组权限
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: user_group_remove", 1)
+
+        try:
+            user_groups = param["userGroups"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_get_permissions: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            res, err = self.user_permission_manager.get_user_groups_permissions(user_groups)
+            return res, err
+
