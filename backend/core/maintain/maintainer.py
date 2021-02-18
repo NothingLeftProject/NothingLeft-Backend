@@ -27,11 +27,12 @@ class Maintainer:
         """
         self.log.add_log("Maintainer: start the auto maintain system", 1)
 
+        # database checking
         self.log.add_log("Maintainer: checking database...", 1)
         self.mongodb_manipulator.get_database_names_list()
 
         database_check_list = [
-            "user", "user_group"
+            "user", "user_group", "stuff"
         ]
         for event in database_check_list:
             if event not in self.mongodb_manipulator.database_names_list:
@@ -40,6 +41,7 @@ class Maintainer:
                 self.log.add_log("Maintainer: database-" + event + " exists", 1)
             self.mongodb_manipulator.get_collection_names_list(event)
 
+        # user_group-superuser and user-root checking
         if self.mongodb_manipulator.is_collection_exist("user_group", "superuser", update=True) is False:
             root_permissions = json.load(open("./backend/data/json/root_permissions_list.json", "r", encoding="utf-8"))
             self.user_group_manager.add_user_group("superuser", permissions_list=root_permissions)
@@ -55,5 +57,4 @@ class Maintainer:
             # self.mongodb_manipulator.update_many_documents("user", "root", {"_id": 12}, {"permissionsList": root_permissions})
 
             self.log.add_log("Maintainer: add root success", 1)
-
 
