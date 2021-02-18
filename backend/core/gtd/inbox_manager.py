@@ -78,6 +78,11 @@ class InboxManager:
         stuff_info["status"] = status
         stuff_info["_id"] = stuff_id
 
+        # add to nlu understand mission
+        # NLU理解stuff-content的设计：
+        # 大概就是给nlu处理器content然后从中提取信息，然后信息会被自动更新到stuff_info里面（如果被更新的key是None的话）
+        # 所以要给nlu.analyze_stuff的参数有：stuff_content, stuff_id, account
+
         # update stuff_info to database
         if self.mongodb_manipulator.add_one_document("stuff", account, stuff_info) is False:
             self.log.add_log("InboxManager: meet error when add stuff into database", 3)
