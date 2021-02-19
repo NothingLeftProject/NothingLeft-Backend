@@ -74,3 +74,4 @@
 - 再修复pass了在全初始下的数据库建立及setup
 - 废弃user_manager中的loginUsers判断法，以isOnline为准，修了一堆bug
 - 写了个add_stuff和modify_stuff并修改了一些东西，适配了一些东西
+- 添加了get_many_stuffs并修了一些InboxManager里的bugs
