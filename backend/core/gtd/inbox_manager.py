@@ -33,7 +33,7 @@ class InboxManager:
         :param status: 状态
         :type tags: list
         :type links: list
-        :return:
+        :return: bool, str
         """
         self.log.add_log("InboxManager: add_stuff start for user-%s" % account, 1)
         err = ""
@@ -50,7 +50,7 @@ class InboxManager:
 
         # generate stuff_id
         stuff_id_list = self.mongodb_manipulator.parse_document_result(
-            self.mongodb_manipulator.get_document("stuff", account, {"_id": 0}, 2),
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
             ["allIdList"]
         )[0]["allIdList"]
         stuff_id = self.encryption.md5(content + self.encryption.generate_random_key())
@@ -99,7 +99,7 @@ class InboxManager:
         :param stuff_id: stuff的id
         :param info: 要更改的信息， key:value
         :type info: dict
-        :return:
+        :return: bool, str
         """
         self.log.add_log("InboxManager: modify user-%s 's stuff-%s info start" % account, stuff_id, 1)
         skip_keys = []
@@ -116,7 +116,7 @@ class InboxManager:
 
         # is stuff_id exist
         stuff_id_list = self.mongodb_manipulator.parse_document_result(
-            self.mongodb_manipulator.get_document("stuff", account, {"_id": 0}, 2),
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
             ["allIdList"]
         )[0]["allIdList"]
         if stuff_id not in stuff_id_list:
@@ -125,7 +125,7 @@ class InboxManager:
 
         # update info to database
         stuff_info = self.mongodb_manipulator.parse_document_result(
-            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 2),
+            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
             ["content", "description", "createDate", "tags", "links", "time", "place", "level", "status"]
         )[0]
         need_updated_keys = list(info.keys())
@@ -144,4 +144,80 @@ class InboxManager:
             self.log.add_log("InboxManager: modify stuff info success", 1)
             return True, "success"
 
+    def get_many_stuffs(self, account, stuff_ids, get_all=False, result_type="list"):
+
+        """
+        获取多个stuff
+        :param account: 用户名
+        :param stuff_ids: 要获取的stuffs的id
+        :param get_all: 获取全部？
+        :param result_type: 返回的res的类型是什么 dict/list
+        :type stuff_ids: list
+        :type get_all: bool
+        :return: bool, str
+        """
+        self.log.add_log("InboxManager: get user-%s 's many stuffs in mode-%s and get_all is %s start" % account, result_type, get_all, 1)
+        skip_ids = []
+
+        # is param in law
+        if type(stuff_ids) != list and get_all is False:
+            self.log.add_log("InboxManager: type error, when get_all is False, stuff_ids must be a list", 2)
+            return False, "type error, when get_all is False, stuff_ids must be a list"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 2)
+            return False, "user-%s does not exist" % account
+
+        # get allIdList
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
+
+        # get
+        if result_type == "dict":
+            result = {}
+            if get_all:
+                if self.setting["inboxSettings"]["allowGetAllStuffsInDict"]:
+                    self.log.add_log("InboxManager: get_all stuffs in dict mode, which means spend a long time!", 2)
+                    for stuff_id in all_stuff_id_list:
+                        result["stuff_id"] = self.mongodb_manipulator.parse_document_result(
+                            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                            ["content", "description", "createDate", "stuffId", "tags", "links", "time", "place",
+                             "level", "status"]
+                        )[0]
+                else:
+                    self.log.add_log("InboxManager: it's not allowed to get all stuffs in dict mode", 2)
+                    return False, "it's not allowed to get all stuffs in dict mode"
+            else:
+                for stuff_id in stuff_ids:
+                    if stuff_id not in all_stuff_id_list:
+                        self.log.add_log("InboxManager: can't find stuff-%s in all_stuff_id_list, skip" % stuff_id, 2)
+                        skip_ids.append(stuff_ids)
+                        continue
+
+                    result["stuff_id"] = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                        ["content", "description", "createDate", "stuffId", "tags", "links", "time", "place", "level",
+                         "status"]
+                    )[0]
+
+        else:
+            if get_all:
+                result = list(self.mongodb_manipulator.get_document("stuff", account, mode=0))  # might error here
+            else:
+                result = []
+                for stuff_id in stuff_ids:
+                    if stuff_id not in all_stuff_id_list:
+                        self.log.add_log("InboxManager: can't find stuff-%s in all_stuff_id_list, skip" % stuff_id, 2)
+                        skip_ids.append(stuff_ids)
+                        continue
+
+                    result.append(
+                        self.mongodb_manipulator.parse_document_result(
+                            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                            ["content", "description", "createDate", "stuffId", "tags", "links", "time", "place", "level",
+                             "status"]
+                    )[0])
 
