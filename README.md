@@ -4,11 +4,12 @@
     </a>
   </p>
 
-<p align="center">
+<h1 align="center">
     <b>NothingLeft</b>
-  </p>
+  </h1>
 <p align="center">
     A time management system based on GTD.
+  <a href="https://nothingleftproject.github.io/ProjectDocs">ProjectDocument</a>
   </p>
 
 # NothingLeft-ClassicSystem
