@@ -173,7 +173,7 @@ class MemcachedManipulator():
     def _decrease(self, key):
 
         """
-        key的值自加
+        key的值自减
         :param key 键
         :return bool
         """
