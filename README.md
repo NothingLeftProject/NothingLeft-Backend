@@ -11,7 +11,7 @@
     A time management system based on GTD.
   </p>
 
-# NothingLeftProject-NothingLeft_ClassicSystem
+# NothingLeft-ClassicSystem
 - NothingLeft经典系统
 
 
