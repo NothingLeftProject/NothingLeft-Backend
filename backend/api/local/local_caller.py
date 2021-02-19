@@ -198,8 +198,8 @@ class LocalCaller:
 
     def user_info_get_multi_multi(self, param):
 
-        """
-        获取多个用户的多个信息(ONLY ROOT CAN OWN)
+        """ root only
+        获取多个用户的多个信息
         :return:
         """
         self.log.add_log("LocalCaller: start user_info_get_multi_multi", 1)
@@ -250,8 +250,8 @@ class LocalCaller:
 
     def user_write_permissions(self, param):
 
-        """
-        写入一个用户的权限(覆盖用户，比较用户组) (ONLY ROOT CAN OWN)
+        """ root only
+        写入一个用户的权限(覆盖用户，比较用户组)
         :param param:
         :return:
         """
@@ -269,8 +269,8 @@ class LocalCaller:
 
     def user_edit_permissions(self, param):
 
-        """
-        编辑一个用户的权限(覆盖用户，比较用户组) (ONLY ROOT CAN OWN)
+        """ root only
+        编辑一个用户的权限(覆盖用户，比较用户组)
         :param param:
         :return:
         """
@@ -288,7 +288,7 @@ class LocalCaller:
 
     def user_group_add_users(self, param):
 
-        """
+        """ root only
         添加多个用户到用户组里
         :param param:
         :return:
@@ -307,7 +307,7 @@ class LocalCaller:
 
     def user_group_remove_users(self, param):
 
-        """
+        """ root only
         从用户组里移除多个用户
         :param param:
         :return:
@@ -326,7 +326,7 @@ class LocalCaller:
 
     def user_group_move_one_to_one(self, param):
 
-        """
+        """ root only
         将某用户从一用户组移到另一用户组
         :param param:
         :return:
@@ -345,7 +345,7 @@ class LocalCaller:
 
     def user_group_add(self, param):
 
-        """
+        """ root only
         添加用户组
         :param param:
         :return:
@@ -377,7 +377,7 @@ class LocalCaller:
 
     def user_group_remove(self, param):
 
-        """
+        """ root only
         删除用户组
         :param param:
         :return:
@@ -396,7 +396,7 @@ class LocalCaller:
     def user_group_get_permissions(self, param):
 
         """
-        获取用户组权限
+        获取用户组权限...有安全漏洞...但没关系
         :param param:
         :return:
         """
