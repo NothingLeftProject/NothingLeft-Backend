@@ -71,7 +71,7 @@ class InboxManager:
         stuff_info["content"] = content
         stuff_info["description"] = desc
         stuff_info["createDate"] = self.log.get_date() + "/" + self.log.get_formatted_time()
-        stuff_info["createTimeStamp"] = self.log.get_time_stamp()
+        stuff_info["lastOperateTimeStamp"] = self.log.get_time_stamp()
         stuff_info["stuffId"] = stuff_id
         stuff_info["tags"] = tags
         stuff_info["links"] = links
@@ -188,7 +188,7 @@ class InboxManager:
                     for stuff_id in all_stuff_id_list:
                         result["stuff_id"] = self.mongodb_manipulator.parse_document_result(
                             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                            ["content", "description", "createDate", "createTimeStamp", "stuffId", "tags", "links", "time", "place",
+                            ["content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags", "links", "time", "place",
                              "level", "status"]
                         )[0]
                 else:
@@ -203,7 +203,7 @@ class InboxManager:
 
                     result["stuff_id"] = self.mongodb_manipulator.parse_document_result(
                         self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                        ["content", "description", "createDate", "createTimeStamp", "stuffId", "tags", "links", "time", "place", "level",
+                        ["content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags", "links", "time", "place", "level",
                          "status"]
                     )[0]
 
@@ -221,15 +221,30 @@ class InboxManager:
                     result.append(
                         self.mongodb_manipulator.parse_document_result(
                             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                            ["content", "description", "createDate", "createTimeStamp", "stuffId", "tags", "links", "time", "place", "level",
+                            ["content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags", "links", "time", "place", "level",
                              "status"]
                     )[0])
 
         if skip_ids:
-            return False, "but fail with id-%s" % skip_ids
-        return result, "success"
+            return "fail with id-%s" % skip_ids
+        else:
+            err = "success"
+        return result, err
 
-    def get_stuff_id(self, account, mode, start_index=None, end_index=None):
+    def get_stuff_id_from_condition(self, account, condition, length=None, from_cache=True, cache=True):
+
+        """
+        根据条件来即时筛选获取stuff_id
+        :param account: 账户名
+        :param condition: 条件 dict: stuff_info中的key-要求value
+        :param length: 获取多少个，如果从memcached获取则非常有用，从mongodb则意味着要重新生成并选取
+        :param cache: 是否缓存这次的生成结果
+        :param from_cache: 是否从memcached中查找，如果有，从中查找，而不是mongodb
+        :type condition: dict
+        :return: bool, str
+        """
+
+    def get_stuff_id_from_preset(self, account, mode, start_index=None, end_index=None):
 
         """
         从预设列表中获取stuff_id
@@ -277,6 +292,11 @@ class InboxManager:
                 self.mongodb_manipulator.get_document("stuff", account, {"waitExecuteList": 1}, 2),
                 ["waitExecuteList"]
             )[0]["waitExecuteList"]
+        elif mode == "achieved" or mode == 4:
+            id_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"achievedList": 1}, 2),
+                ["achievedList"]
+            )[0]["achievedList"]
         else:
             self.log.add_log("InboxManager: unknown mode! exit", 3)
             return False, "unknown mode"
@@ -335,10 +355,15 @@ class InboxManager:
                 self.mongodb_manipulator.delete_many_documents("stuff", account, {"_id": stuff_id})
 
         if skip_ids:
-            res = "success, but fail with id-%s" % skip_ids
+            if len(skip_ids) == len(stuff_ids):
+                res = False
+            else:
+                res = True
+            err = "success, but fail with id-%s" % skip_ids
         else:
-            res = "success"
-        return True, res
+            res = True
+            err = "success"
+        return res, err
 
     def generate_preset_stuff_list(self, account, list_name=None):
 
@@ -366,7 +391,7 @@ class InboxManager:
             return False, "user-%s does not exist" % account
 
         # start
-        all_preset_list_name = ["allIdList", "waitClassifyList", "waitOrganizeList", "waitExecuteList"]
+        all_preset_list_name = ["allIdList", "waitClassifyList", "waitOrganizeList", "waitExecuteList", "achievedList"]
         if list_name is None:
             list_name = all_preset_list_name
 
@@ -384,41 +409,107 @@ class InboxManager:
 
                 raw_list = self.mongodb_manipulator.parse_document_result(
                     self.mongodb_manipulator.get_document("stuff", account, mode=0),
-                    ["stuffId", "createTimeStamp", "status"]
+                    ["stuffId", "lastOperateTimeStamp", "status"]
                 )
                 if now_list == "allIdList":
                     for event in raw_list:
-                        sec_stage_process_list[int(event["createTimeStamp"])] = event["stuffId"]
+                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
 
                 elif now_list == "waitClassifyList":
                     for event in raw_list:
                         if event["status"] != "wait_classify":
                             continue
-                        sec_stage_process_list[int(event["createTimeStamp"])] = event["stuffId"]
+                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
 
                 elif now_list == "waitOrganizeList":
                     for event in raw_list:
                         if event["status"] != "wait_organize":
                             continue
-                        sec_stage_process_list[int(event["createTimeStamp"])] = event["stuffId"]
+                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
                 elif now_list == "waitExecuteList":
                     for event in raw_list:
                         if event["status"] != "wait_execute":
                             continue
-                        sec_stage_process_list[int(event["createTimeStamp"])] = event["stuffId"]
+                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
+                elif now_list == "achievedList":
+                    for event in raw_list:
+                        if event["status"] != "achieved":
+                            continue
+                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
 
                 sorted_result = sorted(sec_stage_process_list.items(), key=itemgetter(0), reverse=True)
                 for i in sorted_result:
                     result_list.append(i[1])
 
         if skip_lists or generated_list:
-            res = "fail with this request list-%s which not exist or already generated just now" % skip_lists
+            err = "fail with this request list-%s which not exist or already generated just now" % skip_lists
         else:
-            res = "success"
+            err = "success"
 
-        return result_list, res
+        return result_list, err
+
+    def set_many_stuffs_status(self, account, stuff_ids, status):
+
+        """
+        设置多个stuffs的状态
+        :param account: 用户名
+        :param stuff_ids: 要操作的stuff的stuff_id列表
+        :param status: 状态
+        :type stuff_ids: list
+        :return: bool, str
+        """
+        self.log.add_log("InboxManager: set user-%s 's many stuffs to status-%s" % account, status, 1)
+        skip_ids = []
+
+        # is param in law
+        if type(stuff_ids) != list:
+            self.log.add_log("InboxManager: type error with param-stuff_ids", 3)
+            return False, "type error with param-stuff_ids"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # start
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
+
+        # update preset list
+        if status == "wait_classify":
+            preset_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"waitClassifyList": 1}, 2),
+                ["waitClassifyList"]
+            )[0]["waitClassifyList"]
+            preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
+            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 1}, {"waitClassifyList": preset_list})
+        # more to add
+
+        for stuff_id in stuff_ids:
+            if stuff_id not in all_stuff_id_list:
+                self.log.add_log("InboxManager: can't find stuff-%s, skip" % stuff_id, 2)
+                skip_ids.append(stuff_id)
+                continue
+            if self.modify_stuff(account, stuff_id, {"status": status}) is False:
+                skip_ids.append(stuff_id)
+                self.log.add_log("InboxManager: stuff-%s set status-%s fail" % stuff_id, status, 3)
+
+        if skip_ids:
+            if len(skip_ids) == len(stuff_ids):
+                res = False
+            else:
+                res = True
+            err = "fail with this id-%s" % skip_ids
+        else:
+            res = True
+            err = "success"
+        return res, err
 
 
 # JUST SOME TEST HERE LOL
 # yuanyihong is really angry with you now bcause of your foolish behaviour
 # 袁翊闳现在是真的非常的生气，因为你那愚蠢的行为
+# 也许allIdList应该放一个在Memcached里面方便快速读取
+# 跳过的==给的，那res=False，爱改不改，问题不大
