@@ -305,7 +305,7 @@ class InboxManager:
         :type stuff_ids: list
         :return: bool, str
         """
-        self.log.add_log("InboxManager: delete user-%s 'smany stuffs" % account, 1)
+        self.log.add_log("InboxManager: delete user-%s 's many stuffs" % account, 1)
         skip_ids = []
 
         # is param in law
@@ -337,3 +337,27 @@ class InboxManager:
         else:
             res = "success"
         return True, res
+
+    def generate_preset_stuff_list(self, account, list_name=None):
+
+        """
+        生成预设列表
+        :param account: 账户名
+        :param list_name: 要生成的列表的名称
+        :type list_name: list
+        :return: bool, str
+        """
+        self.log.add_log("InboxManager: generate user-%s 's preset stuff list" % account, 1)
+        skip_lists = []
+
+        # is param in law
+        if type(list_name) != list and list_name is not None:
+            self.log.add_log("InboxManager: param-list_name type error", 3)
+            return False, "param-list_name type error"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # need to continue later
