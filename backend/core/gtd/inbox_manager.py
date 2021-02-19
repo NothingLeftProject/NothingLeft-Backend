@@ -40,12 +40,12 @@ class InboxManager:
 
         # is param in law
         if type(tags) != list or type(links) != list or type(level) != int:
-            self.log.add_log("InboxManager: param-tags, links, level; there is a type error among them", 2)
+            self.log.add_log("InboxManager: param-tags, links, level; there is a type error among them", 3)
             return False, "param-tags, links, level; there is a type error among them"
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
-            self.log.add_log("InboxManager: user-%s does not exist" % account, 2)
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
             return False, "user-%s does not exist" % account
 
         # generate stuff_id
@@ -106,12 +106,12 @@ class InboxManager:
 
         # is param in law
         if type(info) != dict:
-            self.log.add_log("InboxManager: param-info must be a dict, type error", 2)
+            self.log.add_log("InboxManager: param-info must be a dict, type error", 3)
             return False, "param-info must be a dict, type error"
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
-            self.log.add_log("InboxManager: user-%s does not exist" % account, 2)
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
             return False, "user-%s does not exist" % account
 
         # is stuff_id exist
@@ -163,12 +163,12 @@ class InboxManager:
 
         # is param in law
         if type(stuff_ids) != list and get_all is False:
-            self.log.add_log("InboxManager: type error, when get_all is False, stuff_ids must be a list", 2)
+            self.log.add_log("InboxManager: type error, when get_all is False, stuff_ids must be a list", 3)
             return False, "type error, when get_all is False, stuff_ids must be a list"
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
-            self.log.add_log("InboxManager: user-%s does not exist" % account, 2)
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
             return False, "user-%s does not exist" % account
 
         # get allIdList
@@ -227,5 +227,113 @@ class InboxManager:
             return False, "but fail with id-%s" % skip_ids
         return result, "success"
 
+    def get_stuff_id(self, account, mode, start_index=None, end_index=None):
 
+        """
+        从预设列表中获取stuff_id
+        :param account: 用户名
+        :param mode: 预设列表名称/id
+        :param start_index: 开始index
+        :param end_index: 结束index
+        :return: bool, str
+        """
+        self.log.add_log("InboxManager: get_stuff_id in mode-%s from %s to %s start" % mode, start_index, end_index, 1)
+        result = []
+        end_index_over = False
 
+        # is param in law
+        if start_index is not None and type(start_index) != str:
+            self.log.add_log("InboxManager: type error with param-start_index", 3)
+            return False, "type error with param-start_index"
+        if end_index is not None and type(end_index) != str:
+            self.log.add_log("InboxManager: type error with param-end_index", 3)
+            return False, "type error with param-end_index"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # start
+        if mode == "allIdList" or mode == 0:
+            id_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+                ["allIdList"]
+            )[0]["allIdList"]
+        elif mode == "waitClassifyList" or mode == 1:
+            id_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"waitClassifyList": 1}, 2),
+                ["waitClassifyList"]
+            )[0]["waitClassifyList"]
+        elif mode == "waitOrganizeList" or mode == 2:
+            id_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"waitOrganizeList": 1}, 2),
+                ["waitOrganizeList"]
+            )[0]["waitOrganizeList"]
+        elif mode == "waitExecuteList" or mode == 3:
+            id_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"waitExecuteList": 1}, 2),
+                ["waitExecuteList"]
+            )[0]["waitExecuteList"]
+        else:
+            self.log.add_log("InboxManager: unknown mode! exit", 3)
+            return False, "unknown mode"
+
+        if start_index is None:
+            result = id_list
+        else:
+            if end_index is None:
+                result = id_list[start_index:]
+            else:
+                if end_index > len(id_list) - 1:
+                    self.log.add_log("InboxManager: end_index over the list's length", 2)
+                    end_index_over = True
+                result = id_list[start_index:end_index]
+
+        if end_index_over:
+            res = "end index over length"
+        else:
+            res = "success"
+        return result, res
+
+    def delete_many_stuffs(self, account, stuff_ids):
+
+        """
+        删除多个stuffs
+        :param account: 用户名
+        :param stuff_ids: 要删除的stuff的stuff_id列表
+        :type stuff_ids: list
+        :return: bool, str
+        """
+        self.log.add_log("InboxManager: delete user-%s 'smany stuffs" % account, 1)
+        skip_ids = []
+
+        # is param in law
+        if type(stuff_ids) != list:
+            self.log.add_log("InboxManager: type error with param-stuff_ids", 3)
+            return False, "type error with param-stuff_ids"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # start
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
+        for stuff_id in stuff_ids:
+            if stuff_id not in all_stuff_id_list:
+                self.log.add_log("InboxManager: stuff-%s does not exist, skip", 2)
+                stuff_ids.remove(stuff_id)
+                skip_ids.append(stuff_id)
+                continue
+            else:
+                self.mongodb_manipulator.delete_many_documents("stuff", account, {"_id": stuff_id})
+
+        if skip_ids:
+            res = "success, but fail with id-%s" % skip_ids
+        else:
+            res = "success"
+        return True, res
