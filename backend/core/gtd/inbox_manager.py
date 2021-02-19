@@ -4,6 +4,7 @@
 # date: 2020/10/17
 
 import json
+from operator import itemgetter
 from backend.database.mongodb import MongoDBManipulator
 from backend.data.encryption import Encryption
 
@@ -70,6 +71,7 @@ class InboxManager:
         stuff_info["content"] = content
         stuff_info["description"] = desc
         stuff_info["createDate"] = self.log.get_date() + "/" + self.log.get_formatted_time()
+        stuff_info["createTimeStamp"] = self.log.get_time_stamp()
         stuff_info["stuffId"] = stuff_id
         stuff_info["tags"] = tags
         stuff_info["links"] = links
@@ -186,7 +188,7 @@ class InboxManager:
                     for stuff_id in all_stuff_id_list:
                         result["stuff_id"] = self.mongodb_manipulator.parse_document_result(
                             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                            ["content", "description", "createDate", "stuffId", "tags", "links", "time", "place",
+                            ["content", "description", "createDate", "createTimeStamp", "stuffId", "tags", "links", "time", "place",
                              "level", "status"]
                         )[0]
                 else:
@@ -201,7 +203,7 @@ class InboxManager:
 
                     result["stuff_id"] = self.mongodb_manipulator.parse_document_result(
                         self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                        ["content", "description", "createDate", "stuffId", "tags", "links", "time", "place", "level",
+                        ["content", "description", "createDate", "createTimeStamp", "stuffId", "tags", "links", "time", "place", "level",
                          "status"]
                     )[0]
 
@@ -219,7 +221,7 @@ class InboxManager:
                     result.append(
                         self.mongodb_manipulator.parse_document_result(
                             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                            ["content", "description", "createDate", "stuffId", "tags", "links", "time", "place", "level",
+                            ["content", "description", "createDate", "createTimeStamp", "stuffId", "tags", "links", "time", "place", "level",
                              "status"]
                     )[0])
 
@@ -349,6 +351,9 @@ class InboxManager:
         """
         self.log.add_log("InboxManager: generate user-%s 's preset stuff list" % account, 1)
         skip_lists = []
+        generated_list = []
+        sec_stage_process_list = {}
+        result_list = []
 
         # is param in law
         if type(list_name) != list and list_name is not None:
@@ -360,4 +365,58 @@ class InboxManager:
             self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
             return False, "user-%s does not exist" % account
 
-        # need to continue later
+        # start
+        all_preset_list_name = ["allIdList", "waitClassifyList", "waitOrganizeList", "waitExecuteList"]
+        if list_name is None:
+            list_name = all_preset_list_name
+
+        for now_list in list_name:
+            if now_list not in all_preset_list_name:
+                self.log.add_log("InboxManager: preset_list-%s does not exist", 2)
+                skip_lists.append(now_list)
+                continue
+            else:
+                if now_list in generated_list:
+                    skip_lists.append(now_list)
+                    self.log.add_log("InboxManager: preset_list-%s already generated just now" % list_name, 2)
+                    continue
+                generated_list.append(now_list)
+
+                raw_list = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("stuff", account, mode=0),
+                    ["stuffId", "createTimeStamp", "status"]
+                )
+                if now_list == "allIdList":
+                    for event in raw_list:
+                        sec_stage_process_list[int(event["createTimeStamp"])] = event["stuffId"]
+
+                elif now_list == "waitClassifyList":
+                    for event in raw_list:
+                        if event["status"] != "wait_classify":
+                            continue
+                        sec_stage_process_list[int(event["createTimeStamp"])] = event["stuffId"]
+
+                elif now_list == "waitOrganizeList":
+                    for event in raw_list:
+                        if event["status"] != "wait_organize":
+                            continue
+                        sec_stage_process_list[int(event["createTimeStamp"])] = event["stuffId"]
+                elif now_list == "waitExecuteList":
+                    for event in raw_list:
+                        if event["status"] != "wait_execute":
+                            continue
+                        sec_stage_process_list[int(event["createTimeStamp"])] = event["stuffId"]
+
+                sorted_result = sorted(sec_stage_process_list.items(), key=itemgetter(0), reverse=True)
+                for i in sorted_result:
+                    result_list.append(i[1])
+
+        if skip_lists or generated_list:
+            res = "fail with this request list-%s which not exist or already generated just now" % skip_lists
+        else:
+            res = "success"
+
+        return result_list, res
+
+
+
