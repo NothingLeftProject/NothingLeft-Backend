@@ -9,8 +9,10 @@
   </h1>
 <p align="center">
     A time management system based on GTD.
+</p>
+<p align="center">
   <a href="https://nothingleftproject.github.io/ProjectDocs">ProjectDocument</a>
-  </p>
+</p>
 
 # NothingLeft-ClassicSystem
 - NothingLeft经典系统
