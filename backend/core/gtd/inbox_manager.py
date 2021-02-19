@@ -142,6 +142,8 @@ class InboxManager:
             return False, "database error"
         else:
             self.log.add_log("InboxManager: modify stuff info success", 1)
+            if skip_keys:
+                return True, "but fail with key-%s" % skip_keys
             return True, "success"
 
     def get_many_stuffs(self, account, stuff_ids, get_all=False, result_type="list"):
@@ -220,4 +222,10 @@ class InboxManager:
                             ["content", "description", "createDate", "stuffId", "tags", "links", "time", "place", "level",
                              "status"]
                     )[0])
+
+        if skip_ids:
+            return False, "but fail with id-%s" % skip_ids
+        return result, "success"
+
+
 
