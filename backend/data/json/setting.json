@@ -13,6 +13,9 @@
       }
     }
   },
+  "inboxSettings": {
+    "allowGetAllStuffsInDict": true
+  },
   "allowSimultaneousOnline": true,
   "allowSignup": true,
   "loginValidTime": 24
