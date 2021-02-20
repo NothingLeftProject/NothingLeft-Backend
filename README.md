@@ -30,8 +30,13 @@
 
 
 ### 使用-Usage
-- 请查看本项目的[Wiki](https://nothingleftproject.github.io/ProjectDocs/)
-
+- 准备好mongoDB和Memcached
+- python3 -m pip install flask pymongo pymemcache socket
+- git clone https://github.com/NothingLeftProject/NothingLeft
+- 修改setting.json中的databaseSettings中的mongodb和memcached中的address->default分别为数据库的对应地址
+- 将setting.json中的hostIP清空
+- python3 run.py即可启动
+- - 更多请查看本项目的[Wiki](https://nothingleftproject.github.io/ProjectDocs/#/usage/README)
 
 ### 关于GTD-About GTD:
 - - Getting Things Done is a kind of time management system which was proposed by David Allen. Usually, we abbreviate Getting Things Done as GTD.

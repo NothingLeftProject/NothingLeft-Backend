@@ -189,7 +189,7 @@ class InboxManager:
         # get
         if designated_keys is None:
             designated_keys = ["content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags", "links", "time", "place",
-                             "level", "status"]
+                               "level", "status"]
 
         if result_type == "dict":
             result = {}
