@@ -11,7 +11,13 @@
     A time management system based on GTD.
 </p>
 <p align="center">
-  <a href="https://nothingleftproject.github.io/ProjectDocs">ProjectDocument</a>
+  <a href="https://nothingleftproject.github.io/ProjectDocs">ProjectDocument</a> | 
+  <a href="https://nothingleftproject.github.io/ProjectDocs/#/usage/README">Usage</a>
+</p>
+<p>
+    <img src="https://svg.hamm.cn/badge.svg?key=License&&value=Apache2.0">
+    <img src="https://svg.hamm.cn/badge.svg?key=Status&&value=InDeveloping">
+    <img src="https://svg.hamm.cn/badge.svg?key=Version&&value=dev-0.6">
 </p>
 
 # NothingLeft-ClassicSystem
