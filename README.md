@@ -38,7 +38,7 @@
 - [Gtd-Introduction](./GTD.md)
 
 
-### 设计-How it works
+### 设计-Design
 - 那么，这个项目是如何使用，或者说工作的呢
 - **交互（前端）**
   - 首先，我们需要一个可视化的交互口以便用户操作，而这种可视化的交互口是可以有很多种实现方式的。在这里，我就对一些初级阶段需要实现的交互方式进行列举和说明
@@ -54,7 +54,7 @@
 - 到这里，相信你已经对本项目有了一定的认识，如果您想要了解更多，请查看我们的[Wiki](https://nothingleftproject.github.io/NothingLeft/)
 
 
-## About
+## 更多-More
 
 ### 贡献者-Contributors
 - Lan_zhijiang(我)

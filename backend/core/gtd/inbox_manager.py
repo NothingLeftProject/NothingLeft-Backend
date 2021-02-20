@@ -1,6 +1,6 @@
 # coding=utf-8
 # author: Lan_zhijiang
-# desciption: stuff相关操作
+# description: stuff相关操作
 # date: 2020/10/17
 
 import json

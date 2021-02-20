@@ -1,6 +1,6 @@
 # coding=utf-8
 # author: Lan_zhijiang
-# desciption: 对stuff的分类管理器
+# description: 分类管理器
 # date: 2020/10/25
 
 
