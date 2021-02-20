@@ -150,14 +150,16 @@ class InboxManager:
                 return True, "but fail with key-%s" % skip_keys
             return True, "success"
 
-    def get_many_stuffs(self, account, stuff_ids, get_all=False, result_type="list"):
+    def get_many_stuffs(self, account, stuff_ids, designated_keys =None, get_all=False, result_type="list"):
 
         """
         获取多个stuff
         :param account: 用户名
         :param stuff_ids: 要获取的stuffs的id
-        :param get_all: 获取全部？
+        :param get_all: 获取全部stuff
+        :param designated_keys: 指定获取哪些信息
         :param result_type: 返回的res的类型是什么 dict/list
+        :type designated_keys: list
         :type stuff_ids: list
         :type get_all: bool
         :return: bool, str
@@ -169,6 +171,9 @@ class InboxManager:
         if type(stuff_ids) != list and get_all is False:
             self.log.add_log("InboxManager: type error, when get_all is False, stuff_ids must be a list", 3)
             return False, "type error, when get_all is False, stuff_ids must be a list"
+        if type(designated_keys) != list and designated_keys is not None:
+            self.log.add_log("InboxManager: type error with param-designated_keys", 3)
+            return False, "type error with param-designated_keys"
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
@@ -182,6 +187,10 @@ class InboxManager:
         )[0]["allIdList"]
 
         # get
+        if designated_keys is None:
+            designated_keys = ["content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags", "links", "time", "place",
+                             "level", "status"]
+
         if result_type == "dict":
             result = {}
             if get_all:
@@ -190,8 +199,7 @@ class InboxManager:
                     for stuff_id in all_stuff_id_list:
                         result["stuff_id"] = self.mongodb_manipulator.parse_document_result(
                             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                            ["content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags", "links", "time", "place",
-                             "level", "status"]
+                            designated_keys
                         )[0]
                 else:
                     self.log.add_log("InboxManager: it's not allowed to get all stuffs in dict mode", 2)
@@ -205,8 +213,7 @@ class InboxManager:
 
                     result["stuff_id"] = self.mongodb_manipulator.parse_document_result(
                         self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                        ["content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags", "links", "time", "place", "level",
-                         "status"]
+                        designated_keys
                     )[0]
 
         else:
