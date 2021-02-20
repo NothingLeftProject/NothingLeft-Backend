@@ -485,7 +485,27 @@ class InboxManager:
             )[0]["waitClassifyList"]
             preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
             self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 1}, {"waitClassifyList": preset_list})
-        # more to add
+        elif status == "wait_organize":
+            preset_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"waitOrganizeList": 1}, 2),
+                ["waitOrganizeList"]
+            )[0]["waitOrganizeList"]
+            preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
+            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 1}, {"waitOrganizeList": preset_list})
+        elif status == "wait_execute":
+            preset_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"waitExecuteList": 1}, 2),
+                ["waitExecuteList"]
+            )[0]["waitExecuteList"]
+            preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
+            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 1}, {"waitExecuteList": preset_list})
+        elif status == "achieved":
+            preset_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"achievedList": 1}, 2),
+                ["achievedList"]
+            )[0]["achievedList"]
+            preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
+            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 1}, {"achievedList": preset_list})
 
         for stuff_id in stuff_ids:
             if stuff_id not in all_stuff_id_list:
