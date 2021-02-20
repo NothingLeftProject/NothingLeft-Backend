@@ -6,6 +6,7 @@
 import json
 from operator import itemgetter
 from backend.database.mongodb import MongoDBManipulator
+from backend.database.memcached import MemcachedManipulator
 from backend.data.encryption import Encryption
 
 
@@ -17,6 +18,7 @@ class InboxManager:
         self.setting = setting
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        self.memcached_manipulator = MemcachedManipulator(log, setting)
         self.encryption = Encryption(log, setting)
 
     def add_stuff(self, account, content, desc=None, tags=[], links=[], time=None, place=None, level=0, status="wait_classify"):
@@ -245,6 +247,7 @@ class InboxManager:
         :return: bool, str
         """
         self.log.add_log("InboxManager: get stuff id list from condition in user-%s" % account, 1)
+        err = "success"
 
         # is param in law
         if type(condition) != dict:
@@ -263,11 +266,45 @@ class InboxManager:
             return False, "user-%s does not exist" % account
 
         # start
-        all_stuff_list = self.mongodb_manipulator.parse_document_result(
-            self.mongodb_manipulator.get_document("stuff", account, mode=0),
-            ["stuffId", "lastOperateTimeStamp", list(condition.keys())[0]]
-        )
-        
+        condition_key = list(condition.keys())[0]
+        result_list = []
+
+        if from_cache:
+            result_list = self.memcached_manipulator._get(condition_key+"List")
+            if type(result_list) == list:
+                self.log.add_log("InboxManager: get stuff_id_%sList from memcached success", 1)
+            else:
+                self.log.add_log("InboxManager: get stuff_id_%sList from memcached fail", 3)
+                return False, "database error or condition wrong or you haven't cache it yet"
+        else:
+            all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+                ["allIdList"]
+            )[0]["allIdList"]
+
+            for stuff_id in all_stuff_id_list:
+                stuff_info = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                    ["lastOperateTimeStamp", condition_key]
+                )[0]
+                if stuff_info[condition_key] == condition[condition_key]:
+                    self.log.add_log("InboxManager: find a stuff-%s match the condition, add in" % stuff_id, 0)
+                    result_list.append(stuff_id)
+
+            if cache:
+                if self.memcached_manipulator._set(condition_key+"List", result_list):
+                    self.log.add_log("InboxManager: result cache success", 1)
+                else:
+                    self.log.add_log("InboxManager: result cache fail", 3)
+                    err = "result cache fail"
+
+        if start_index is not None:
+            if end_index is None:
+                result_list = result_list[start_index:]
+            else:
+                result_list = result_list[start_index:end_index]
+
+        return result_list, err
 
     def get_stuff_id_from_preset(self, account, mode, start_index=None, end_index=None):
 
@@ -328,13 +365,16 @@ class InboxManager:
         if start_index is None:
             result = id_list
         else:
-            if end_index is None:
-                result = id_list[start_index:]
+            if start_index is not None:
+                if end_index is None:
+                    result = id_list[start_index:]
+                else:
+                    if end_index > len(id_list) - 1:
+                        self.log.add_log("InboxManager: end_index over the list's length", 2)
+                        end_index_over = True
+                    result = id_list[start_index:end_index]
             else:
-                if end_index > len(id_list) - 1:
-                    self.log.add_log("InboxManager: end_index over the list's length", 2)
-                    end_index_over = True
-                result = id_list[start_index:end_index]
+                result = id_list
 
         if end_index_over:
             res = "end index over length"
