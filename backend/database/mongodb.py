@@ -282,7 +282,7 @@ class MongoDBManipulator:
                 can_not_find_targets.append(target)
 
         if can_not_find_targets:
-            self.log.add_log("MongoDB: parse_result: can't find these targets in your documents: %s" % can_not_find_targets, 3)
+            self.log.add_log("MongoDB: parse_result: can't find these targets in your documents: %s" % can_not_find_targets, 2)
 
         return result
 
