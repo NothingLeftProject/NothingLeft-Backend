@@ -32,7 +32,7 @@ class Maintainer:
         self.mongodb_manipulator.get_database_names_list()
 
         database_check_list = [
-            "user", "user_group", "stuff"
+            "user", "user_group", "stuff", "classification"
         ]
         for event in database_check_list:
             if event not in self.mongodb_manipulator.database_names_list:
