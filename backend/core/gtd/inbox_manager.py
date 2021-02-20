@@ -231,18 +231,43 @@ class InboxManager:
             err = "success"
         return result, err
 
-    def get_stuff_id_from_condition(self, account, condition, length=None, from_cache=True, cache=True):
+    def get_stuff_id_from_condition(self, account, condition, start_index=None, end_index=None, from_cache=True, cache=True):
 
         """
         根据条件来即时筛选获取stuff_id
         :param account: 账户名
         :param condition: 条件 dict: stuff_info中的key-要求value
-        :param length: 获取多少个，如果从memcached获取则非常有用，从mongodb则意味着要重新生成并选取
+        :param start_index: 开始index 不指定则end不作用
+        :param end_index: 结束index
         :param cache: 是否缓存这次的生成结果
         :param from_cache: 是否从memcached中查找，如果有，从中查找，而不是mongodb
         :type condition: dict
         :return: bool, str
         """
+        self.log.add_log("InboxManager: get stuff id list from condition in user-%s" % account, 1)
+
+        # is param in law
+        if type(condition) != dict:
+            self.log.add_log("InboxManager: type error with param-condition, it should be a list", 3)
+            return False, "type error with param-condition, it should be a list"
+        if start_index is not None and type(start_index) != str:
+            self.log.add_log("InboxManager: type error with param-start_index", 3)
+            return False, "type error with param-start_index"
+        if end_index is not None and type(end_index) != str:
+            self.log.add_log("InboxManager: type error with param-end_index", 3)
+            return False, "type error with param-end_index"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # start
+        all_stuff_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, mode=0),
+            ["stuffId", "lastOperateTimeStamp", list(condition.keys())[0]]
+        )
+        
 
     def get_stuff_id_from_preset(self, account, mode, start_index=None, end_index=None):
 
@@ -254,17 +279,16 @@ class InboxManager:
         :param end_index: 结束index
         :return: bool, str
         """
-        self.log.add_log("InboxManager: get_stuff_id in mode-%s from %s to %s start" % mode, start_index, end_index, 1)
-        result = []
-        end_index_over = False
-
         # is param in law
-        if start_index is not None and type(start_index) != str:
+        if start_index is not None and type(start_index) != int:
             self.log.add_log("InboxManager: type error with param-start_index", 3)
             return False, "type error with param-start_index"
-        if end_index is not None and type(end_index) != str:
+        if end_index is not None and type(end_index) != int:
             self.log.add_log("InboxManager: type error with param-end_index", 3)
             return False, "type error with param-end_index"
+
+        self.log.add_log("InboxManager: get_stuff_id in mode-%s from %s to %s start" % mode, start_index, end_index, 1)
+        end_index_over = False
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
@@ -458,13 +482,16 @@ class InboxManager:
         :type stuff_ids: list
         :return: bool, str
         """
-        self.log.add_log("InboxManager: set user-%s 's many stuffs to status-%s" % account, status, 1)
-        skip_ids = []
-
         # is param in law
         if type(stuff_ids) != list:
             self.log.add_log("InboxManager: type error with param-stuff_ids", 3)
             return False, "type error with param-stuff_ids"
+        if type(status) != str:
+            self.log.add_log("InboxManager: type error with param-status", 3)
+            return False, "type error with param-status"
+
+        self.log.add_log("InboxManager: set user-%s 's many stuffs to status-%s" % account, status, 1)
+        skip_ids = []
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
@@ -526,6 +553,37 @@ class InboxManager:
             res = True
             err = "success"
         return res, err
+
+    def set_many_stuffs_level(self, account, stuff_ids, level):
+
+        """
+        设置多个stuffs的level(好像没有必要做)——放弃
+        :param account: 用户名
+        :param stuff_ids:
+        :param level: 级别 int
+        :return: bool, str
+        """
+        # is param in law
+        if type(stuff_ids) != list:
+            self.log.add_log("InboxManager: type error with param-stuff_ids", 3)
+            return False, "type error with param-stuff_ids"
+        if type(level) != int:
+            self.log.add_log("InboxManager: type error with param-level", 3)
+            return False, "type error with param-level"
+
+        self.log.add_log("InboxManager: set user-%s 's stuffs level to %s" % account, level, 1)
+        skip_ids = []
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # start
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
 
 
 # JUST SOME TEST HERE LOL
