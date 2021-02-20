@@ -81,8 +81,17 @@ class UserManager:
                 res, err = False, "fail to init coll-stuff/%s" % account
             else:
                 self.log.add_log("UserManager: Initialize coll-stuff/%s success" % account, 1)
-                preset_stuff_id_list = json.load(open("./backend/data/json/preset_stuff_id_list.json"))
+                preset_stuff_id_list = json.load(open("./backend/data/json/preset_stuff_id_list.json", "r", encoding="utf-8"))
                 self.mongodb_manipulator.add_many_documents("stuff", account, preset_stuff_id_list)
+
+            # init user's coll-classification/account
+            if self.mongodb_manipulator.add_collection("classification", account) is False:
+                self.log.add_log("UserManager: fail to initialize coll-classification/%s" % account, 3)
+                res, err = False, "fail to init coll-classification/%s" % account
+            else:
+                self.log.add_log("UserManager: Initialize coll-classification/%s success" % account, 1)
+                preset_stuff_id_list = json.load(open("./backend/data/json/preset_classification.json", "r", encoding="utf-8"))
+                self.mongodb_manipulator.add_many_documents("classification", account, preset_stuff_id_list)
 
             self.log.add_log("UserManager: Sign up user-%s done" % account, 1)
             return res, err
