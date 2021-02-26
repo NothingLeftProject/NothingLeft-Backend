@@ -90,7 +90,7 @@ class UserManager:
                 res, err = False, "fail to init coll-classification/%s" % account
             else:
                 self.log.add_log("UserManager: Initialize coll-classification/%s success" % account, 1)
-                preset_stuff_id_list = json.load(open("./backend/data/json/preset_classification.json", "r", encoding="utf-8"))
+                preset_stuff_id_list = json.load(open("./backend/data/json/init_classification.json", "r", encoding="utf-8"))
                 self.mongodb_manipulator.add_many_documents("classification", account, preset_stuff_id_list)
 
             self.log.add_log("UserManager: Sign up user-%s done" % account, 1)
