@@ -1,0 +1,9 @@
+[
+  {"_id": 0, "classificationNames": [], "classificationIds": []},
+  {"_id": 1, "canExecuteList": []},
+  {"_id": 2, "cannotExecuteList": []},
+  {"_id": 3, "referenceList": []},
+  {"_id": 4, "trackingList": []},
+  {"_id": 5, "somedayList": []},
+  {"_id": 6, "trashList": []}
+]
