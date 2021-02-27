@@ -400,6 +400,7 @@ class InboxManager:
         """
         self.log.add_log("InboxManager: delete user-%s 's many stuffs" % account, 1)
         skip_ids = []
+        err = ""
 
         # is param in law
         if type(stuff_ids) != list:
@@ -424,16 +425,21 @@ class InboxManager:
                 continue
             else:
                 self.mongodb_manipulator.delete_many_documents("stuff", account, {"_id": stuff_id})
+                all_stuff_id_list.remove(stuff_id)
+
+        if not self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 0}, {"allIdList": all_stuff_id_list}):
+            self.log.add_log("InboxManager: fail to update allIdList while deleting stuffs", 3)
+            err = "fail to update allIdList!"
 
         if skip_ids:
             if len(skip_ids) == len(stuff_ids):
                 res = False
             else:
                 res = True
-            err = "success, but fail with id-%s" % skip_ids
+            err = err + ", fail with id-%s" % skip_ids
         else:
             res = True
-            err = "success"
+            err = err + "success"
         return res, err
 
     def generate_preset_stuff_list(self, account, list_name=None):
@@ -631,6 +637,31 @@ class InboxManager:
             self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
             ["allIdList"]
         )[0]["allIdList"]
+
+    def is_stuff_exist(self, account, stuff_id):
+
+        """
+        判断某个stuff是否存在
+        :param account: 用户名
+        :param stuff_id:
+        :return: bool
+        """
+        self.log.add_log("InboxManager: is stuff-%s exist in user-%s" % stuff_id, account, 1)
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
+
+        if stuff_id in all_stuff_id_list:
+            return True, "success"
+        else:
+            return False, "success"
 
 
 # JUST SOME TEST HERE LOL
