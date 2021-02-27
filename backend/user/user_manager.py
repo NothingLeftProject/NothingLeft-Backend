@@ -67,7 +67,7 @@ class UserManager:
             if res:
                 # set user permissions
                 user_permissions_list, _ = self.user_permission_manager.get_user_permissions(account, ask_update=True)
-                result, _ = self.user_info_manager.update_user_info(account, {"permissionsList": user_permissions_list})
+                result, _ = self.user_info_manager.update_user_info(account, {"permissionsList": user_permissions_list}, special_allow=True)
                 if result is False:
                     self.log.add_log("UserManager: Sign up success but fail to update permissions list", 2)
                     res, err = True, "but fail to update permissions list"
