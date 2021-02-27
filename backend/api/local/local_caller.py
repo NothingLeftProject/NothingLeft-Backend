@@ -7,6 +7,7 @@ from backend.user.user_manager import UserManager
 from backend.user.user_info_operator import UserInfoManager
 from backend.user.user_permission_mamanger import UserPermissionManager
 from backend.user.user_group_manager import UserGroupManager
+from backend.core.gtd.inbox_manager import InboxManager
 
 
 class LocalCaller:
@@ -26,6 +27,7 @@ class LocalCaller:
         self.user_permission_manager = UserPermissionManager(log, setting)
         self.user_info_manager = UserInfoManager(log, setting)
         self.user_group_manager = UserGroupManager(log, setting)
+        self.inbox_manager = InboxManager(log, setting)
 
     def user_login(self, param):
 
@@ -409,5 +411,42 @@ class LocalCaller:
             return False, "param incomplete"
         else:
             res, err = self.user_permission_manager.get_user_groups_permissions(user_groups)
+            return res, err
+
+    def stuff_add(self, param):
+
+        """
+        添加stuff到inbox
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_add", 1)
+
+        try:
+            account = param["account"]
+            content = param["content"]
+        except KeyError:
+            self.log.add_log("LocalCaller: user_group_get_permissions: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            optional_param = ["description", "tags", "links", "time", "place", "level", "status"]
+            desc, tags, links, time, place, level, status = None, [], [], None, None, 0, "wait_classify"
+            for key in optional_param:
+                if key == "description":
+                    desc = param["description"]
+                elif key == "tags":
+                    tags = param["tags"]
+                elif key == "links":
+                    links = param["links"]
+                elif key == "time":
+                    time = param["time"]
+                elif key == "place":
+                    place = param["place"]
+                elif key == "level":
+                    level = param["level"]
+                elif key == "status":
+                    status = param["status"]
+
+            res, err = self.inbox_manager.add_stuff(account, content, desc=desc, tags=tags, links=links, time=time, place=place, level=level, status=status)
             return res, err
 
