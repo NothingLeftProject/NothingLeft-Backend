@@ -11,5 +11,8 @@
     "level": 0,
     "status": "",
     "belongingClassificationId": "",
-    "hasCustomAttribute": false
+    "hasCustomAttribute": false,
+    "events": [],
+    "eventsStatus": [],
+    "isSplitAsEvent"
 }

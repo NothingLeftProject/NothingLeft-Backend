@@ -712,20 +712,141 @@ class InboxManager:
             ["allIdList"]
         )[0]["allIdList"]
 
-    def is_stuff_exist(self, account, stuff_id):
+    def add_events(self, account, stuff_id, start_indexes, end_indexes):
 
         """
-        判断某个stuff是否存在
+        添加event（stuff中可以存在多个事件，每个事件可以有自己的status）
         :param account: 用户名
         :param stuff_id:
-        :return: bool
+        :param start_indexes: event的开始位置
+        :param end_indexes: event的结束位置
+        :type start_indexes: list
+        :type end_indexes: list
+        :return: bool, str
         """
-        self.log.add_log("InboxManager: is stuff-%s exist in user-%s" % stuff_id, account, 1)
+        self.log.add_log("InboxManager: add events for user-%s's stuff-%s" % account, stuff_id, 1)
+        err = "success"
+
+        # is param in law
+        if type(start_indexes) != list:
+            self.log.add_log("InboxManager: type error with param-start_indexes", 3)
+            return False, "type error with param-start_indexes"
+        if type(end_indexes) != list:
+            self.log.add_log("InboxManager: type error with param-end_indexes", 3)
+            return False, "type error with param-end_indexes"
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
             self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
             return False, "user-%s does not exist" % account
+
+        # is stuff exist
+        if self.is_stuff_exist(account, stuff_id, verify_account=False) is False:
+            self.log.add_log("InboxManager: stuff-%s is not exist, quit" % stuff_id, 3)
+            return False, "stuff-%s does not exist" % stuff_id
+
+        # add event
+        # get raw evenrs list
+        events_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+            ["events"]
+        )[0]["events"]
+        # generate events list
+        for index in range(0, len(start_indexes)):
+            try:
+                event = (int(start_indexes[index])), int(end_indexes[index])
+                if event in events_list:
+                    continue
+                events_list.append(event)
+            except IndexError:
+                self.log.add_log("InboxManager: add_events: end_indexes or start_indexes is not matched, skip", 3)
+                err = "end_indexes or start_indexes is not matched"
+                continue
+        # update
+        result_1 = self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"isSplitAsEvent": True})
+        result_2 = self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"events": events_list})
+
+        if not result_1 or not result_2:
+            self.log.add_log("InboxManager: database error while processing add_events", 3)
+            return False, err
+        else:
+            return False, err
+
+    def set_event_status(self, account, stuff_id, start_index, end_index, status):
+
+        """
+        设置event的状态
+        :param account: 用户名
+        :param stuff_id:
+        :param start_index: event开始位置
+        :param end_index: event结束位置
+        :param status: 要设置为的状态
+        :type start_index: int
+        :type end_index: int
+        :return: bool, str
+        """
+        # is param in law
+        if type(start_index) != int:
+            self.log.add_log("InboxManager: type error with param-start_index", 3)
+            return False, "type error with param-start_index"
+        if type(end_index) != int:
+            self.log.add_log("InboxManager: type error with param-end_index", 3)
+            return False, "type error with param-end_index"
+
+        self.log.add_log("InboxManager: set user-%s 's event-%s:%s to status-%s" % account, start_index, end_index, status, 1)
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # is stuff exist
+        if self.is_stuff_exist(account, stuff_id, verify_account=False) is False:
+            self.log.add_log("InboxManager: stuff-%s is not exist, quit" % stuff_id, 3)
+            return False, "stuff-%s does not exist" % stuff_id
+
+        # set event status
+        # is event exist
+        events_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+            ["events"]
+        )[0]["events"]
+        event = (start_index, end_index)
+        if event not in events_list:
+            self.log.add_log("InboxManager: event-%s:%s does not exist, quit" % start_index, end_index, 3)
+            return False, "event does not exist"
+        else:
+            # set event status
+            events_status_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                ["eventsStatus"]
+            )[0]["eventsStatus"]
+            event_index = events_list.find(event)
+            events_status_list.insert(event_index, status)
+            # update
+            result = self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"eventsStatus": events_status_list})
+            if result:
+                return True, "success"
+            else:
+                self.log.add_log("InboxManager: fail to set event status because of dabase error", 3)
+                return False, "database error"
+
+    def is_stuff_exist(self, account, stuff_id, verify_account=True):
+
+        """
+        判断某个stuff是否存在
+        :param account: 用户名
+        :param stuff_id:
+        :param verify_account: 效验用户名是否存在(不在api中开放)
+        :return: bool
+        """
+        self.log.add_log("InboxManager: is stuff-%s exist in user-%s" % stuff_id, account, 1)
+
+        if verify_account:
+            # is account exist
+            if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+                self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+                return False, "user-%s does not exist" % account
 
         all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
             self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
