@@ -638,21 +638,28 @@ class InboxManager:
                 ["waitOrganizeList"]
             )[0]["waitOrganizeList"]
             preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
-            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 1}, {"waitOrganizeList": preset_list})
+            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 2}, {"waitOrganizeList": preset_list})
         elif status == "wait_execute":
             preset_list = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("stuff", account, {"waitExecuteList": 1}, 2),
                 ["waitExecuteList"]
             )[0]["waitExecuteList"]
             preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
-            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 1}, {"waitExecuteList": preset_list})
+            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 3}, {"waitExecuteList": preset_list})
         elif status == "achieved":
             preset_list = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("stuff", account, {"achievedList": 1}, 2),
                 ["achievedList"]
             )[0]["achievedList"]
             preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
-            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 1}, {"achievedList": preset_list})
+            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 4}, {"achievedList": preset_list})
+        elif status == "put_off":
+            preset_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"puttedOffList": 1}, 2),
+                ["puttedOffList"]
+            )[0]["puttedOffList"]
+            preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
+            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 5}, {"puttedOffList": preset_list})
 
         for stuff_id in stuff_ids:
             if stuff_id not in all_stuff_id_list:
