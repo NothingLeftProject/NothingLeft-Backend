@@ -39,5 +39,6 @@ class CommandFinder:
             "stuff_generate_preset_list": self.local_caller.stuff_generate_preset_list,
             "stuff_set_many_status": self.local_caller.stuff_set_many_status,
             "stuff_set_many_level": self.local_caller.stuff_set_many_level,
-            "stuff_is_exist": self.local_caller.stuff_is_exist
+            "stuff_is_exist": self.local_caller.stuff_is_exist,
+            "stuff_add_many_custom_attribute": self.local_caller.stuff_add_many_custom_attribute
         }

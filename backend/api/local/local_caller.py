@@ -702,3 +702,29 @@ class LocalCaller:
 
             res, err = self.inbox_manager.is_stuff_exist(account, stuff_id)
             return res, err
+
+    def stuff_add_many_custom_attribute(self, param):
+
+        """
+        为多个stuff添加多个自定义属性
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_is_exist", 1)
+
+        try:
+            account = param["account"]
+            stuff_ids = param["stuffIds"]
+            keys = param["keys"]
+            values = param["values"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_is_exist: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allowed to modify other user's info"
+                    return False, err
+
+            res, err = self.inbox_manager.add_many_stuffs_custom_attribute(account, stuff_ids, keys, values)
+            return res, err
