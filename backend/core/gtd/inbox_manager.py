@@ -814,6 +814,11 @@ class InboxManager:
             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
             ["events"]
         )[0]["events"]
+        # get events status list
+        events_status_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+            ["eventsStatus"]
+        )[0]["eventsStatus"]
         # remove
         for index in range(0, len(start_indexes)):
             try:
@@ -821,6 +826,8 @@ class InboxManager:
                 if event not in events_list:
                     self.log.add_log("InboxManager: event-%s:%s does not exist, skip" % (start_indexes[index], end_indexes[index]), 2)
                     continue
+                event_index = events_list.find(event)
+                events_status_list.remove(events_status_list[event_index]) # 同步删除status
                 events_list.remove(event)
             except IndexError:
                 self.log.add_log("InboxManager: add_events: end_indexes or start_indexes is not matched, skip", 3)
@@ -831,9 +838,10 @@ class InboxManager:
             if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"isSplitAsEvent": False}) is False:
                 self.log.add_log("InboxManager: database error while removing events", 3)
                 return False, "database error"
-        result = self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"events": events_list})
+        result_1 = self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"events": events_list})
+        result_2 = self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"eventsStatus": events_status_list})
 
-        if not result:
+        if not result_1 or not result_2:
             self.log.add_log("InboxManager: database error while removing events", 3)
             err = err + ", database error"
             return False, err
