@@ -40,5 +40,8 @@ class CommandFinder:
             "stuff_set_many_status": self.local_caller.stuff_set_many_status,
             "stuff_set_many_level": self.local_caller.stuff_set_many_level,
             "stuff_is_exist": self.local_caller.stuff_is_exist,
-            "stuff_add_many_custom_attribute": self.local_caller.stuff_add_many_custom_attribute
+            "stuff_add_many_custom_attribute": self.local_caller.stuff_add_many_custom_attribute,
+            "stuff_add_events": self.local_caller.stuff_add_events,
+            "stuff_remove_events": self.local_caller.stuff_remove_events,
+            "stuff_set_event_status": self.local_caller.stuff_set_event_status
         }
