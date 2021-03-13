@@ -99,3 +99,5 @@
 - 完成了InboxManager基本功能，未经调试，修复了一些显而易见的bug
 - 修复sign_up bug，通过了其dev-0.6下的测试
 - stuff支持了自定义属性
+- stuff支持了事件(event)分割及其状态设置
+- 又又又修了一堆bug
