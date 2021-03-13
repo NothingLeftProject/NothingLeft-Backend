@@ -150,7 +150,7 @@ class InboxManager:
                 return True, "but fail with key-%s" % skip_keys
             return True, "success"
 
-    def get_many_stuffs(self, account, stuff_ids, designated_keys =None, get_all=False, result_type="list"):
+    def get_many_stuffs(self, account, stuff_ids, designated_keys=None, get_all=False, result_type="list"):
 
         """
         获取多个stuff
