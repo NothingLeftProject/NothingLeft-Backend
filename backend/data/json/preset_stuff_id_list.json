@@ -3,5 +3,6 @@
   {"_id": 1, "waitClassifyList": []},
   {"_id": 2, "waitOrganizeList": []},
   {"_id": 3, "waitExecuteList": []},
-  {"_id": 4, "achievedList": []}
+  {"_id": 4, "achievedList": []},
+  {"_id": 5, "puttedOffList": []}
 ]
