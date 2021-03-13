@@ -98,4 +98,4 @@
 - 添加了get_many_stuffs并修了一些InboxManager里的bugs
 - 完成了InboxManager基本功能，未经调试，修复了一些显而易见的bug
 - 修复sign_up bug，通过了其dev-0.6下的测试
-- 一点小更新，未经测试
+- stuff支持了自定义属性
