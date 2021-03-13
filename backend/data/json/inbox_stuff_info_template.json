@@ -10,5 +10,6 @@
     "place": "",
     "level": 0,
     "status": "",
-    "belongingClassificationId": ""
+    "belongingClassificationId": "",
+    "hasCustomAttribute": false
 }

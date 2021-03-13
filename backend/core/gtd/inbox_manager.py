@@ -16,6 +16,11 @@ class InboxManager:
 
         self.log = log
         self.setting = setting
+        
+        self.stuff_standard_attributes_list = [
+            "content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags",
+            "links", "time", "place", "level", "status",
+            "belongingClassificationId", "hasCustomAttribute"]
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
         self.memcached_manipulator = MemcachedManipulator(log, setting)
@@ -130,7 +135,7 @@ class InboxManager:
         # update info to database
         stuff_info = self.mongodb_manipulator.parse_document_result(
             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-            ["content", "description", "createDate", "tags", "links", "time", "place", "level", "status"]
+            self.stuff_standard_attributes_list
         )[0]
         need_updated_keys = list(info.keys())
         stuff_info_keys = list(info.keys())
@@ -149,6 +154,70 @@ class InboxManager:
             if skip_keys:
                 return True, "but fail with key-%s" % skip_keys
             return True, "success"
+
+    def add_many_stuffs_custom_attribute(self, account, stuff_ids, keys, values):
+
+        """
+        为多个stuff添加多个自定义属性
+        要获取自定义属性的值则必须在get_many_stuffs中单独指定，被custom的stuff会存在标记
+        :param account: 用户名
+        :param stuff_ids:
+        :param keys: 自定义属性名称
+        :param values: 自定义属性值
+        :type stuff_ids: list
+        :return:
+        """
+        self.log.add_log("InboxManager: add many stuffs custom attribute for user-%s" % account, 1)
+        skip_ids = []
+
+        # is param in law
+        if type(stuff_ids) != list:
+            self.log.add_log("InboxManager: type error, stuff_ids must be a list", 3)
+            return False, "type error, stuff_ids must be a list"
+        if type(keys) != list:
+            self.log.add_log("InboxManager: type error, keys must be a list", 3)
+            return False, "type error, keys must be a list"
+        if type(values) != list:
+            self.log.add_log("InboxManager: type error, values must be a list", 3)
+            return False, "type error, stuff_ids must be a list"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # get allIdList
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
+
+        # add
+        for stuff_id in stuff_ids:
+            if stuff_id not in all_stuff_id_list:
+                self.log.add_log("InboxManager: can't find stuff-%s in all_stuff_id_list, skip" % stuff_id, 2)
+                skip_ids.append(stuff_ids)
+                continue
+            else:
+                # get raw stuff info
+                stuff_info = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                    self.stuff_standard_attributes_list   
+                )
+                # change hasCustomAttribute
+                stuff_info["hasCustomAttribute"] = True
+                for index in range(0, len(keys)):
+                    stuff_info[keys[index]] = values[index]
+                if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, stuff_info) is False:
+                    self.log.add_log("InboxManager: fail to add custom attributes for stuff-%s because of database error" % account, 3)
+                    skip_ids.append(stuff_id)
+                    continue
+
+        if skip_ids:
+            err= "fail with id-%s" % skip_ids
+        else:
+            err = "success"
+        return True, err
 
     def get_many_stuffs(self, account, stuff_ids, designated_keys=None, get_all=False, result_type="list"):
 
@@ -188,8 +257,7 @@ class InboxManager:
 
         # get
         if designated_keys is None:
-            designated_keys = ["content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags", "links", "time", "place",
-                               "level", "status"]
+            designated_keys = self.stuff_standard_attributes_list
 
         if result_type == "dict":
             result = {}
@@ -230,12 +298,11 @@ class InboxManager:
                     result.append(
                         self.mongodb_manipulator.parse_document_result(
                             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                            ["content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags", "links", "time", "place", "level",
-                             "status"]
+                            designated_keys
                     )[0])
 
         if skip_ids:
-            return "fail with id-%s" % skip_ids
+            return True, "fail with id-%s" % skip_ids
         else:
             err = "success"
         return result, err
