@@ -30,5 +30,14 @@ class CommandFinder:
             "user_group_add": self.local_caller.user_group_add,
             "user_group_remove": self.local_caller.user_group_remove,
             "user_group_get_permissions": self.local_caller.user_group_get_permissions,
-            "stuff_add": self.local_caller.stuff_add
+            "stuff_add": self.local_caller.stuff_add,
+            "stuff_modify": self.local_caller.stuff_modify,
+            "stuff_get_many": self.local_caller.stuff_get_many,
+            "stuff_get_id_from_condition": self.local_caller.stuff_get_id_from_condition,
+            "stuff_get_id_from_preset": self.local_caller.stuff_get_id_from_preset,
+            "stuff_delete_many": self.local_caller.stuff_delete_many,
+            "stuff_generate_preset_list": self.local_caller.stuff_generate_preset_list,
+            "stuff_set_many_status": self.local_caller.stuff_set_many_status,
+            "stuff_set_many_level": self.local_caller.stuff_set_many_level,
+            "stuff_is_exist": self.local_caller.stuff_is_exist
         }

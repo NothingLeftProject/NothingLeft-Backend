@@ -135,9 +135,9 @@ class LocalCaller:
         else:
             if self.not_root:
                 if self.caller != account:
-                    err = "you are not allow to change other user's info"
+                    err = "you are not allowed to change other user's info"
                 elif self.caller == account and "permissionsList" in info:
-                    err = "you are not allow to change your own permissionsList"
+                    err = "you are not allowed to change your own permissionsList"
                 if err != "":
                     return res, err
 
@@ -190,7 +190,7 @@ class LocalCaller:
         else:
             if self.not_root:
                 if self.caller != account:
-                    err = "you are not allow to get other user's info"
+                    err = "you are not allowed to get other user's info"
                     return res, err
 
             res, err = self.user_info_manager.get_one_user_multi_info(account, keys)
@@ -431,7 +431,7 @@ class LocalCaller:
         else:
             if self.not_root:
                 if self.caller != account:
-                    err = "you are not allow to add stuff into other user's inbox"
+                    err = "you are not allowed to add stuff into other user's inbox"
                     return False, err
 
             optional_param = ["description", "tags", "links", "time", "place", "level", "status"]
@@ -474,7 +474,7 @@ class LocalCaller:
         else:
             if self.not_root:
                 if self.caller != account:
-                    err = "you are not allow to mpdify other user's stuff info"
+                    err = "you are not allowed to mpdify other user's stuff info"
                     return False, err
 
             res, err = self.inbox_manager.modify_stuff(account, stuff_id, info)
@@ -498,7 +498,7 @@ class LocalCaller:
         else:
             if self.not_root:
                 if self.caller != account:
-                    err = "you are not allow to get other user's stuff"
+                    err = "you are not allowed to get other user's stuff"
                     return False, err
             optional_param = ["designated_keys", "get_all", "result_type"]
             designated_keys, get_all, result_type = None, False, "list"
@@ -531,7 +531,7 @@ class LocalCaller:
         else:
             if self.not_root:
                 if self.caller != account:
-                    err = "you are not allow to get other user's stuff_id"
+                    err = "you are not allowed to get other user's stuff_id"
                     return False, err
 
             optional_param = ["start_index", "end_index", "from_cache", "cache"]
@@ -568,7 +568,7 @@ class LocalCaller:
         else:
             if self.not_root:
                 if self.caller != account:
-                    err = "you are not allow to get other user's stuff_id"
+                    err = "you are not allowed to get other user's stuff_id"
                     return False, err
 
             optional_param = ["start_index", "end_index"]
@@ -600,7 +600,7 @@ class LocalCaller:
         else:
             if self.not_root:
                 if self.caller != account:
-                    err = "you are not allow to delete other user's stuff"
+                    err = "you are not allowed to delete other user's stuff"
                     return False, err
 
             res, err = self.inbox_manager.delete_many_stuffs(account, stuff_ids)
@@ -627,4 +627,78 @@ class LocalCaller:
                 if key == "list_name":
                     list_name = param["listName"]
             res, err = self.inbox_manager.generate_preset_stuff_list(account, list_name=list_name)
+            return res, err
+
+    def stuff_set_many_status(self, param):
+
+        """
+        设置多个stuff的状态
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_set_many_status", 1)
+
+        try:
+            account = param["account"]
+            stuff_ids = param["stuffIds"]
+            status = param["status"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_set_many_status: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allowed to modify other user's stuff info"
+                    return False, err
+
+            res, err = self.inbox_manager.set_many_stuffs_status(account, stuff_ids, status)
+            return res, err
+
+    def stuff_set_many_level(self, param):
+
+        """
+        设置多个stuff的状态
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_set_many_level", 1)
+
+        try:
+            account = param["account"]
+            stuff_ids = param["stuffIds"]
+            level = param["level"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_set_many_level: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allowed to modify other user's stuff info"
+                    return False, err
+
+            res, err = self.inbox_manager.set_many_stuffs_level(account, stuff_ids, level)
+            return res, err
+
+    def stuff_is_exist(self, param):
+
+        """
+        检测stuff是否存在
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_is_exist", 1)
+
+        try:
+            account = param["account"]
+            stuff_id = param["stuffId"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_is_exist: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allowed to know if the stuff in other inboxes exist"
+                    return False, err
+
+            res, err = self.inbox_manager.is_stuff_exist(account, stuff_id)
             return res, err
