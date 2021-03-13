@@ -36,10 +36,10 @@
 - 修改setting.json中的databaseSettings中的mongodb和memcached中的address->default分别为数据库的对应地址
 - 将setting.json中的hostIP清空
 - python3 run.py即可启动
-- - 更多请查看本项目的[Wiki](https://nothingleftproject.github.io/ProjectDocs/#/usage/README)
+- 更多请查看本项目的[Wiki](https://nothingleftproject.github.io/ProjectDocs/#/usage/README)
 
 ### 关于GTD-About GTD:
-- - Getting Things Done is a kind of time management system which was proposed by David Allen. Usually, we abbreviate Getting Things Done as GTD.
+- Getting Things Done is a kind of time management system which was proposed by David Allen. Usually, we abbreviate Getting Things Done as GTD.
 - [Gtd-Introduction](./GTD.md)
 
 
@@ -97,4 +97,5 @@
 - 写了个add_stuff和modify_stuff并修改了一些东西，适配了一些东西
 - 添加了get_many_stuffs并修了一些InboxManager里的bugs
 - 完成了InboxManager基本功能，未经调试，修复了一些显而易见的bug
-- 修复sign_up bug，通过了其dev-0.6下的测试，
+- 修复sign_up bug，通过了其dev-0.6下的测试
+- 一点小更新，未经测试
