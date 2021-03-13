@@ -746,7 +746,7 @@ class InboxManager:
             return False, "stuff-%s does not exist" % stuff_id
 
         # add event
-        # get raw evenrs list
+        # get raw events list
         events_list = self.mongodb_manipulator.parse_document_result(
             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
             ["events"]
@@ -756,6 +756,8 @@ class InboxManager:
             try:
                 event = (int(start_indexes[index])), int(end_indexes[index])
                 if event in events_list:
+                    self.log.add_log(
+                        "InboxManager: event-%s:%s already exist, skip" % (start_indexes[index], end_indexes[index]), 2)
                     continue
                 events_list.append(event)
             except IndexError:
@@ -768,9 +770,75 @@ class InboxManager:
 
         if not result_1 or not result_2:
             self.log.add_log("InboxManager: database error while processing add_events", 3)
+            err = err + ", database error"
             return False, err
         else:
+            return True, err
+
+    def remove_events(self, account, stuff_id, start_indexes, end_indexes):
+
+        """
+        删除event（stuff中可以存在多个事件，每个事件可以有自己的status）
+        :param account: 用户名
+        :param stuff_id:
+        :param start_indexes:
+        :param end_indexes:
+        :type start_indexes: list
+        :type end_indexes: list
+        :return: bool. str
+        """
+        self.log.add_log("InboxManager: remove events for user-%s's stuff-%s" % account, stuff_id, 1)
+        err = "success"
+
+        # is param in law
+        if type(start_indexes) != list:
+            self.log.add_log("InboxManager: type error with param-start_indexes", 3)
+            return False, "type error with param-start_indexes"
+        if type(end_indexes) != list:
+            self.log.add_log("InboxManager: type error with param-end_indexes", 3)
+            return False, "type error with param-end_indexes"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # is stuff exist
+        if self.is_stuff_exist(account, stuff_id, verify_account=False) is False:
+            self.log.add_log("InboxManager: stuff-%s is not exist, quit" % stuff_id, 3)
+            return False, "stuff-%s does not exist" % stuff_id
+
+        # remove event
+        # get events list
+        events_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+            ["events"]
+        )[0]["events"]
+        # remove
+        for index in range(0, len(start_indexes)):
+            try:
+                event = (int(start_indexes[index])), int(end_indexes[index])
+                if event not in events_list:
+                    self.log.add_log("InboxManager: event-%s:%s does not exist, skip" % (start_indexes[index], end_indexes[index]), 2)
+                    continue
+                events_list.remove(event)
+            except IndexError:
+                self.log.add_log("InboxManager: add_events: end_indexes or start_indexes is not matched, skip", 3)
+                err = "end_indexes or start_indexes is not matched"
+                continue
+        # update
+        if not events_list:
+            if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"isSplitAsEvent": False}) is False:
+                self.log.add_log("InboxManager: database error while removing events", 3)
+                return False, "database error"
+        result = self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"events": events_list})
+
+        if not result:
+            self.log.add_log("InboxManager: database error while removing events", 3)
+            err = err + ", database error"
             return False, err
+        else:
+            return True, err
 
     def set_event_status(self, account, stuff_id, start_index, end_index, status):
 
