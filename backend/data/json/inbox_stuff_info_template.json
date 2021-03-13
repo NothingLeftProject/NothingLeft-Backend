@@ -9,5 +9,6 @@
     "time": "",
     "place": "",
     "level": 0,
-    "status": ""
+    "status": "",
+    "belongingClassificationId": ""
 }
