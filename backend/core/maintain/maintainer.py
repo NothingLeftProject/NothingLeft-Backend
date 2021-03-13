@@ -41,11 +41,18 @@ class Maintainer:
                 self.log.add_log("Maintainer: database-" + event + " exists", 1)
             self.mongodb_manipulator.get_collection_names_list(event)
 
-        # user_group-superuser and user-root checking
+        # user_group checking
+        self.log.add_log("Maintainer: checking user_group...", 1)
+        if self.mongodb_manipulator.is_collection_exist("user_group", "default", update=True) is False:
+            default_user_permissions = json.load(open("./backend/data/json/default_user_permissions_list.json", "r", encoding="utf-8"))
+            self.user_group_manager.add_user_group("default", permissions_list=default_user_permissions)
+
         if self.mongodb_manipulator.is_collection_exist("user_group", "superuser", update=True) is False:
             root_permissions = json.load(open("./backend/data/json/root_permissions_list.json", "r", encoding="utf-8"))
             self.user_group_manager.add_user_group("superuser", permissions_list=root_permissions)
 
+        # user-root checking
+        self.log.add_log("Maintainer: checking user-root...", 1)
         if self.mongodb_manipulator.is_collection_exist("user", "root") is False:
             root_key = self.encryption.generate_random_key() + self.encryption.generate_random_key()
             root_key = self.encryption.md5(root_key)
