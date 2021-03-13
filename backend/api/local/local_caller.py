@@ -429,6 +429,11 @@ class LocalCaller:
             self.log.add_log("LocalCaller: user_group_get_permissions: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allow to add stuff into other user's inbox"
+                    return False, err
+
             optional_param = ["description", "tags", "links", "time", "place", "level", "status"]
             desc, tags, links, time, place, level, status = None, [], [], None, None, 0, "wait_classify"
             for key in optional_param:
@@ -450,3 +455,176 @@ class LocalCaller:
             res, err = self.inbox_manager.add_stuff(account, content, desc=desc, tags=tags, links=links, time=time, place=place, level=level, status=status)
             return res, err
 
+    def stuff_modify(self, param):
+
+        """
+        修改某个stuff的信息
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_modify", 1)
+
+        try:
+            account = param["account"]
+            stuff_id = param["stuffId"]
+            info = param["info"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_modify: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allow to mpdify other user's stuff info"
+                    return False, err
+
+            res, err = self.inbox_manager.modify_stuff(account, stuff_id, info)
+            return res, err
+
+    def stuff_get_many(self, param):
+
+        """
+        获取多个stuff
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_get_many", 1)
+
+        try:
+            account = param["account"]
+            stuff_ids = param["stuffIds"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_get_many: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allow to get other user's stuff"
+                    return False, err
+            optional_param = ["designated_keys", "get_all", "result_type"]
+            designated_keys, get_all, result_type = None, False, "list"
+            for key in optional_param:
+                if key == "description":
+                    designated_keys = param["designatedKeys"]
+                elif key == "get_all":
+                    get_all = param["getAll"]
+                elif key == "result_type":
+                    result_type = param["resultType"]
+            res, err = self.inbox_manager.get_many_stuffs(account, stuff_ids, designated_keys=designated_keys,
+                                                          get_all=get_all, result_type=result_type)
+            return res, err
+
+    def stuff_get_id_from_condition(self, param):
+
+        """
+        通过条件来获取stuff_id
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_get_id_from_condition", 1)
+
+        try:
+            account = param["account"]
+            condition = param["condition"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_get_id_from_condition: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allow to get other user's stuff_id"
+                    return False, err
+
+            optional_param = ["start_index", "end_index", "from_cache", "cache"]
+            start_index, end_index, from_cache, cache = None, None, True, True
+            for key in optional_param:
+                if key == "start_index":
+                    start_index = param["startIndex"]
+                elif key == "end_index":
+                    end_index = param["endIndex"]
+                elif key == "from_cache":
+                    from_cache = param["fromCache"]
+                elif key == "cache":
+                    cache = param["cache"]
+            res, err = self.inbox_manager.get_stuff_id_from_condition(account, condition, start_index=start_index,
+                                                                      end_index=end_index, from_cache=from_cache,
+                                                                      cache=cache)
+            return res, err
+
+    def stuff_get_id_from_preset(self, param):
+
+        """
+        通过预设列表来获取stuff_id
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_get_id_from_preset", 1)
+
+        try:
+            account = param["account"]
+            mode = param["mode"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_get_id_from_preset: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allow to get other user's stuff_id"
+                    return False, err
+
+            optional_param = ["start_index", "end_index"]
+            start_index, end_index = None, None
+            for key in optional_param:
+                if key == "start_index":
+                    start_index = param["startIndex"]
+                elif key == "end_index":
+                    end_index = param["endIndex"]
+            res, err = self.inbox_manager.get_stuff_id_from_condition(account, mode, start_index=start_index,
+                                                                      end_index=end_index)
+            return res, err
+
+    def stuff_delete_many(self, param):
+
+        """
+        删除多个stuff
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_delete_many", 1)
+
+        try:
+            account = param["account"]
+            stuff_ids = param["stuffIds"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_delete_many: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allow to delete other user's stuff"
+                    return False, err
+
+            res, err = self.inbox_manager.delete_many_stuffs(account, stuff_ids)
+            return res, err
+
+    def stuff_generate_preset_list(self, param):
+
+        """(ONLY ROOT CAN HAS)
+        生成预设列表
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_generate_preset_list", 1)
+
+        try:
+            account = param["account"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_generate_preset_list: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            optional_param = ["list_name"]
+            list_name = None
+            for key in optional_param:
+                if key == "list_name":
+                    list_name = param["listName"]
+            res, err = self.inbox_manager.generate_preset_stuff_list(account, list_name=list_name)
+            return res, err
