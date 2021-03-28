@@ -14,5 +14,5 @@
     "hasCustomAttribute": false,
     "events": [],
     "eventsStatus": [],
-    "isSplitAsEvent"
+    "isSplitAsEvent": false
 }
