@@ -13,7 +13,7 @@ class CommandFinder:
         self.local_caller = LocalCaller(log, setting, caller)
 
         self.all_command_list = {
-            "user_sign_up": self.local_caller.user_sign_up,
+            "user_sign_up": self.local_caller.user_sign_up,  # ERROR: USER_ADD WILL BE GOING TO SUPERUSER!
             "user_login": self.local_caller.user_login,
             "user_logout": self.local_caller.user_logout,
             "user_delete": self.local_caller.user_delete,

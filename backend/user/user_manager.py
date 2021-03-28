@@ -24,7 +24,7 @@ class UserManager:
         self.user_info_manager = UserInfoManager(log, setting)
         self.user_permission_manager = UserPermissionManager(log, setting)
 
-    def sign_up(self, account, password, email, user_group="user"):
+    def sign_up(self, account, password, email, user_group="default"):
 
         """
         注册用户
