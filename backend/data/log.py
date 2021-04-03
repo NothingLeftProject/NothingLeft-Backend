@@ -3,6 +3,7 @@
 # desciption: Log class
 # date: 2020/10/2
 
+import json
 import time
 import datetime
 import os
@@ -16,6 +17,7 @@ class GtdLog():
         self.logLevelList = [
            "DEBUG", "INFO", "WARNING", "ERROR", "FATAL"
         ]
+        self.log_setting = json.load(open("./backend/data/json/log_setting.json", "r", encoding="utf-8"))
 
     def get_log_file_path(self):
 
@@ -23,7 +25,7 @@ class GtdLog():
         获取log文件路径
         :return:
         """
-        basic_path = "./backend/data/log/"
+        basic_path = self.log_setting["logPath"]
         log_file_name = self.get_date() + ".txt"
         if os.path.exists(basic_path + log_file_name) is False:
             create_log_file = open(basic_path + log_file_name, "w")
@@ -71,14 +73,15 @@ class GtdLog():
         if is_period:
             log = log + " ."
         if is_print:
-            print(log)
+            if level >= self.log_setting["displayLevel"]:
+                print(log)
         
         try:
             log_file = open(self.get_log_file_path(), "a")
             log_file.write(log + '\r\n')
             log_file.close()
         except IOError:
-            print("[WARNING] " + self.get_formatted_time() + " Can't write into the log file!")
+            print("[WARNING] %s Can't write into the log file, please check the permission or is the path correct!" % self.get_formatted_time())
         else:
             if level > 3:
                 sys.exit()
