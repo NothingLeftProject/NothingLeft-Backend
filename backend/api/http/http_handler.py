@@ -52,15 +52,19 @@ class HttpHandler:
             # is time stamp in law
             if 0 <= time_loss <= 600:
 
-                try:
-                    if self.request_data["header"]["loginRequest"]:
-                        self.special_auth_pass = True
-                        return True
-                    elif self.request_data["header"]["signupRequest"]: # maybe bug here
-                        self.special_auth_pass = True
-                        return True
-                except KeyError:
-                    pass
+                param = ["loginRequest", "signupRequest"]
+                for key in param:
+                    try:
+                        if key == "loginRequest":
+                            if self.request_data["header"]["loginRequest"]:
+                                self.special_auth_pass = True
+                                return True
+                        elif key == "signupRequest":
+                            if self.request_data["header"]["signupRequest"]:
+                                self.special_auth_pass = True
+                                return True
+                    except KeyError:
+                        pass
 
                 last_login_time_stamp = self.mongodb_manipulator.parse_document_result(
                     self.mongodb_manipulator.get_document("user", account, {"lastLoginTimeStamp": 1}, 2),
@@ -119,7 +123,7 @@ class HttpHandler:
                 else:
                     # auth fail, login outdated
                     self.log.add_log("HttpHandler: login outdated, auth fail", 1)
-                    self.response_data["header"]["errorMsg"] = "login outdated, please login"  # login outdate error
+                    self.response_data["header"]["errorMsg"] = "login outdated, please login"  # login outdated error
                     return False
             else:
                 # auth fail, time stamp not in law
