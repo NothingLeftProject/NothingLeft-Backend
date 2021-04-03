@@ -157,26 +157,29 @@ class HttpHandler:
 
             if self.special_auth_pass:
                 # the handle of login request
-                if self.request_data["header"]["loginRequest"]:
-                    try:
-                        command_name = self.request_data["command"][0]["commandName"]
-                    except IndexError:
-                        self.response_data["header"]["status"] = 1
-                        self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
-                        allow_process_command = False
-                        self.log.add_log("HttpHandler: can't find commandName", 1)
-                    else:
-                        if command_name != "user_login":
+                try:
+                    if self.request_data["header"]["loginRequest"]:
+                        try:
+                            command_name = self.request_data["command"][0]["commandName"]
+                        except IndexError:
                             self.response_data["header"]["status"] = 1
                             self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
                             allow_process_command = False
-                            self.log.add_log("HttpHandler: false request to login", 1)
+                            self.log.add_log("HttpHandler: can't find commandName", 1)
                         else:
-                            self.response_data["header"]["status"] = 0
-                            self.response_data["header"]["errorMsg"] = None
-                            special_handle_pass = True
+                            if command_name != "user_login":
+                                self.response_data["header"]["status"] = 1
+                                self.response_data["header"]["errorMsg"] = "you lied to me! you are not here to login!"
+                                allow_process_command = False
+                                self.log.add_log("HttpHandler: false request to login", 1)
+                            else:
+                                self.response_data["header"]["status"] = 0
+                                self.response_data["header"]["errorMsg"] = None
+                                special_handle_pass = True
+                except KeyError:
+                    pass
                 # the handle of signup request
-                elif self.request_data["header"]["signupRequest"]:
+                if self.request_data["header"]["signupRequest"]:
                     if self.setting["allowSignup"]:
                         try:
                             command_name = self.request_data["command"][0]["commandName"]
