@@ -184,7 +184,7 @@ class UserGroupManager:
         else:
 
             user_group_info = self.user_group_info_template   # WARNING: must use like this to make sure it won't change raw data
-            user_group_info[0]["user_group"] = user_group
+            user_group_info[0]["name"] = user_group
             user_group_info[2]["permissionsList"] = permissions_list
 
             result_1 = self.mongodb_manipulator.add_collection("user_group", user_group)
