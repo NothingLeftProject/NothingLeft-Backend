@@ -26,7 +26,7 @@ class GtdLog():
         :return:
         """
         basic_path = self.log_setting["logPath"]
-        log_file_name = self.get_date() + ".txt"
+        log_file_name = self.get_date() + ".log"
         if os.path.exists(basic_path + log_file_name) is False:
             create_log_file = open(basic_path + log_file_name, "w")
             create_log_file.close()

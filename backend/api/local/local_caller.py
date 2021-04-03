@@ -83,12 +83,21 @@ class LocalCaller:
         try:
             account = param["account"]
             password = param["password"]
-            email = param["email"]
-            user_group = param["userGroup"]
         except KeyError:
             self.log.add_log("LocalCaller: user_sign_up: Your param is incomplete!", 3)
             return False, "param incomplete"
         else:
+            optional_param = ["email", "user_group"]
+            email, user_group = None, "default"
+            try:
+                for key in optional_param:
+                    if key == "email":
+                        email = param["email"]
+                    elif key == "user_group":
+                        user_group = param["user_group"]
+            except KeyError:
+                pass
+
             res, err = self.user_manager.sign_up(account, password, email, user_group)
             if res is False:
                 return False, err

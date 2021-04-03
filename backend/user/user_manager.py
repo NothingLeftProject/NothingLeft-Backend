@@ -24,7 +24,7 @@ class UserManager:
         self.user_info_manager = UserInfoManager(log, setting)
         self.user_permission_manager = UserPermissionManager(log, setting)
 
-    def sign_up(self, account, password, email, user_group="default"):
+    def sign_up(self, account, password, email=None, user_group="default"):
 
         """
         注册用户
@@ -54,7 +54,8 @@ class UserManager:
         user_info = json.load(open("./backend/data/json/user_info_template.json", "r", encoding="utf-8"))
         user_info[0]["account"] = account
         user_info[1]["password"] = password
-        user_info[2]["email"].append(email)
+        if email is not None:
+            user_info[2]["email"].append(email)
         user_info[4]["userGroup"] = user_group
 
         # update user info into database
