@@ -89,14 +89,14 @@ class LocalCaller:
         else:
             optional_param = ["email", "user_group"]
             email, user_group = None, "default"
-            try:
-                for key in optional_param:
+            for key in optional_param:
+                try:
                     if key == "email":
                         email = param["email"]
                     elif key == "user_group":
                         user_group = param["user_group"]
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
 
             res, err = self.user_manager.sign_up(account, password, email, user_group)
             if res is False:
@@ -445,8 +445,8 @@ class LocalCaller:
 
             optional_param = ["description", "tags", "links", "time", "place", "level", "status"]
             desc, tags, links, time, place, level, status = None, [], [], None, None, 0, "wait_classify"
-            try:
-                for key in optional_param:
+            for key in optional_param:
+                try:
                     if key == "description":
                         desc = param["description"]
                     elif key == "tags":
@@ -461,8 +461,8 @@ class LocalCaller:
                         level = param["level"]
                     elif key == "status":
                         status = param["status"]
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
 
             res, err = self.inbox_manager.add_stuff(account, content, desc=desc, tags=tags, links=links, time=time, place=place, level=level, status=status)
             return res, err
@@ -514,16 +514,16 @@ class LocalCaller:
                     return False, err
             optional_param = ["designated_keys", "get_all", "result_type"]
             designated_keys, get_all, result_type = None, False, "list"
-            try:
-                for key in optional_param:
+            for key in optional_param:
+                try:
                     if key == "description":
                         designated_keys = param["designatedKeys"]
                     elif key == "get_all":
                         get_all = param["getAll"]
                     elif key == "result_type":
                         result_type = param["resultType"]
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
 
             res, err = self.inbox_manager.get_many_stuffs(account, stuff_ids, designated_keys=designated_keys,
                                                           get_all=get_all, result_type=result_type)
@@ -552,8 +552,8 @@ class LocalCaller:
 
             optional_param = ["start_index", "end_index", "from_cache", "cache"]
             start_index, end_index, from_cache, cache = None, None, True, True
-            try:
-                for key in optional_param:
+            for key in optional_param:
+                try:
                     if key == "start_index":
                         start_index = param["startIndex"]
                     elif key == "end_index":
@@ -562,8 +562,8 @@ class LocalCaller:
                         from_cache = param["fromCache"]
                     elif key == "cache":
                         cache = param["cache"]
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
             res, err = self.inbox_manager.get_stuff_id_from_condition(account, condition, start_index=start_index,
                                                                       end_index=end_index, from_cache=from_cache,
                                                                       cache=cache)
@@ -592,14 +592,14 @@ class LocalCaller:
 
             optional_param = ["start_index", "end_index"]
             start_index, end_index = None, None
-            try:
-                for key in optional_param:
+            for key in optional_param:
+                try:
                     if key == "start_index":
                         start_index = param["startIndex"]
                     elif key == "end_index":
                         end_index = param["endIndex"]
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
 
             res, err = self.inbox_manager.get_stuff_id_from_condition(account, mode, start_index=start_index,
                                                                       end_index=end_index)
@@ -646,12 +646,12 @@ class LocalCaller:
         else:
             optional_param = ["list_name"]
             list_name = None
-            try:
-                for key in optional_param:
+            for key in optional_param:
+                try:
                     if key == "list_name":
                         list_name = param["listName"]
-            except KeyError:
-                pass
+                except KeyError:
+                    pass
 
             res, err = self.inbox_manager.generate_preset_stuff_list(account, list_name=list_name)
             return res, err
