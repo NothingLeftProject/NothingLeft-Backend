@@ -337,7 +337,7 @@ class InboxManager:
             err = err + "success"
         return result, err
 
-    def get_stuff_id_from_condition(self, account, condition, start_index=None, end_index=None, from_cache=True, cache=True):
+    def get_stuff_id_from_condition(self, account, condition, start_index=None, end_index=None, from_cache=False, cache=True):
 
         """
         根据条件来即时筛选获取stuff_id
@@ -370,15 +370,15 @@ class InboxManager:
             return False, "user-%s does not exist" % account
 
         # start
-        condition_key = list(condition.keys())[0]
+        condition_key = list(condition.keys())[0] # attention: 目前只支持一个条件
         result_list = []
 
         if from_cache:
             result_list = self.memcached_manipulator._get(condition_key+"List")
             if type(result_list) == list:
-                self.log.add_log("InboxManager: get stuff_id_%sList from memcached success", 1)
+                self.log.add_log("InboxManager: get stuff_ids List from memcached success", 1)
             else:
-                self.log.add_log("InboxManager: get stuff_id_%sList from memcached fail", 3)
+                self.log.add_log("InboxManager: get stuff_ids List from memcached fail", 3)
                 return False, "database error or condition wrong or you haven't cache it yet"
         else:
             all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
@@ -387,13 +387,17 @@ class InboxManager:
             )[0]["allIdList"]
 
             for stuff_id in all_stuff_id_list:
-                stuff_info = self.mongodb_manipulator.parse_document_result(
-                    self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                    ["lastOperateTimeStamp", condition_key]
-                )[0]
-                if stuff_info[condition_key] == condition[condition_key]:
-                    self.log.add_log("InboxManager: find a stuff-%s match the condition, add in" % stuff_id, 0)
-                    result_list.append(stuff_id)
+                try:
+                    stuff_info = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                        ["lastOperateTimeStamp", condition_key]
+                    )[0]
+                except IndexError:
+                    pass
+                else:
+                    if stuff_info[condition_key] == condition[condition_key]:
+                        self.log.add_log("InboxManager: find a stuff-%s match the condition, add in" % stuff_id, 0)
+                        result_list.append(stuff_id)
 
             if cache:
                 if self.memcached_manipulator._set(condition_key+"List", result_list):
