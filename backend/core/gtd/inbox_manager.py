@@ -100,7 +100,9 @@ class InboxManager:
             return False, err + "database error"
         else:
             self.log.add_log("InboxManager: add stuff-%s complete" % stuff_id, 1)
-            return True, err + "success"
+            # change preset_list
+            res, err_2 = self.set_many_stuffs_status(account, [stuff_id], status)
+            return True, err + "success; preset_list_change:" + err_2
 
     def modify_stuff(self, account, stuff_id, info):
 
