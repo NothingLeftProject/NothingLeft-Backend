@@ -438,7 +438,7 @@ class InboxManager:
             self.log.add_log("InboxManager: type error with param-end_index", 3)
             return False, "type error with param-end_index"
 
-        self.log.add_log("InboxManager: get_stuff_id in mode-%s from %s to %s start" % mode % start_index % end_index, 1)
+        self.log.add_log("InboxManager: get_stuff_id in mode-%s from %s to %s start" % (mode, start_index, end_index), 1)
         end_index_over = False
 
         # is account exist
