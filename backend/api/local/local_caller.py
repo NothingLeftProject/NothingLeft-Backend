@@ -486,7 +486,7 @@ class LocalCaller:
         else:
             if self.not_root:
                 if self.caller != account:
-                    err = "you are not allowed to mpdify other user's stuff info"
+                    err = "you are not allowed to modify other user's stuff info"
                     return False, err
 
             res, err = self.inbox_manager.modify_stuff(account, stuff_id, info)

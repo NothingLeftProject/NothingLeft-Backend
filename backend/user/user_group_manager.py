@@ -27,7 +27,7 @@ class UserGroupManager:
         :type accounts: list
         :return: bool
         """
-        self.log.add_log("UserGroupManager: try to add users-%s" % accounts + " into user_group-%s" % target_group, 1)
+        self.log.add_log("UserGroupManager: try to add users-%s into user_group-%s" % (accounts, target_group), 1)
         err_add_users = []
 
         if type(accounts) != list:
@@ -58,7 +58,7 @@ class UserGroupManager:
                 user_list.append(account)
                 if self.mongodb_manipulator.update_many_documents("user_group", target_group, {"_id": 1}, {"userList": user_list}) is False:
                     err_add_users.append(account)
-                    self.log.add_log("UserGroupManager: add user-%s" % account + " into user_group-%s" % target_group + " fail, skip", 3)
+                    self.log.add_log("UserGroupManager: add user-%s into user_group-%s fail, skip" % (account, target_group), 3)
                     continue
                 else:
                     self.log.add_log("UserGroupManager: add user-%s" % account + " into user_group-%s" % target_group + " success", 1)

@@ -93,10 +93,10 @@ class UserPermissionManager:
                 else:
                     self.log.add_log("UserPermissionManager: cache permission list fail", 3)
         else:
-            self.log.add_log("UserPermissionManager: try to get permissions list from temple-%s" % from_temple)
+            self.log.add_log("UserPermissionManager: try to get permissions list from temple-%s" % from_temple, 1)
             if from_temple is str:
                 try:
-                    permissions_list = json.load(open("./backend/data/json/permissions_list_temples/%s" % from_temple + ".json", "r", encoding="utf-8"))
+                    permissions_list = json.load(open("./backend/data/json/permissions_list_temples/%s.json" % from_temple, "r", encoding="utf-8"))
                 except IOError:
                     return False, "template-%s does not exist" % from_temple
             else:
