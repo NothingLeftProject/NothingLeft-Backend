@@ -109,3 +109,4 @@
   - stuff_get
   - stuff_get_id_from_condition
   - stuff_delete_many
+  - stuff_get_id_from_preset
