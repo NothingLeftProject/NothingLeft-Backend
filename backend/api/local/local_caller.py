@@ -601,8 +601,8 @@ class LocalCaller:
                 except KeyError:
                     pass
 
-            res, err = self.inbox_manager.get_stuff_id_from_condition(account, mode, start_index=start_index,
-                                                                      end_index=end_index)
+            res, err = self.inbox_manager.get_stuff_id_from_preset(account, mode, start_index=start_index,
+                                                                   end_index=end_index)
             return res, err
 
     def stuff_delete_many(self, param):
