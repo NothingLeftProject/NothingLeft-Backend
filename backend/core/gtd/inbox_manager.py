@@ -4,6 +4,7 @@
 # date: 2020/10/17
 
 import json
+import copy
 from operator import itemgetter
 from backend.database.mongodb import MongoDBManipulator
 from backend.database.memcached import MemcachedManipulator
@@ -541,14 +542,16 @@ class InboxManager:
                 [self.preset_list_name[list_id]]
             )[0][self.preset_list_name[list_id]]
 
-            raw_preset_list = preset_list
+            raw_preset_list = copy.deepcopy(preset_list) # attention: to prevent raw_preset_list has the same id with preset_list
 
             for stuff_id in stuff_ids:
                 try:
                     preset_list.remove(stuff_id)
                 except ValueError:
-                    pass
+                    self.log.add_log("InboxManager: stuff-%s is not in preset_list-%s" % (stuff_id, list_id), 0)
+
             if preset_list != raw_preset_list:
+                self.log.add_log("InboxManager: preset_list has changed, update", 1)
                 if not self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": list_id}, {self.preset_list_name[list_id]: preset_list}):
                     self.log.add_log("InboxManager: fail to update %s while deleting stuffs" % self.preset_list_name[list_id], 3)
                     err = "fail to update %s!" % self.preset_list_name[list_id]
