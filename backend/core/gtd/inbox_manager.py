@@ -243,7 +243,7 @@ class InboxManager:
         :return: bool, str
         """
         self.log.add_log("InboxManager: get user-%s 's many stuffs in mode-%s and get_all is %s start" % (account, result_type, get_all), 1)
-        skip_ids = []
+        skip_ids, err = [], ""
 
         # is param in law
         if type(stuff_ids) != list and get_all is False:
@@ -258,26 +258,24 @@ class InboxManager:
             self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
             return False, "user-%s does not exist" % account
 
-        # get allIdList
+        # get allIdList(一个函数内多次调用，使用这个)
         all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
             self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
             ["allIdList"]
         )[0]["allIdList"]
 
         # get
-        if designated_keys is None:
-            designated_keys = self.stuff_standard_attributes_list
-
         if result_type == "dict":
             result = {}
             if get_all:
                 if self.setting["inboxSettings"]["allowGetAllStuffsInDict"]:
                     self.log.add_log("InboxManager: get_all stuffs in dict mode, which means spend a long time!", 2)
-                    for stuff_id in all_stuff_id_list:
-                        result["stuff_id"] = self.mongodb_manipulator.parse_document_result(
+                    for stuff_id in all_stuff_id_list: # attention: here is the all_stuff_id_list
+                        stuff_info = self.mongodb_manipulator.parse_document_result(
                             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                            designated_keys
+                            self.stuff_standard_attributes_list
                         )[0]
+                        result[stuff_id] = stuff_info
                 else:
                     self.log.add_log("InboxManager: it's not allowed to get all stuffs in dict mode", 2)
                     return False, "it's not allowed to get all stuffs in dict mode"
@@ -288,10 +286,22 @@ class InboxManager:
                         skip_ids.append(stuff_ids)
                         continue
 
-                    result["stuff_id"] = self.mongodb_manipulator.parse_document_result(
+                    raw_stuff_info = self.mongodb_manipulator.parse_document_result(
                         self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                        designated_keys
+                        self.stuff_standard_attributes_list
                     )[0]
+                    if designated_keys is not None:
+                        stuff_info = {}
+                        for key in designated_keys:
+                            try:
+                                stuff_info[key] = raw_stuff_info[key]
+                            except KeyError:
+                                self.log.add_log("InboxManager: can't find key-%s when get_stuff stuff-%s, skip" % (key, stuff_id), 3)
+                                err = "can't find key-%s when get_stuff stuff-%s, skip" % (key, stuff_id)
+                                continue
+                    else:
+                        stuff_info = raw_stuff_info
+                    result[stuff_id] = stuff_info
 
         else:
             if get_all:
@@ -304,16 +314,27 @@ class InboxManager:
                         skip_ids.append(stuff_ids)
                         continue
 
-                    result.append(
-                        self.mongodb_manipulator.parse_document_result(
-                            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
-                            designated_keys
-                    )[0])
+                    raw_stuff_info = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                        self.stuff_standard_attributes_list
+                    )[0]
+                    if designated_keys is not None:
+                        stuff_info = {}
+                        for key in designated_keys:
+                            try:
+                                stuff_info[key] = raw_stuff_info[key]
+                            except KeyError:
+                                self.log.add_log("InboxManager: can't find key-%s when get_stuff stuff-%s, skip" % (key, stuff_id), 3)
+                                err = "can't find key-%s when get_stuff stuff-%s, skip" % (key, stuff_id)
+                                continue
+                    else:
+                        stuff_info = raw_stuff_info
+                    result.append(stuff_info)
 
         if skip_ids:
             return True, "fail with id-%s" % skip_ids
         else:
-            err = "success"
+            err = err + "success"
         return result, err
 
     def get_stuff_id_from_condition(self, account, condition, start_index=None, end_index=None, from_cache=True, cache=True):
