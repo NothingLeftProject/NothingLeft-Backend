@@ -106,3 +106,5 @@
 - 测试修复并pass了以下功能：
   - stuff_add
   - stuff_modify
+  - stuff_get
+  - stuff_get_id_from_condition
