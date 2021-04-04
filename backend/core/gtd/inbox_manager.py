@@ -23,6 +23,9 @@ class InboxManager:
             "belongingClassificationId", "hasCustomAttribute", "customizedAttributes",
             "events", "eventsStatus", "isSplitAsEvent"
         ]
+        self.preset_list_name = [
+            "allIdList", "waitClassifyList", "waitOrganizeList", "waitExecuteList", "achievedList", "puttedOffList"
+        ]
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
         self.memcached_manipulator = MemcachedManipulator(log, setting)
@@ -501,7 +504,7 @@ class InboxManager:
         :type stuff_ids: list
         :return: bool, str
         """
-        self.log.add_log("InboxManager: delete user-%s 's many stuffs" % account, 1)
+        self.log.add_log("InboxManager: delete user-%s 's many stuffs-%s" % (account, stuff_ids), 1)
         skip_ids = []
         err = ""
 
@@ -515,24 +518,40 @@ class InboxManager:
             self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
             return False, "user-%s does not exist" % account
 
-        # start
+        # get allIdList
         all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
             self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
             ["allIdList"]
         )[0]["allIdList"]
+
+        # main
         for stuff_id in stuff_ids:
             if stuff_id not in all_stuff_id_list:
                 self.log.add_log("InboxManager: stuff-%s does not exist, skip", 2)
                 stuff_ids.remove(stuff_id)
                 skip_ids.append(stuff_id)
                 continue
-            else:
-                self.mongodb_manipulator.delete_many_documents("stuff", account, {"_id": stuff_id})
-                all_stuff_id_list.remove(stuff_id)
 
-        if not self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 0}, {"allIdList": all_stuff_id_list}):
-            self.log.add_log("InboxManager: fail to update allIdList while deleting stuffs", 3)
-            err = "fail to update allIdList!"
+            self.mongodb_manipulator.delete_many_documents("stuff", account, {"_id": stuff_id})
+
+        # delete id in the preset_lists
+        for list_id in range(0, 6):
+            preset_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"_id": list_id}, 1),
+                [self.preset_list_name[list_id]]
+            )[0][self.preset_list_name[list_id]]
+
+            raw_preset_list = preset_list
+
+            for stuff_id in stuff_ids:
+                try:
+                    preset_list.remove(stuff_id)
+                except ValueError:
+                    pass
+            if preset_list != raw_preset_list:
+                if not self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": list_id}, {self.preset_list_name[list_id]: preset_list}):
+                    self.log.add_log("InboxManager: fail to update %s while deleting stuffs" % self.preset_list_name[list_id], 3)
+                    err = "fail to update %s!" % self.preset_list_name[list_id]
 
         if skip_ids:
             if len(skip_ids) == len(stuff_ids):
