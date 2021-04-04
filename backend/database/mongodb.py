@@ -20,13 +20,13 @@ class MongoDBManipulator:
         self.collection_names_list = {}
 
         try:
-            self.memcached_server_address = self.mongodb_settings["address"][database_name]
+            self.mongodb_server_address = self.mongodb_settings["address"][database_name]
         except KeyError:
             self.log.add_log("MongoDB: Can't find mongodb server named: "
                              + database_name + "'s address in the settings, please check it.", 3)
         else:
             self.server = pymongo.MongoClient(
-                [self.memcached_server_address]
+                [self.mongodb_server_address]
             )
             self.get_database_names_list()
 
