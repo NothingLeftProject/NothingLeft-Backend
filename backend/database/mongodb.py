@@ -261,7 +261,7 @@ class MongoDBManipulator:
     def parse_document_result(self, documents, targets, debug=True):
 
         """
-        解析搜索到的文档结果
+        解析搜索到的文档结果(返回包含targets中任一一个的document)
         :param documents: 查找结果
         :param targets: 查找目标
         :param debug: 是否输出哪些keys没有被找到
