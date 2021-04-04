@@ -551,7 +551,7 @@ class LocalCaller:
                     return False, err
 
             optional_param = ["start_index", "end_index", "from_cache", "cache"]
-            start_index, end_index, from_cache, cache = None, None, True, True
+            start_index, end_index, from_cache, cache = None, None, False, True
             for key in optional_param:
                 try:
                     if key == "start_index":
