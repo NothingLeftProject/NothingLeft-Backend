@@ -516,7 +516,7 @@ class LocalCaller:
             designated_keys, get_all, result_type = None, False, "list"
             for key in optional_param:
                 try:
-                    if key == "description":
+                    if key == "designated_keys":
                         designated_keys = param["designatedKeys"]
                     elif key == "get_all":
                         get_all = param["getAll"]
