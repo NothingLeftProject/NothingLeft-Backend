@@ -12,6 +12,7 @@
     "status": "",
     "belongingClassificationId": "",
     "hasCustomAttribute": false,
+    "customizedAttributes": [],
     "events": [],
     "eventsStatus": [],
     "isSplitAsEvent": false

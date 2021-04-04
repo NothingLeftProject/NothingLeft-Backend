@@ -20,7 +20,9 @@ class InboxManager:
         self.stuff_standard_attributes_list = [
             "content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags",
             "links", "time", "place", "level", "status",
-            "belongingClassificationId", "hasCustomAttribute"]
+            "belongingClassificationId", "hasCustomAttribute", "customizedAttributes",
+            "events", "eventsStatus", "isSplitAsEvent"
+        ]
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
         self.memcached_manipulator = MemcachedManipulator(log, setting)
@@ -110,7 +112,7 @@ class InboxManager:
         :type info: dict
         :return: bool, str
         """
-        self.log.add_log("InboxManager: modify user-%s 's stuff-%s info start" % account, stuff_id, 1)
+        self.log.add_log("InboxManager: modify user-%s 's stuff-%s info start" % (account, stuff_id), 1)
         skip_keys = []
 
         # is param in law
@@ -129,16 +131,22 @@ class InboxManager:
             ["allIdList"]
         )[0]["allIdList"]
         if stuff_id not in stuff_id_list:
-            self.log.add_log("InboxManager: stuff-%s does not exist in user-%s 's inbox" % stuff_id, account, 2)
+            self.log.add_log("InboxManager: stuff-%s does not exist in user-%s 's inbox" % (stuff_id, account), 2)
             return False, "stuff-%s does not exist" % stuff_id
 
-        # update info to database
+        # main
         stuff_info = self.mongodb_manipulator.parse_document_result(
             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
             self.stuff_standard_attributes_list
         )[0]
+        if stuff_info["hasCustomAttribute"]:
+            stuff_info = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                self.stuff_standard_attributes_list + stuff_info["customizedAttributes"]
+            )[0]
+
         need_updated_keys = list(info.keys())
-        stuff_info_keys = list(info.keys())
+        stuff_info_keys = list(stuff_info.keys())
         for key in need_updated_keys:
             if key not in stuff_info_keys:
                 self.log.add_log("InboxManager: key-%s does not allow or not exist to operate, skip" % key, 2)
@@ -207,6 +215,7 @@ class InboxManager:
                 # change hasCustomAttribute
                 stuff_info["hasCustomAttribute"] = True
                 for index in range(0, len(keys)):
+                    stuff_info["customizedAttributes"].append(keys[index])
                     stuff_info[keys[index]] = values[index]
                 if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, stuff_info) is False:
                     self.log.add_log("InboxManager: fail to add custom attributes for stuff-%s because of database error" % account, 3)
@@ -233,7 +242,7 @@ class InboxManager:
         :type get_all: bool
         :return: bool, str
         """
-        self.log.add_log("InboxManager: get user-%s 's many stuffs in mode-%s and get_all is %s start" % account, result_type, get_all, 1)
+        self.log.add_log("InboxManager: get user-%s 's many stuffs in mode-%s and get_all is %s start" % (account, result_type, get_all), 1)
         skip_ids = []
 
         # is param in law
@@ -398,7 +407,7 @@ class InboxManager:
             self.log.add_log("InboxManager: type error with param-end_index", 3)
             return False, "type error with param-end_index"
 
-        self.log.add_log("InboxManager: get_stuff_id in mode-%s from %s to %s start" % mode, start_index, end_index, 1)
+        self.log.add_log("InboxManager: get_stuff_id in mode-%s from %s to %s start" % mode % start_index % end_index, 1)
         end_index_over = False
 
         # is account exist
