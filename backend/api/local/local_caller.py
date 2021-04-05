@@ -746,7 +746,6 @@ class LocalCaller:
             account = param["account"]
             stuff_ids = param["stuffIds"]
             keys = param["keys"]
-            values = param["values"]
         except KeyError:
             self.log.add_log("LocalCaller: stuff_delete_many_custom_attribute: Your param is incomplete", 3)
             return False, "param incomplete"
@@ -756,7 +755,7 @@ class LocalCaller:
                     err = "you are not allowed to modify other user's info"
                     return False, err
 
-            res, err = self.inbox_manager.delete_many_stuffs_custom_attribute(account, stuff_ids, keys, values)
+            res, err = self.inbox_manager.delete_many_stuffs_custom_attribute(account, stuff_ids, keys)
             return res, err
 
     def stuff_add_events(self, param):
