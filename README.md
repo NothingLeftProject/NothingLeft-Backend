@@ -110,3 +110,6 @@
   - stuff_get_id_from_condition
   - stuff_delete_many
   - stuff_get_id_from_preset
+- 测试修复pass还更新了stuff_generate_preset_list
+- 还修了一堆问题
+- 更新新的预设列表，优化算法 
