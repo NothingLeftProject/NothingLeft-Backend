@@ -232,14 +232,83 @@ class InboxManager:
                 stuff_info = self.mongodb_manipulator.parse_document_result(
                     self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
                     self.stuff_standard_attributes_list   
-                )
+                )[0]
                 # change hasCustomAttribute
                 stuff_info["hasCustomAttribute"] = True
                 for index in range(0, len(keys)):
                     stuff_info["customizedAttributes"].append(keys[index])
                     stuff_info[keys[index]] = values[index]
                 if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, stuff_info) is False:
-                    self.log.add_log("InboxManager: fail to add custom attributes for stuff-%s because of database error" % account, 3)
+                    self.log.add_log("InboxManager: fail to add custom attributes for stuff-%s because of database error" % stuff_id, 3)
+                    skip_ids.append(stuff_id)
+                    continue
+
+        if skip_ids:
+            err= "fail with id-%s" % skip_ids
+        else:
+            err = "success"
+        return True, err
+
+    def delete_many_stuffs_custom_attribute(self, account, stuff_ids, keys, values):
+
+        """
+        为多个stuff删除多个自定义属性
+        :param account: 用户名
+        :param stuff_ids:
+        :param keys: 自定义属性名称
+        :param values: 自定义属性值
+        :type stuff_ids: list
+        :return:
+        """
+        self.log.add_log("InboxManager: delete many stuffs custom attribute form user-%s" % account, 1)
+        skip_ids = []
+
+        # is param in law
+        if type(stuff_ids) != list:
+            self.log.add_log("InboxManager: type error, stuff_ids must be a list", 3)
+            return False, "type error, stuff_ids must be a list"
+        if type(keys) != list:
+            self.log.add_log("InboxManager: type error, keys must be a list", 3)
+            return False, "type error, keys must be a list"
+        if type(values) != list:
+            self.log.add_log("InboxManager: type error, values must be a list", 3)
+            return False, "type error, stuff_ids must be a list"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # get allIdList
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
+
+        # delete
+        for stuff_id in stuff_ids:
+            if stuff_id not in all_stuff_id_list:
+                self.log.add_log("InboxManager: can't find stuff-%s in all_stuff_id_list, skip" % stuff_id, 2)
+                skip_ids.append(stuff_ids)
+                continue
+            else:
+                # get raw stuff info
+                stuff_info = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                    self.stuff_standard_attributes_list
+                )[0]
+                # change hasCustomAttribute
+                if keys == stuff_info["customizedAttributes"]:
+                    stuff_info["hasCustomAttribute"] = False
+
+                for index in range(0, len(keys)):
+                    try:
+                        stuff_info["customizedAttributes"].remove(keys[index])
+                        del stuff_info[keys[index]]
+                    except (ValueError, KeyError):
+                        self.log.add_log("InboxManager: key-%s does not exist, can't delete" % keys[index], 3)
+                if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, stuff_info) is False:
+                    self.log.add_log("InboxManager: fail to delete custom attributes for stuff-%s because of database error" % stuff_id, 3)
                     skip_ids.append(stuff_id)
                     continue
 

@@ -683,31 +683,6 @@ class LocalCaller:
             res, err = self.inbox_manager.set_many_stuffs_status(account, stuff_ids, status)
             return res, err
 
-    def stuff_set_many_level(self, param):
-
-        """
-        设置多个stuff的状态
-        :param param:
-        :return:
-        """
-        self.log.add_log("LocalCaller: stuff_set_many_level", 1)
-
-        try:
-            account = param["account"]
-            stuff_ids = param["stuffIds"]
-            level = param["level"]
-        except KeyError:
-            self.log.add_log("LocalCaller: stuff_set_many_level: Your param is incomplete", 3)
-            return False, "param incomplete"
-        else:
-            if self.not_root:
-                if self.caller != account:
-                    err = "you are not allowed to modify other user's stuff info"
-                    return False, err
-
-            res, err = self.inbox_manager.set_many_stuffs_level(account, stuff_ids, level)
-            return res, err
-
     def stuff_is_exist(self, param):
 
         """
@@ -756,6 +731,32 @@ class LocalCaller:
                     return False, err
 
             res, err = self.inbox_manager.add_many_stuffs_custom_attribute(account, stuff_ids, keys, values)
+            return res, err
+
+    def stuff_delete_many_custom_attribute(self, param):
+
+        """
+        删除多个stuff的多个自定义属性
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_delete_many_custom_attribute", 1)
+
+        try:
+            account = param["account"]
+            stuff_ids = param["stuffIds"]
+            keys = param["keys"]
+            values = param["values"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_delete_many_custom_attribute: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allowed to modify other user's info"
+                    return False, err
+
+            res, err = self.inbox_manager.delete_many_stuffs_custom_attribute(account, stuff_ids, keys, values)
             return res, err
 
     def stuff_add_events(self, param):
