@@ -249,14 +249,13 @@ class InboxManager:
             err = "success"
         return True, err
 
-    def delete_many_stuffs_custom_attribute(self, account, stuff_ids, keys, values):
+    def delete_many_stuffs_custom_attribute(self, account, stuff_ids, keys):
 
         """
         为多个stuff删除多个自定义属性
         :param account: 用户名
         :param stuff_ids:
         :param keys: 自定义属性名称
-        :param values: 自定义属性值
         :type stuff_ids: list
         :return:
         """
@@ -270,9 +269,6 @@ class InboxManager:
         if type(keys) != list:
             self.log.add_log("InboxManager: type error, keys must be a list", 3)
             return False, "type error, keys must be a list"
-        if type(values) != list:
-            self.log.add_log("InboxManager: type error, values must be a list", 3)
-            return False, "type error, stuff_ids must be a list"
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
