@@ -300,7 +300,7 @@ class InboxManager:
                 for index in range(0, len(keys)):
                     try:
                         stuff_info["customizedAttributes"].remove(keys[index])
-                        del stuff_info[keys[index]]
+                        stuff_info.pop(keys[index])
                     except (ValueError, KeyError):
                         self.log.add_log("InboxManager: key-%s does not exist, can't delete" % keys[index], 3)
                 if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, stuff_info) is False:
