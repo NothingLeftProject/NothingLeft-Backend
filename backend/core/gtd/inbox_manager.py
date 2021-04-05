@@ -582,12 +582,13 @@ class InboxManager:
             err = err + "success"
         return res, err
 
-    def generate_preset_stuff_list(self, account, list_name=None):
+    def generate_preset_stuff_list(self, account, list_name=None, update=False):
 
         """
         生成预设列表
         :param account: 账户名
         :param list_name: 要生成的列表的名称
+        :param update: 是否更新到数据库
         :type list_name: list
         :return: bool, str
         """
@@ -648,6 +649,15 @@ class InboxManager:
                     result_list[now_list] = []
                     result_list[now_list].append(i[1])
 
+        if update:
+            self.log.add_log("InboxManager: update is True, update the preset list", 1)
+            if result_list:
+                for now_list in list(result_list.keys()):
+                    self.log.add_log("InboxManager: updating preset_list-%s" % now_list, 0)
+                    self.mongodb_manipulator.update_many_documents("stuff", account,
+                                                                   {"_id": self.preset_list_name.index(now_list)},
+                                                                   {now_list: result_list[now_list]})
+
         if skip_lists or not generated_list:
             err = "fail with this request list-%s which not exist or already generated just now" % skip_lists
         else:
@@ -673,7 +683,7 @@ class InboxManager:
             self.log.add_log("InboxManager: type error with param-status", 3)
             return False, "type error with param-status"
 
-        self.log.add_log("InboxManager: set user-%s 's many stuffs to status-%s" % account, status, 1)
+        self.log.add_log("InboxManager: set user-%s 's many stuffs to status-%s" % (account, status), 1)
         skip_ids = []
 
         # is account exist

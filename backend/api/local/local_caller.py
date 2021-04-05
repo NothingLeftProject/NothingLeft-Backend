@@ -644,16 +644,18 @@ class LocalCaller:
             self.log.add_log("LocalCaller: stuff_generate_preset_list: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
-            optional_param = ["list_name"]
-            list_name = None
+            optional_param = ["list_name", "update"]
+            list_name, update = None, False
             for key in optional_param:
                 try:
                     if key == "list_name":
                         list_name = param["listName"]
+                    elif key == "update":
+                        update = param["update"]
                 except KeyError:
                     pass
 
-            res, err = self.inbox_manager.generate_preset_stuff_list(account, list_name=list_name)
+            res, err = self.inbox_manager.generate_preset_stuff_list(account, list_name=list_name, update=update)
             return res, err
 
     def stuff_set_many_status(self, param):
