@@ -22,6 +22,7 @@
   "stuff_get_id_from_condition",
   "stuff_get_id_from_preset",
   "stuff_delete_many",
+  "stuff_generate_preset_list",
   "stuff_set_many_status",
   "stuff_set_many_level",
   "stuff_is_exist",
