@@ -13,6 +13,7 @@
   "stuff_set_many_level",
   "stuff_is_exist",
   "stuff_add_many_custom_attribute",
+  "stuff_delete_many_custom_attribute",
   "stuff_add_events",
   "stuff_remove_events",
   "stuff_set_event_status"
