@@ -696,6 +696,7 @@ class InboxManager:
             if status == s:
                 list_id = self.status_list.index(status)+1
                 list_name = self.preset_list_name[list_id]
+                self.log.add_log("InboxManager: add stuffs-%s to the preset_list-%s" % (stuff_ids, list_name), 0)
                 preset_list = self.mongodb_manipulator.parse_document_result(
                     self.mongodb_manipulator.get_document("stuff", account, {list_name: 1}, 2),
                     [list_name]
@@ -958,7 +959,7 @@ class InboxManager:
         :param verify_account: 效验用户名是否存在(不在api中开放)
         :return: bool
         """
-        self.log.add_log("InboxManager: is stuff-%s exist in user-%s" % stuff_id, account, 1)
+        self.log.add_log("InboxManager: is stuff-%s exist in user-%s" % (stuff_id, account), 1)
 
         if verify_account:
             # is account exist
