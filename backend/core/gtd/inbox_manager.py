@@ -691,57 +691,26 @@ class InboxManager:
             self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
             return False, "user-%s does not exist" % account
 
-        # start
-        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
-            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
-            ["allIdList"]
-        )[0]["allIdList"]
-
-        # update preset list
-        if status == "wait_classify":
-            preset_list = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("stuff", account, {"waitClassifyList": 1}, 2),
-                ["waitClassifyList"]
-            )[0]["waitClassifyList"]
-            preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
-            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 1}, {"waitClassifyList": preset_list})
-        elif status == "wait_organize":
-            preset_list = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("stuff", account, {"waitOrganizeList": 1}, 2),
-                ["waitOrganizeList"]
-            )[0]["waitOrganizeList"]
-            preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
-            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 2}, {"waitOrganizeList": preset_list})
-        elif status == "wait_execute":
-            preset_list = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("stuff", account, {"waitExecuteList": 1}, 2),
-                ["waitExecuteList"]
-            )[0]["waitExecuteList"]
-            preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
-            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 3}, {"waitExecuteList": preset_list})
-        elif status == "achieved":
-            preset_list = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("stuff", account, {"achievedList": 1}, 2),
-                ["achievedList"]
-            )[0]["achievedList"]
-            preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
-            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 4}, {"achievedList": preset_list})
-        elif status == "put_off":
-            preset_list = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("stuff", account, {"puttedOffList": 1}, 2),
-                ["puttedOffList"]
-            )[0]["puttedOffList"]
-            preset_list = stuff_ids + preset_list  # might error here with the time order, please check it
-            self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": 5}, {"puttedOffList": preset_list})
+        # main
+        for s in self.status_list:
+            if status == s:
+                list_id = self.status_list.index(status)+1
+                list_name = self.preset_list_name[list_id]
+                preset_list = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("stuff", account, {list_name: 1}, 2),
+                    [list_name]
+                )[0][list_name]
+                preset_list = stuff_ids + preset_list
+                self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": list_id}, {list_name: preset_list})
 
         for stuff_id in stuff_ids:
-            if stuff_id not in all_stuff_id_list:
+            if self.is_stuff_exist(account, stuff_id, verify_account=False) is False:
                 self.log.add_log("InboxManager: can't find stuff-%s, skip" % stuff_id, 2)
                 skip_ids.append(stuff_id)
                 continue
             if self.modify_stuff(account, stuff_id, {"status": status}) is False:
                 skip_ids.append(stuff_id)
-                self.log.add_log("InboxManager: stuff-%s set status-%s fail" % stuff_id, status, 3)
+                self.log.add_log("InboxManager: stuff-%s set status-%s fail" % (stuff_id, status), 3)
 
         if skip_ids:
             if len(skip_ids) == len(stuff_ids):
