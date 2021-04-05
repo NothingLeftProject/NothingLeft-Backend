@@ -579,8 +579,7 @@ class InboxManager:
         self.log.add_log("InboxManager: generate user-%s 's preset stuff list" % account, 1)
         skip_lists = []
         generated_list = []
-        sec_stage_process_list = {}
-        result_list = []
+        result_list = {}
 
         # is param in law
         if type(list_name) != list and list_name is not None:
@@ -602,48 +601,53 @@ class InboxManager:
                 self.log.add_log("InboxManager: preset_list-%s does not exist", 2)
                 skip_lists.append(now_list)
                 continue
-            else:
-                if now_list in generated_list:
-                    skip_lists.append(now_list)
-                    self.log.add_log("InboxManager: preset_list-%s already generated just now" % list_name, 2)
-                    continue
-                generated_list.append(now_list)
+            if now_list in generated_list:
+                skip_lists.append(now_list)
+                self.log.add_log("InboxManager: preset_list-%s already generated just now" % list_name, 2)
+                continue
+            generated_list.append(now_list)
 
-                raw_list = self.mongodb_manipulator.parse_document_result(
-                    self.mongodb_manipulator.get_document("stuff", account, mode=0),
-                    ["stuffId", "lastOperateTimeStamp", "status"]
-                )
-                if now_list == "allIdList":
-                    for event in raw_list:
+            self.log.add_log("InboxManager: generating the preset_list-%s" % now_list, 1)
+            sec_stage_process_list = {}
+            raw_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, mode=0),
+                ["stuffId", "lastOperateTimeStamp", "status"]
+            )
+
+            if now_list == "allIdList":
+                for event in raw_list:
+                    self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
+                    sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
+            elif now_list == "waitClassifyList":
+                for event in raw_list:
+                    if event["status"] == "wait_classify":
+                        self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
+                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
+            elif now_list == "waitOrganizeList":
+                for event in raw_list:
+                    if event["status"] == "wait_organize":
+                        self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
+                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
+            elif now_list == "waitExecuteList":
+                for event in raw_list:
+                    if event["status"] == "wait_execute":
+                        self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
+                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
+            elif now_list == "achievedList":
+                for event in raw_list:
+                    if event["status"] == "achieved":
+                        self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
                         sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
 
-                elif now_list == "waitClassifyList":
-                    for event in raw_list:
-                        if event["status"] != "wait_classify":
-                            continue
-                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
+            sorted_result = sorted(sec_stage_process_list.items(), key=itemgetter(0), reverse=True)
+            for i in sorted_result:
+                try:
+                    result_list[now_list].append(i[1])
+                except KeyError:
+                    result_list[now_list] = []
+                    result_list[now_list].append(i[1])
 
-                elif now_list == "waitOrganizeList":
-                    for event in raw_list:
-                        if event["status"] != "wait_organize":
-                            continue
-                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
-                elif now_list == "waitExecuteList":
-                    for event in raw_list:
-                        if event["status"] != "wait_execute":
-                            continue
-                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
-                elif now_list == "achievedList":
-                    for event in raw_list:
-                        if event["status"] != "achieved":
-                            continue
-                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
-
-                sorted_result = sorted(sec_stage_process_list.items(), key=itemgetter(0), reverse=True)
-                for i in sorted_result:
-                    result_list.append(i[1])
-
-        if skip_lists or generated_list:
+        if skip_lists or not generated_list:
             err = "fail with this request list-%s which not exist or already generated just now" % skip_lists
         else:
             err = "success"
