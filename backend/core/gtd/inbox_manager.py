@@ -25,8 +25,23 @@ class InboxManager:
             "events", "eventsStatus", "isSplitAsEvent"
         ]
         self.preset_list_name = [
-            "allIdList", "waitClassifyList", "waitOrganizeList", "waitExecuteList", "achievedList", "puttedOffList"
+            "allIdList", "waitClassifyList", "waitOrganizeList", "waitExecuteList", "achievedList", "puttedOffList",
+            "doneList", "failList", "cancelList"
         ]
+        self.status_list = [
+            "wait_classify", "wait_organize", "wait_execute", "achieved", "putted_off", "done", "fail", "cancel"
+        ]
+        self.list_status_mapping = {
+            "allIdList": None,
+            "waitClassifyList": "wait_classify",
+            "waitOrganizeList": "wait_organize",
+            "waitExecuteList": "wait_execute",
+            "achievedList": "achieved",
+            "puttedOffList": "putted_off",
+            "doneList": "done",
+            "failList": "fail",
+            "cancelList": "cancel"
+        }
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
         self.memcached_manipulator = MemcachedManipulator(log, setting)
@@ -536,7 +551,7 @@ class InboxManager:
             self.mongodb_manipulator.delete_many_documents("stuff", account, {"_id": stuff_id})
 
         # delete id in the preset_lists
-        for list_id in range(0, 6):
+        for list_id in range(0, 10):
             preset_list = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("stuff", account, {"_id": list_id}, 1),
                 [self.preset_list_name[list_id]]
@@ -591,16 +606,16 @@ class InboxManager:
             self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
             return False, "user-%s does not exist" % account
 
-        # start
-        all_preset_list_name = ["allIdList", "waitClassifyList", "waitOrganizeList", "waitExecuteList", "achievedList"]
+        # main
         if list_name is None:
-            list_name = all_preset_list_name
+            list_name = self.preset_list_name
 
         for now_list in list_name:
-            if now_list not in all_preset_list_name:
-                self.log.add_log("InboxManager: preset_list-%s does not exist", 2)
-                skip_lists.append(now_list)
-                continue
+            if list_name is not None:
+                if now_list not in self.preset_list_name:
+                    self.log.add_log("InboxManager: preset_list-%s does not exist", 2)
+                    skip_lists.append(now_list)
+                    continue
             if now_list in generated_list:
                 skip_lists.append(now_list)
                 self.log.add_log("InboxManager: preset_list-%s already generated just now" % list_name, 2)
@@ -614,30 +629,16 @@ class InboxManager:
                 ["stuffId", "lastOperateTimeStamp", "status"]
             )
 
-            if now_list == "allIdList":
-                for event in raw_list:
-                    self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
-                    sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
-            elif now_list == "waitClassifyList":
-                for event in raw_list:
-                    if event["status"] == "wait_classify":
+            for i in self.preset_list_name:
+                if now_list == "allIdList":
+                    for event in raw_list:
                         self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
                         sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
-            elif now_list == "waitOrganizeList":
-                for event in raw_list:
-                    if event["status"] == "wait_organize":
-                        self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
-                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
-            elif now_list == "waitExecuteList":
-                for event in raw_list:
-                    if event["status"] == "wait_execute":
-                        self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
-                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
-            elif now_list == "achievedList":
-                for event in raw_list:
-                    if event["status"] == "achieved":
-                        self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
-                        sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
+                elif now_list == i:
+                    for event in raw_list:
+                        if event["status"] == self.list_status_mapping[i]:
+                            self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
+                            sec_stage_process_list[int(event["lastOperateTimeStamp"])] = event["stuffId"]
 
             sorted_result = sorted(sec_stage_process_list.items(), key=itemgetter(0), reverse=True)
             for i in sorted_result:
