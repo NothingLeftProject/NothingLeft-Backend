@@ -4,5 +4,8 @@
   {"_id": 2, "waitOrganizeList": []},
   {"_id": 3, "waitExecuteList": []},
   {"_id": 4, "achievedList": []},
-  {"_id": 5, "puttedOffList": []}
+  {"_id": 5, "puttedOffList": []},
+  {"_id": 6, "doneList": []},
+  {"_id": 7, "failList": []},
+  {"_id": 8, "cancelList": []}
 ]
