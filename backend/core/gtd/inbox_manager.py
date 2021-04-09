@@ -293,6 +293,7 @@ class InboxManager:
                     self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
                     self.stuff_standard_attributes_list
                 )[0]
+                print(stuff_info)
                 # change hasCustomAttribute
                 if keys == stuff_info["customizedAttributes"]:
                     stuff_info["hasCustomAttribute"] = False
@@ -301,7 +302,7 @@ class InboxManager:
                     try:
                         stuff_info["customizedAttributes"].remove(keys[index])
                         stuff_info.pop(keys[index])
-                    except (ValueError, KeyError):
+                    except (ValueError, KeyError):  # 日后有时间再完善一下吧，都找不到了，还success
                         self.log.add_log("InboxManager: key-%s does not exist, can't delete" % keys[index], 3)
                 if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, stuff_info) is False:
                     self.log.add_log("InboxManager: fail to delete custom attributes for stuff-%s because of database error" % stuff_id, 3)
