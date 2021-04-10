@@ -120,3 +120,4 @@
   - stuff_get_event_status
   - stuff_remove_events
   - stuff_remove_event_status
+- AchievedPoint: 测试完基本的InboxManager功能
