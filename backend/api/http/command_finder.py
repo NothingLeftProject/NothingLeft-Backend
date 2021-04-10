@@ -43,5 +43,6 @@ class CommandFinder:
             "stuff_delete_many_custom_attribute": self.local_caller.stuff_delete_many_custom_attribute,
             "stuff_add_events": self.local_caller.stuff_add_events,
             "stuff_remove_events": self.local_caller.stuff_remove_events,
-            "stuff_set_event_status": self.local_caller.stuff_set_event_status
+            "stuff_set_event_status": self.local_caller.stuff_set_event_status,
+            "stuff_get_event_status": self.local_caller.stuff_get_event_status
         }
