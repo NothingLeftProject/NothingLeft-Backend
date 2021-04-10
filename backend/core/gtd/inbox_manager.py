@@ -978,6 +978,8 @@ class InboxManager:
         :type end_index: int
         :return: bool, str
         """
+        self.log.add_log("InboxManager: set user-%s 's event-%s:%s to status-%s" % (account, start_index, end_index, status), 1)
+
         # is param in law
         if type(start_index) != int:
             self.log.add_log("InboxManager: type error with param-start_index", 3)
@@ -985,8 +987,6 @@ class InboxManager:
         if type(end_index) != int:
             self.log.add_log("InboxManager: type error with param-end_index", 3)
             return False, "type error with param-end_index"
-
-        self.log.add_log("InboxManager: set user-%s 's event-%s:%s to status-%s" % (account, start_index, end_index, status), 1)
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
@@ -1026,6 +1026,54 @@ class InboxManager:
             else:
                 self.log.add_log("InboxManager: fail to set event status because of dabase error", 3)
                 return False, "database error"
+
+    def get_event_status(self, account, stuff_id, start_index, end_index):
+
+        """
+        获取event的状态
+        :param account: 用户名
+        :param stuff_id:
+        :param start_index: 开始index
+        :param end_index: 结束index
+        :return: bool/str, str
+        """
+        self.log.add_log("InboxManager: get user-%s 's event-%s:%s's status" % (account, start_index, end_index), 1)
+        # is param in law
+        if type(start_index) != int:
+            self.log.add_log("InboxManager: type error with param-start_index", 3)
+            return False, "type error with param-start_index"
+        if type(end_index) != int:
+            self.log.add_log("InboxManager: type error with param-end_index", 3)
+            return False, "type error with param-end_index"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # is stuff exist
+        if self.is_stuff_exist(account, stuff_id, verify_account=False) is False:
+            self.log.add_log("InboxManager: stuff-%s is not exist, quit" % stuff_id, 3)
+            return False, "stuff-%s does not exist" % stuff_id
+
+        # is event exist
+        events_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+            ["events"]
+        )[0]["events"]
+        event = [start_index, end_index]
+        if event not in events_list:
+            self.log.add_log("InboxManager: event-%s:%s does not exist, quit" % (start_index, end_index), 3)
+            return False, "event does not exist"
+        else:
+            # get event status
+            events_status_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                ["eventsStatus"]
+            )[0]["eventsStatus"]
+            event_index = events_list.index(event)
+            event_status = events_status_list[event_index]
+            return event_status, "success"
 
     def is_stuff_exist(self, account, stuff_id, verify_account=True):
 
