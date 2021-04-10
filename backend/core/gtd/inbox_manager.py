@@ -1075,6 +1075,63 @@ class InboxManager:
             event_status = events_status_list[event_index]
             return event_status, "success"
 
+    def remove_event_status(self, account, stuff_id, start_index, end_index):
+
+        """
+        删除event的status
+        :param account: 用户名
+        :param stuff_id:
+        :param start_index:
+        :param end_index:
+        :return: bool, str
+        """
+        self.log.add_log(
+            "InboxManager: remove user-%s 's event-%s:%s's status" % (account, start_index, end_index), 1)
+
+        # is param in law
+        if type(start_index) != int:
+            self.log.add_log("InboxManager: type error with param-start_index", 3)
+            return False, "type error with param-start_index"
+        if type(end_index) != int:
+            self.log.add_log("InboxManager: type error with param-end_index", 3)
+            return False, "type error with param-end_index"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # is stuff exist
+        if self.is_stuff_exist(account, stuff_id, verify_account=False) is False:
+            self.log.add_log("InboxManager: stuff-%s is not exist, quit" % stuff_id, 3)
+            return False, "stuff-%s does not exist" % stuff_id
+
+        # remove event status
+        # is event exist
+        events_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+            ["events"]
+        )[0]["events"]
+        event = [start_index, end_index]
+        if event not in events_list:
+            self.log.add_log("InboxManager: event-%s:%s does not exist, quit" % (start_index, end_index), 3)
+            return False, "event does not exist"
+        else:
+            # remove event status
+            events_status_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
+                ["eventsStatus"]
+            )[0]["eventsStatus"]
+            event_index = events_list.index(event)
+            del(events_status_list[event_index])
+            # update
+            result = self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"eventsStatus": events_status_list})
+            if result:
+                return True, "success"
+            else:
+                self.log.add_log("InboxManager: fail to set event status because of dabase error", 3)
+                return False, "database error"
+
     def is_stuff_exist(self, account, stuff_id, verify_account=True):
 
         """
