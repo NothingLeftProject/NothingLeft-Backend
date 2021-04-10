@@ -293,7 +293,6 @@ class InboxManager:
                     self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
                     self.stuff_standard_attributes_list
                 )[0]
-                print(stuff_info)
                 # change hasCustomAttribute
                 if keys == stuff_info["customizedAttributes"]:
                     stuff_info["hasCustomAttribute"] = False
@@ -301,16 +300,25 @@ class InboxManager:
                 for index in range(0, len(keys)):
                     try:
                         stuff_info["customizedAttributes"].remove(keys[index])
-                        stuff_info.pop(keys[index])
                     except (ValueError, KeyError):  # 日后有时间再完善一下吧，都找不到了，还success
                         self.log.add_log("InboxManager: key-%s does not exist, can't delete" % keys[index], 3)
-                if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, stuff_info) is False:
-                    self.log.add_log("InboxManager: fail to delete custom attributes for stuff-%s because of database error" % stuff_id, 3)
+                        return False, "key-%s does not exist, can't delete" % keys[index]
+                    else:
+                        stuff_info.pop(keys[index])
+
+                # update
+                if self.mongodb_manipulator.delete_many_documents("stuff", account, {"_id": stuff_id}) is False:
+                    self.log.add_log("InboxManager: fail to delete custom attributes for stuff-%s because because fail to delete raw data" % stuff_id, 3)
                     skip_ids.append(stuff_id)
                     continue
+                else:
+                    if self.mongodb_manipulator.add_many_documents("stuff", account, [stuff_info]) is False:
+                        self.log.add_log("InboxManager: fail to delete custom attributes for stuff-%s because fail to upload new data" % stuff_id, 3)
+                        skip_ids.append(stuff_id)
+                        continue
 
         if skip_ids:
-            err= "fail with id-%s" % skip_ids
+            err = "fail with id-%s" % skip_ids
         else:
             err = "success"
         return True, err
