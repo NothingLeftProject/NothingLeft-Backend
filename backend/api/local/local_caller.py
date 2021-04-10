@@ -862,3 +862,29 @@ class LocalCaller:
 
             res, err = self.inbox_manager.get_event_status(account, stuff_id, start_index, end_index)
             return res, err
+
+    def stuff_remove_event_status(self, param):
+
+        """
+        获取event的status
+        :param param:
+        :return:
+        """
+        self.log.add_log("LocalCaller: stuff_remove_event_status", 1)
+
+        try:
+            account = param["account"]
+            stuff_id = param["stuffId"]
+            start_index = param["startIndex"]
+            end_index = param["endIndex"]
+        except KeyError:
+            self.log.add_log("LocalCaller: stuff_remove_event_status: Your param is incomplete", 3)
+            return False, "param incomplete"
+        else:
+            if self.not_root:
+                if self.caller != account:
+                    err = "you are not allowed to get other user's info"
+                    return False, err
+
+            res, err = self.inbox_manager.remove_event_status(account, stuff_id, start_index, end_index)
+            return res, err

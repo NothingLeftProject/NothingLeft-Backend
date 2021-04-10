@@ -17,5 +17,6 @@
   "stuff_add_events",
   "stuff_remove_events",
   "stuff_set_event_status",
-  "stuff_get_event_status"
+  "stuff_get_event_status",
+  "stuff_remove_event_status"
 ]
