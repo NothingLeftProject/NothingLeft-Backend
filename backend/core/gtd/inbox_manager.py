@@ -841,7 +841,7 @@ class InboxManager:
         :type end_indexes: list
         :return: bool, str
         """
-        self.log.add_log("InboxManager: add events for user-%s's stuff-%s" % account, stuff_id, 1)
+        self.log.add_log("InboxManager: add events for user-%s's stuff-%s" % (account, stuff_id), 1)
         err = "success"
 
         # is param in law
@@ -904,7 +904,7 @@ class InboxManager:
         :type end_indexes: list
         :return: bool. str
         """
-        self.log.add_log("InboxManager: remove events for user-%s's stuff-%s" % account, stuff_id, 1)
+        self.log.add_log("InboxManager: remove events for user-%s's stuff-%s" % (account, stuff_id), 1)
         err = "success"
 
         # is param in law
@@ -986,7 +986,7 @@ class InboxManager:
             self.log.add_log("InboxManager: type error with param-end_index", 3)
             return False, "type error with param-end_index"
 
-        self.log.add_log("InboxManager: set user-%s 's event-%s:%s to status-%s" % account, start_index, end_index, status, 1)
+        self.log.add_log("InboxManager: set user-%s 's event-%s:%s to status-%s" % (account, start_index, end_index, status), 1)
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
@@ -1004,9 +1004,9 @@ class InboxManager:
             self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
             ["events"]
         )[0]["events"]
-        event = (start_index, end_index)
+        event = [start_index, end_index]
         if event not in events_list:
-            self.log.add_log("InboxManager: event-%s:%s does not exist, quit" % start_index, end_index, 3)
+            self.log.add_log("InboxManager: event-%s:%s does not exist, quit" % (start_index, end_index), 3)
             return False, "event does not exist"
         else:
             # set event status
@@ -1014,8 +1014,11 @@ class InboxManager:
                 self.mongodb_manipulator.get_document("stuff", account, {"_id": stuff_id}, 1),
                 ["eventsStatus"]
             )[0]["eventsStatus"]
-            event_index = events_list.find(event)
-            events_status_list.insert(event_index, status)
+            event_index = events_list.index(event)
+            try:
+                events_status_list[event_index] = status
+            except IndexError:
+                events_status_list.insert(event_index, status)
             # update
             result = self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, {"eventsStatus": events_status_list})
             if result:
