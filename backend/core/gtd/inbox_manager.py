@@ -939,11 +939,11 @@ class InboxManager:
         # remove
         for index in range(0, len(start_indexes)):
             try:
-                event = (int(start_indexes[index])), int(end_indexes[index])
+                event = [start_indexes[index], end_indexes[index]]
                 if event not in events_list:
                     self.log.add_log("InboxManager: event-%s:%s does not exist, skip" % (start_indexes[index], end_indexes[index]), 2)
                     continue
-                event_index = events_list.find(event)
+                event_index = events_list.index(event)
                 events_status_list.remove(events_status_list[event_index]) # 同步删除status
                 events_list.remove(event)
             except IndexError:
