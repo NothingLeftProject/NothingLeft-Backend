@@ -112,4 +112,11 @@
   - stuff_get_id_from_preset
 - 测试修复pass还更新了stuff_generate_preset_list
 - 还修了一堆问题
-- 更新新的预设列表，优化算法 
+- 更新新的预设列表，优化算法
+- 修复并pass了:
+  - stuff_delete_many_custom_attribute 
+  - stuff_add_events
+  - stuff_set_event_status
+  - stuff_get_event_status
+  - stuff_remove_events
+  - stuff_remove_event_status
