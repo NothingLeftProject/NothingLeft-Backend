@@ -44,7 +44,7 @@ class ClassificationManager():
     def is_cl_id_exist(self, account, cl_id):
 
         """
-        判断某个cl_name是否存在
+        判断某个cl_id是否存在
         :param account: 用户名
         :param cl_id: 分类id
         :return: bool
@@ -139,7 +139,7 @@ class ClassificationManager():
         )[0]
         for stuff_id in stuff_ids:
             if self.mongodb_manipulator.is_collection_exist("stuff", stuff_id) is False:
-                self.log.add_log("ClassificationManager: fail to add stuff-%s to cl-%s because it isn't exist", 3)
+                self.log.add_log("ClassificationManager: stuff-%s is not exist, skip" % stuff_id, 2)
                 skip_ids.append(stuff_id)
                 continue
             cl_info["stuffList"].append(stuff_id)
@@ -186,7 +186,7 @@ class ClassificationManager():
         )[0]
         for stuff_id in stuff_ids:
             if self.mongodb_manipulator.is_collection_exist("stuff", stuff_id) is False:
-                self.log.add_log("ClassificationManager: fail to remove stuff-%s from cl-%s because it isn't exist", 3)
+                self.log.add_log("ClassificationManager: stuff-%s is not exist, skip" % stuff_id, 3)
                 skip_ids.append(stuff_id)
                 continue
             cl_info["stuffList"].remove(stuff_id)
@@ -203,6 +203,98 @@ class ClassificationManager():
                     return True, "success, but fail with stuffs-%s" % skip_ids
             else:
                 return True, "success"
+
+    def get_classifications_info(self, account, cl_ids, designated_keys=None, get_all=False, result_type="list"):
+
+        """
+        获取多个分类信息
+        :param account: 用户名
+        :param cl_ids: 要获取的分类的id列表
+        :param designated_keys: 指定key
+        :param get_all: 获取全部分类信息
+        :param result_type: 返回数据类型 list/dict
+        :type cl_ids: list
+        :type designated_keys: list
+        :return: list/dict/bool, str
+        """
+        self.log.add_log("ClassificationManager: get user-%s classifications info in mode-%s" % (account, result_type), 1)
+        skip_ids = []
+
+        # is param in law
+        if type(cl_ids) != list and get_all is False:
+            self.log.add_log("ClassificationManager: type error, when param-get_all is False, param-cl_ids must be a list", 3)
+            return False, "ClassificationManager: type error, when get_all is False, cl_ids must be a list"
+        if type(designated_keys) != list and designated_keys is not None:
+            self.log.add_log("ClassificationManager: type error with param-designated_keys", 3)
+            return False, "type error with param-designated_keys"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("ClassificationManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # main
+        # get all cl_ids
+        all_cl_ids = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("classification", account, {"_id": 0}, 1),
+            ["classificationIds"]
+        )[0]["classificationIds"]
+
+        # get
+        if designated_keys is None:
+            designated_keys = self.standard_classification_info_keys
+        else:
+            for key in designated_keys:
+                if key not in self.standard_classification_info_keys:
+                    self.log.add_log("ClassificationManager: key-%s is not exist, remove from designated_keys" % key, 2)
+                    designated_keys.remove(key)
+
+        if result_type == "dict":
+            result = {}
+            if get_all:
+                for cl_id in all_cl_ids:
+                    cl_info = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("classification", account, {"_id": cl_id}, 1),
+                        designated_keys
+                    )[0]
+                    result[cl_id] = cl_info
+            else:
+                for cl_id in cl_ids:
+                    if cl_id not in all_cl_ids:
+                        self.log.add_log("ClassificationManager: cl-%s is not exist, skip" % cl_id, 2)
+                        skip_ids.append(cl_id)
+                        continue
+                    cl_info = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("classification", account, {"_id": cl_id}, 1),
+                        designated_keys
+                    )[0]
+                    result[cl_id] = cl_info
+
+        else:
+            result = []
+            if get_all:
+                for cl_id in all_cl_ids:
+                    cl_info = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("classification", account, {"_id": cl_id}, 1),
+                        designated_keys
+                    )[0]
+                    result.append(cl_info)
+            else:
+                for cl_id in cl_ids:
+                    if cl_id not in all_cl_ids:
+                        self.log.add_log("ClassificationManager: cl-%s is not exist, skip" % cl_id, 2)
+                        skip_ids.append(cl_id)
+                        continue
+                    cl_info = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("classification", account, {"_id": cl_id}, 1),
+                        designated_keys
+                    )[0]
+                    result.append(cl_info)
+
+        if skip_ids:
+            return result, "success, but fail with cl-%s" % skip_ids
+        else:
+            return result, "success"
 
     def add_classification(self, account, name, cl_type="parent", desc=None, p_c_id=None):
 
