@@ -330,7 +330,7 @@ class InboxManager:
         :param account: 用户名
         :param stuff_ids: 要获取的stuffs的id
         :param get_all: 获取全部stuff
-        :param designated_keys: 指定获取哪些信息
+        :param designated_keys: 指定获取哪些信息 get_all=True则designated_keys失效
         :param result_type: 返回的res的类型是什么 dict/list
         :type designated_keys: list
         :type stuff_ids: list
@@ -377,7 +377,7 @@ class InboxManager:
             else:
                 for stuff_id in stuff_ids:
                     if stuff_id not in all_stuff_id_list:
-                        self.log.add_log("InboxManager: can't find stuff-%s in all_stuff_id_list, skip" % stuff_id, 2)
+                        self.log.add_log("InboxManager: stuff-%s is not exist, skip" % stuff_id, 2)
                         skip_ids.append(stuff_ids)
                         continue
 
@@ -427,7 +427,7 @@ class InboxManager:
                     result.append(stuff_info)
 
         if skip_ids:
-            return True, "fail with id-%s" % skip_ids
+            err = err + "but fail with id-%s" % skip_ids
         else:
             err = err + "success"
         return result, err
