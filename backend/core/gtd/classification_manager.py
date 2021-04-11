@@ -8,7 +8,7 @@ from backend.database.memcached import MemcachedManipulator
 from backend.data.encryption import Encryption
 
 
-class ClassificationManager():
+class ClassificationManager:
 
     def __init__(self, log, setting):
 
@@ -295,6 +295,63 @@ class ClassificationManager():
             return result, "success, but fail with cl-%s" % skip_ids
         else:
             return result, "success"
+
+    def get_classifications_stuffs(self, account, cl_ids, start_index=None, end_index=None):
+
+        """
+        获取多个分类的stuff
+        :param account: 用户名
+        :param cl_ids: 分类id
+        :param start_index: 开始点
+        :param end_index: 结束点
+        :type cl_ids: list
+        :type start_index: int
+        :type end_index: int
+        :return: dict{cl_id: list}/bool, str
+        """
+        self.log.add_log("ClassificationManager: get classifications stuffs start", 1)
+        skip_ids = []
+
+        # is param in law
+        if type(cl_ids) != list:
+            self.log.add_log("ClassificationManager: type error, param-cl_ids must be a list", 3)
+            return False, "ClassificationManager: type error, cl_ids must be a list"
+        if (type(start_index) != list and start_index is not None) or (type(end_index) != list and end_index is not None):
+            self.log.add_log("ClassificationManager: type error with param-start/end_index", 3)
+            return False, "type error with param-start/end_index"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("ClassificationManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # main
+        #  get all cl_ids
+        all_cl_ids = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("classification", account, {"_id": 0}, 1),
+            ["classificationIds"]
+        )[0]["classificationIds"]
+        result = {}
+        for cl_id in cl_ids:
+            # is cl_id exist
+            if cl_id not in all_cl_ids:
+                self.log.add_log("ClassificationManager: cl-%s is not exist, skip" % cl_id, 2)
+                skip_ids.append(cl_id)
+                continue
+            stuff_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("classification", account, {"_id": cl_id}, 1),
+                ["stuffList"]
+            )[0]["stuffList"]
+            if start_index is None:
+                result[cl_id] = stuff_list
+            else:
+                result[cl_id] = stuff_list[start_index:end_index]
+
+        if skip_ids:
+            return result, "fail with cl-%s" % skip_ids
+        else:
+            return result, "success"
+
 
     def add_classification(self, account, name, cl_type="parent", desc=None, p_c_id=None):
 
