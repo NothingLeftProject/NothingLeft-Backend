@@ -153,7 +153,7 @@ class ClassificationManager():
                 if skip_ids == stuff_ids:
                     return False, "all stuff_id aren't exist at all"
                 else:
-                    return True, "but fail with stuffs-%s" % skip_ids
+                    return True, "success, but fail with stuffs-%s" % skip_ids
             else:
                 return True, "success"
 
@@ -166,6 +166,43 @@ class ClassificationManager():
         :param cl_id: 分类的id，父子无需分开
         :return: bool, str
         """
+        self.log.add_log("ClassificationManager: remove many stuffs from user-%s's cl-%s" % (account, cl_id), 1)
+        skip_ids = []
+
+        # is param in law
+        if type(stuff_ids) != list:
+            self.log.add_log("ClassificationManager: param-stuff_ids must be a list, type error", 3)
+            return False, "ClassificationManager: param-stuff_ids must be a list, type error"
+
+        # general existence judgement
+        a, b = self.general_existence_judgment(account, cl_id)
+        if a is False:
+            return a, b
+
+        # main
+        cl_info = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("classification", account, {"_id": cl_id}, 1),
+            self.standard_classification_info_keys
+        )[0]
+        for stuff_id in stuff_ids:
+            if self.mongodb_manipulator.is_collection_exist("stuff", stuff_id) is False:
+                self.log.add_log("ClassificationManager: fail to remove stuff-%s from cl-%s because it isn't exist", 3)
+                skip_ids.append(stuff_id)
+                continue
+            cl_info["stuffList"].remove(stuff_id)
+
+        # update
+        if self.mongodb_manipulator.update_many_documents("classification", account, {"_id": cl_id}, cl_info) is False:
+            self.log.add_log("ClassificationManager: database error, can't remove stuff from classification", 3)
+            return False, "database error"
+        else:
+            if skip_ids:
+                if skip_ids == stuff_ids:
+                    return False, "all stuff_id aren't exist at all"
+                else:
+                    return True, "success, but fail with stuffs-%s" % skip_ids
+            else:
+                return True, "success"
 
     def add_classification(self, account, name, cl_type="parent", desc=None, p_c_id=None):
 
