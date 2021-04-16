@@ -3,6 +3,8 @@
 # description: 分类管理器 # 禁止父子分类同名
 # date: 2020/10/25
 
+import json
+
 from backend.database.mongodb import MongoDBManipulator
 from backend.database.memcached import MemcachedManipulator
 from backend.data.encryption import Encryption
@@ -352,7 +354,6 @@ class ClassificationManager:
         else:
             return result, "success"
 
-
     def add_classification(self, account, name, cl_type="parent", desc=None, p_c_id=None):
 
         """
@@ -364,6 +365,56 @@ class ClassificationManager:
         :param p_c_id: 父分类id（若type为child）
         :return:
         """
+        self.log.add_log("ClassificationManager: start add classification for user-%s" % account, 1)
+
+        # is param in law
+        if (cl_type == "child" and p_c_id is None) or (cl_type != "child" and cl_type !="parent"):
+            self.log.add_log("ClassificationManager: if classification_type is 'child', you have to give the p_c_id", 3)
+            return False, "while cl_type is 'child', you have to offer p_c_id"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("ClassificationManager: user-%s does not exist, quit" % account, 3)
+            return False, "ClassificationManager: user-%s does not exist, quit" % account
+
+        # main
+        # generate classification data
+        cl_id = self.encryption.md5(name)
+        if cl_type == "child":
+            cl_id = p_c_id + cl_id
+
+        cl_data = json.load(open("./backend/data/json/classification_info_template.json", "r", encoding="utf-8"))
+        cl_data["name"] = name
+        cl_data["description"] = desc
+        cl_data["lastOperatedTimeStamp"] = self.log.get_time_stamp()
+        cl_data["classificationId"] = cl_id
+        cl_data["type"] = cl_type
+
+        # update to database
+        if self.mongodb_manipulator.add_one_document("classification", account, cl_data) is False:
+            self.log.add_log("ClassificationManager: add classification fail because of database error", 3)
+            return False, "add classification fail because of database error"
+        else:
+            self.log.add_log("ClassificationManager: add cl-%s success" % cl_id, 1)
+            # update the preset_list
+            all_cl_ids = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("classification", account, {"_id": 0}, 1),
+                ["classificationIds"]
+            )[0]["classificationIds"]
+            all_cl_names = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("classification", account, {"_id": 0}, 1),
+                ["classificationNames"]
+            )[0]["classificationNames"]
+            all_cl_ids.append(cl_id)
+            all_cl_names.append(name)
+            result_1 = self.mongodb_manipulator.update_many_documents("classification", account, {"_id": 0},
+                                                                      {"classificationNames": all_cl_names})
+            result_2 = self.mongodb_manipulator.update_many_documents("classification", account, {"_id": 0},
+                                                                      {"classificationIds": all_cl_ids})
+            if not result_1 or not result_2:
+                self.log.add_log("ClassificationManager: fail to update preset_list", 3)
+                return True, "success, but fail with update preset_list"
+            return True, "success"
 
     def remove_classification(self, account, cl_id):
 
