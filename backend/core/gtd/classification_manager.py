@@ -6,7 +6,6 @@
 import json
 
 from backend.database.mongodb import MongoDBManipulator
-from backend.database.memcached import MemcachedManipulator
 from backend.data.encryption import Encryption
 
 
@@ -18,7 +17,6 @@ class ClassificationManager:
         self.setting = setting
 
         self.mongodb_manipulator = MongoDBManipulator(log, setting)
-        self.memcached_manipulator = MemcachedManipulator(log, setting)
         self.encryption = Encryption(self.log, self.setting)
 
         self.standard_classification_info_keys = [
@@ -381,7 +379,7 @@ class ClassificationManager:
         # generate classification data
         cl_id = self.encryption.md5(name)
         if cl_type == "child":
-            cl_id = p_c_id + cl_id
+            cl_id = p_c_id + "-" + cl_id
 
         cl_data = json.load(open("./backend/data/json/classification_info_template.json", "r", encoding="utf-8"))
         cl_data["name"] = name
@@ -389,6 +387,8 @@ class ClassificationManager:
         cl_data["lastOperatedTimeStamp"] = self.log.get_time_stamp()
         cl_data["classificationId"] = cl_id
         cl_data["type"] = cl_type
+        if cl_type == "child":  # ATTENTION: 这里可能有遗漏
+            cl_data["parentId"] = p_c_id
 
         # update to database
         if self.mongodb_manipulator.add_one_document("classification", account, cl_data) is False:
@@ -424,6 +424,27 @@ class ClassificationManager:
         :param cl_id: 分类id
         :return:
         """
+        self.log.add_log("ClassificationManager: remove a classification-%s of user-%s" % (cl_id, account))
 
+        # general existence judgement
+        a, b = self.general_existence_judgment(account, cl_id)
+        if a is False:
+            return a, b
 
-
+        # main
+        # remove cl_info from database
+        if self.mongodb_manipulator.delete_many_documents("classification", account, {"_id": cl_id}) is False:
+            self.log.add_log("ClassificationManager: remove classification fail because of database error", 3)
+            return False, "database error"
+        else:
+            # remove cl_id from preset_list
+            all_cl_ids = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("classification", account, {"_id": 0}, 1),
+                ["classificationIds"]
+            )[0]["classificationIds"]
+            all_cl_ids.remove(cl_id)
+            if self.mongodb_manipulator.update_many_documents("classification", account, {"_id": cl_id}, {"classificationIds": all_cl_ids}) is False:
+                self.log.add_log("ClassificationManager: fail to update preset_list because of database error", 3)
+                return False, "database error that can't update preset_list"
+            else:
+                return True, "success"
