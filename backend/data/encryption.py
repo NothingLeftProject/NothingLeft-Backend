@@ -16,6 +16,10 @@ class Encryption():
         self.log = log
         self.setting = setting
 
+        self.md5_ = hashlib.md5()
+        self.sha1_ = hashlib.sha1()
+        self.hmca_ = hmac.new(bytes(string))
+
     def md5(self, string):
 
         """
@@ -23,9 +27,8 @@ class Encryption():
         :param string:
         :return:
         """
-        md5 = hashlib.md5()
-        md5.update(string.encode("utf-8"))
-        return md5.hexdigest()
+        self.md5_.update(string.encode("utf-8"))
+        return self.md5_.hexdigest()
 
     def sha1(self, string):
 
@@ -34,9 +37,8 @@ class Encryption():
         :param string:
         :return:
         """
-        sha1 = hashlib.sha1()
-        sha1.update(string.encode("utf-8"))
-        return sha1.hexdigest()
+        self.sha1_.update(string.encode("utf-8"))
+        return self.sha1_.hexdigest()
 
     def hmac(self, string):
 
@@ -45,9 +47,8 @@ class Encryption():
         :param string:
         :return:
         """
-        hmca = hmac.new(bytes(string))
-        hmca.update("nothing left is wonderful")
-        return hmca.hexdigest()
+        self.hmca_.update(string)
+        return self.hmca_.hexdigest()
 
     def generate_random_key(self):
 
