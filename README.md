@@ -68,7 +68,15 @@
   - Email: lanzhijiang@foxmail.com
   - Wechat：18680171381
   - QQ: 1481605673
- 
+
+### 想法区
+- 分类-trashList中的stuff状态自动变成cancel
+- maintainer需要去监控各种动向，并根据不同的动向做出不同决策以自动维护整个系统（变更即通知maintainer）
+- inbox的清空操作（归档！）
+  - 即从preset_list中删除归档了的stuff的id
+  - 并添加其id到achievedStuffs中去
+  - 并修改stuff_info中的isAchieved为True
+- 节省资源开销，从init加载一个base_ability类像log一样传递下去
 
 ### 提交记录-Commit Log
 - 基本完成了user的全部内容，配合数据库
