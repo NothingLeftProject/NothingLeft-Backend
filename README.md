@@ -72,11 +72,6 @@
 ### 想法区(完成即清除)
 - 分类-trashList中的stuff状态自动变成cancel
 - maintainer需要去监控各种动向，并根据不同的动向做出不同决策以自动维护整个系统（变更即通知maintainer）
-- inbox的清空操作（归档！）
-  - 即从preset_list中删除归档了的stuff的id
-  - 并添加其id到achievedStuffs中去
-  - 并修改stuff_info中的isAchieved为True
-- 节省资源开销，从init加载一个base_ability类像log一样传递下去
 - 使用memecached加快运行速度
 
 ### 提交记录-Commit Log
