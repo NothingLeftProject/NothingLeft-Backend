@@ -11,6 +11,7 @@
     "level": 0,
     "status": "",
     "belongingClassificationId": "",
+    "isAchieved": false,
     "hasCustomAttribute": false,
     "customizedAttributes": [],
     "events": [],
