@@ -69,7 +69,7 @@
   - Wechat：18680171381
   - QQ: 1481605673
 
-### 想法区
+### 想法区(完成即清除)
 - 分类-trashList中的stuff状态自动变成cancel
 - maintainer需要去监控各种动向，并根据不同的动向做出不同决策以自动维护整个系统（变更即通知maintainer）
 - inbox的清空操作（归档！）
@@ -77,6 +77,7 @@
   - 并添加其id到achievedStuffs中去
   - 并修改stuff_info中的isAchieved为True
 - 节省资源开销，从init加载一个base_ability类像log一样传递下去
+- 使用memecached加快运行速度
 
 ### 提交记录-Commit Log
 - 基本完成了user的全部内容，配合数据库
@@ -129,3 +130,5 @@
   - stuff_remove_events
   - stuff_remove_event_status
 - AchievedPoint: 测试完基本的InboxManager功能
+- 添加了inbox归档功能
+- 优化md5加密性能并修复Enc...一个bug
