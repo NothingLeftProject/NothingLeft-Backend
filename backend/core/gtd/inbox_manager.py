@@ -21,12 +21,12 @@ class InboxManager:
         self.stuff_standard_attributes_list = [
             "content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags",
             "links", "time", "place", "level", "status",
-            "belongingClassificationId", "hasCustomAttribute", "customizedAttributes",
+            "belongingClassificationId", "isAchieved", "hasCustomAttribute", "customizedAttributes",
             "events", "eventsStatus", "isSplitAsEvent"
         ]
         self.preset_list_name = [
             "allIdList", "waitClassifyList", "waitOrganizeList", "waitExecuteList", "achievedList", "puttedOffList",
-            "doneList", "failList", "cancelList"
+            "doneList", "failList", "cancelList", "achievedStuffs"
         ]
         self.status_list = [
             "wait_classify", "wait_organize", "wait_execute", "achieved", "putted_off", "done", "fail", "cancel"
@@ -625,7 +625,7 @@ class InboxManager:
             self.mongodb_manipulator.delete_many_documents("stuff", account, {"_id": stuff_id})
 
         # delete id in the preset_lists
-        for list_id in range(0, 10):
+        for list_id in range(0, 9):
             preset_list = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("stuff", account, {"_id": list_id}, 1),
                 [self.preset_list_name[list_id]]
@@ -655,6 +655,85 @@ class InboxManager:
             res = True
             err = err + "success"
         return res, err
+
+    def achieve_many_stuffs(self, account, stuff_ids, clean_inbox=False):
+
+        """
+        归档多个stuff
+        :param account: 用户名
+        :param stuff_ids: 要归档的stuff id们 list
+        :param clean_inbox: 是否直接清空inbox（所有未归档的stuff）
+        :type clean_box: bool
+        :type stuff_ids: list
+        :return bool, str
+        """
+        self.log.add_log("InboxManager: achieve many stuffs for user-%s" % account, 1)
+        skip_ids = []
+
+        # is param in law
+        if type(stuff_ids) != list and not clean_inbox:
+            self.log.add_log("InboxManager: type error, param-stuff_ids must be a list while clean_inbox is False", 3)
+            return False, "param-stuff_ids type error, it should be a list"
+        
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # main
+        # delete stuff_id from preset_list and update isAchieved as True
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
+        
+        # is clean all?
+        if clean_inbox:
+            stuff_ids = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuffs", account, {"allIdList": 1}, 2),
+                ["allIdList"]
+            )[0]["allIdList"]
+        # get_all_preset_list
+        all_preset_list = {}
+        for list_index in range(0, 9):
+            list_name = self.preset_list_name[list_index]
+            all_preset_list[list_name] = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuffs", account, {"_id": list_index}),
+                [list_name]
+            )[0][list_name]
+
+        achieved_stuffs = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuffs", account, {"_id": 9}),
+            ["achievedStuffs"]
+        )[0]["achievedStuffs"]
+
+        for stuff_id in stuff_ids:
+            if stuff_id not in all_stuff_id_list:
+                self.log.add_log("InboxManager: stuff-%s does not exist, skip" % stuff_id, 2)
+                stuff_ids.remove(stuff_id)
+                skip_ids.append(stuff_id)
+                continue
+            # 查找所有预设列表中存在该stuff_id并删除（可以特化以优化速度）
+            for list_index in range(0, 9):
+                list_name = self.preset_list_name[list_index]
+                preset_list = all_preset_list[list_name]
+                try:
+                    preset_list.remove(stuff_id)
+                except ValueError:
+                    pass
+            # change key-isAchieved as True
+            stuff_info = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("stuffs", account, {"_id": stuff_id}, 1),
+                self.stuff_standard_attributes_list
+            )[0]
+            stuff_info["isAchieved"] = True
+            # add stuff_id into achievedStuffs
+            achieved_stuffs.append(stuff_id)
+
+        if skip_ids:
+            return True, "but fail with id-%s" % skip_ids
+        else:
+            return True, "success"
 
     def generate_preset_stuff_list(self, account, list_name=None, update=False):
 
@@ -704,7 +783,7 @@ class InboxManager:
                 ["stuffId", "lastOperateTimeStamp", "status"]
             )
 
-            for i in self.preset_list_name:
+            for i in self.preset_list_name.remove("achievedStuffs"):
                 if now_list == "allIdList":
                     for event in raw_list:
                         self.log.add_log("InboxManager: add stuff-%s in %s" % (event["stuffId"], now_list), 0)
