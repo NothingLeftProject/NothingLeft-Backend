@@ -5,19 +5,22 @@
 
 import json
 
-from backend.database.mongodb import MongoDBManipulator
-from backend.data.encryption import Encryption
+# from backend.database.mongodb import MongoDBManipulator
+# from backend.data.encryption import Encryption
 
 
 class ClassificationManager:
 
-    def __init__(self, log, setting):
+    def __init__(self, base_abilities):
 
-        self.log = log
-        self.setting = setting
+        self.base_abilities = base_abilities
+        self.log = base_abilities.log
+        self.setting = base_abilities.setting
 
-        self.mongodb_manipulator = MongoDBManipulator(log, setting)
-        self.encryption = Encryption(self.log, self.setting)
+        self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
+        self.encryption = self.base_abilities.encryption
+        # self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        # self.encryption = Encryption(self.log, self.setting)
 
         self.standard_classification_info_keys = [
             "name", "description", "stuffList", "stuffCount", "lastOperatedTimeStamp",

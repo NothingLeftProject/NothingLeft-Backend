@@ -13,16 +13,20 @@ from backend.user.user_permission_mamanger import UserPermissionManager
 
 class UserManager:
 
-    def __init__(self, log, setting):
+    def __init__(self, base_abilities):
 
-        self.log = log
-        self.setting = setting
+        self.base_abilities = base_abilities
+        self.log = base_abilities.log
+        self.setting = base_abilities.setting
 
-        self.encryption = Encryption(log, setting)
-        self.mongodb_manipulator = MongoDBManipulator(log, setting)
-        self.user_group_manager = UserGroupManager(log, setting)
-        self.user_info_manager = UserInfoManager(log, setting)
-        self.user_permission_manager = UserPermissionManager(log, setting)
+        self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
+        self.encryption = self.base_abilities.encryption
+
+        # self.encryption = Encryption(log, setting)
+        # self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        self.user_group_manager = UserGroupManager(self.base_abilities)
+        self.user_info_manager = UserInfoManager(self.base_abilities)
+        self.user_permission_manager = UserPermissionManager(self.base_abilities)
 
     def sign_up(self, account, password, email=None, user_group="default"):
 

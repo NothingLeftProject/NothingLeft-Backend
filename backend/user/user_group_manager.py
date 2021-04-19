@@ -4,19 +4,23 @@
 # date: 2020/11/1
 
 import json
-from backend.database.mongodb import MongoDBManipulator
+# from backend.database.mongodb import MongoDBManipulator
 
 
 class UserGroupManager:
 
-    def __init__(self, log, setting):
+    def __init__(self, base_abilities):
 
-        self.log = log
-        self.setting = setting
+        self.base_abilities = base_abilities
+        self.log = base_abilities.log
+        self.setting = base_abilities.setting
+
+        self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
+
         self.user_group_info_template = json.load(open("./backend/data/json/user_group_info_template.json", "r", encoding="utf-8"))
         self.user_group_info_id_event_mapping = json.load(open("./backend/data/json/user_group_info_id_event_mapping.json", "r", encoding="utf-8"))
 
-        self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        # self.mongodb_manipulator = MongoDBManipulator(log, setting)
 
     def add_users_into_group(self, accounts, target_group):
 

@@ -12,10 +12,11 @@ from backend.core.gtd.inbox_manager import InboxManager
 
 class LocalCaller:
 
-    def __init__(self, log, setting, caller):
+    def __init__(self, base_abilities, caller):
 
-        self.log = log
-        self.setting = setting
+        self.base_abilities = base_abilities
+        self.log = base_abilities.log
+        self.setting = base_abilities.setting
         self.caller = caller
 
         if self.caller == "root":
@@ -23,11 +24,11 @@ class LocalCaller:
         else:
             self.not_root = True
 
-        self.user_manager = UserManager(log, setting)
-        self.user_permission_manager = UserPermissionManager(log, setting)
-        self.user_info_manager = UserInfoManager(log, setting)
-        self.user_group_manager = UserGroupManager(log, setting)
-        self.inbox_manager = InboxManager(log, setting)
+        self.user_manager = UserManager(self.base_abilities)
+        self.user_permission_manager = UserPermissionManager(self.base_abilities)
+        self.user_info_manager = UserInfoManager(self.base_abilities)
+        self.user_group_manager = UserGroupManager(self.base_abilities)
+        self.inbox_manager = InboxManager(self.base_abilities)
 
     def user_login(self, param):
 

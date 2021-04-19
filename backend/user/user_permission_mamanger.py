@@ -3,8 +3,8 @@
 # description: 用户权限管理器
 # date: 2020/11/1
 
-from backend.database.mongodb import MongoDBManipulator
-from backend.database.memcached import MemcachedManipulator
+# from backend.database.mongodb import MongoDBManipulator
+# from backend.database.memcached import MemcachedManipulator
 from .user_group_manager import UserGroupManager
 
 import json
@@ -12,14 +12,18 @@ import json
 
 class UserPermissionManager:
 
-    def __init__(self, log, setting):
+    def __init__(self, base_abilities):
 
-        self.log = log
-        self.setting = setting
+        self.base_abilities = base_abilities
+        self.log = base_abilities.log
+        self.setting = base_abilities.setting
 
-        self.user_group_manager = UserGroupManager(log, setting)
-        self.mongodb_manipulator = MongoDBManipulator(log, setting)
-        self.memcached_manipulator = MemcachedManipulator(log, setting)
+        self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
+        self.memcached_manipulator = self.base_abilities.memcached_manipulator
+
+        self.user_group_manager = UserGroupManager(self.base_abilities)
+        # self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        # self.memcached_manipulator = MemcachedManipulator(log, setting)
 
     def get_user_permissions(self, account, cache_to_memcached=True, ask_update=False, from_temple=None):
 

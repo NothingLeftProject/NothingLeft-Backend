@@ -12,10 +12,11 @@ from backend.api.http.command_finder import CommandFinder
 
 class HttpHandler:
 
-    def __init__(self, log, setting):
+    def __init__(self, base_abilities):
 
-        self.log = log
-        self.setting = setting
+        self.base_abilities = base_abilities
+        self.log = base_abilities.log
+        self.setting = base_abilities.setting
         
         self.request_data = {}
         self.permission_list = []
@@ -24,8 +25,9 @@ class HttpHandler:
         self.special_auth_pass = False
         self.special_auth_pass_type = ""
 
-        self.mongodb_manipulator = MongoDBManipulator(log, setting)
-        self.permission_manager = UserPermissionManager(log, setting)
+        # self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
+        self.permission_manager = UserPermissionManager(self.base_abilities)
         self.command_finder = ""
 
     def auth(self):
@@ -104,7 +106,7 @@ class HttpHandler:
                         # auth pass, load permission list
                         self.log.add_log("HttpHandler: token compared. load permissions list", 1)
                         
-                        self.permission_list, err = self.permission_manager.get_user_permissions(account, ask_update=True)
+                        self.permission_list, _ = self.permission_manager.get_user_permissions(account, ask_update=True)
                         if self.permission_list is False:
                             self.log.add_log("HttpHandler: can't load permission list", 3)
                             self.response_data["header"]["errorMsg"] = "database or something wrong with the backend"  # inside error
@@ -152,7 +154,7 @@ class HttpHandler:
         self.request_data = request_data
 
         if self.auth():
-            self.command_finder = CommandFinder(self.log, self.setting, self.request_data["header"]["account"])
+            self.command_finder = CommandFinder(self.base_abilities, self.request_data["header"]["account"])
 
             self.log.add_log("HttpHandler: auth completed", 1)
             special_handle_pass = False

@@ -11,10 +11,10 @@ import random
 
 class Encryption():
 
-    def __init__(self, log, setting):
+    def __init__(self):
 
-        self.log = log
-        self.setting = setting
+        # self.log = log
+        # self.setting = setting
 
         self.md5_ = hashlib.md5()
         self.sha1_ = hashlib.sha1()

@@ -6,17 +6,18 @@
 import json
 import time
 
-from backend.database.mongodb import MongoDBManipulator
+# from backend.database.mongodb import MongoDBManipulator
 
 
 class UserInfoManager:
 
-    def __init__(self, log, setting):
+    def __init__(self, base_abilities):
 
-        self.log = log
-        self.setting = setting
+        self.base_abilities = base_abilities
+        self.log = base_abilities.log
+        self.setting = base_abilities.setting
 
-        self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
 
         self.user_info_id_event_mapping = json.load(open("./backend/data/json/user_info_id_event_mapping.json", "r", encoding="utf-8"))
         self.all_user_info_keys = list(self.user_info_id_event_mapping.keys())

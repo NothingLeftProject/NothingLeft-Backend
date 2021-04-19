@@ -6,17 +6,22 @@
 import json
 import copy
 from operator import itemgetter
-from backend.database.mongodb import MongoDBManipulator
-from backend.database.memcached import MemcachedManipulator
-from backend.data.encryption import Encryption
+# from backend.database.mongodb import MongoDBManipulator
+# from backend.database.memcached import MemcachedManipulator
+# from backend.data.encryption import Encryption
 
 
 class InboxManager:
 
-    def __init__(self, log, setting):
+    def __init__(self, base_abilities):
+        
+        self.base_abilities = base_abilities
+        self.log = base_abilities.log
+        self.setting = base_abilities.setting
 
-        self.log = log
-        self.setting = setting
+        self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
+        self.memcached_manipulator = self.base_abilities.memcached_manipulator
+        self.encryption = self.base_abilities.encryption
         
         self.stuff_standard_attributes_list = [
             "content", "description", "createDate", "lastOperateTimeStamp", "stuffId", "tags",
@@ -43,9 +48,9 @@ class InboxManager:
             "cancelList": "cancel"
         }
 
-        self.mongodb_manipulator = MongoDBManipulator(log, setting)
-        self.memcached_manipulator = MemcachedManipulator(log, setting)
-        self.encryption = Encryption(log, setting)
+        # self.mongodb_manipulator = MongoDBManipulator(log, setting)
+        # self.memcached_manipulator = MemcachedManipulator(log, setting)
+        # self.encryption = Encryption(log, setting)
 
     def add_stuff(self, account, content, desc=None, tags=[], links=[], time=None, place=None, level=0, status="wait_classify"):
 

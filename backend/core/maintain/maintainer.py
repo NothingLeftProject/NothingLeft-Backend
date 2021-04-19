@@ -9,15 +9,19 @@ import json
 
 class Maintainer:
 
-    def __init__(self, log, setting):
+    def __init__(self, base_abilities):
 
-        self.log = log
-        self.setting = setting
+        self.base_abilities = base_abilities
+        self.log = base_abilities.log
+        self.setting = base_abilities.setting
 
-        self.user_manager = UserManager(self.log, self.setting)
+        self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
+        self.encryption = self.base_abilities.encryption
+
+        self.user_manager = UserManager(base_abilities)
         self.user_group_manager = self.user_manager.user_group_manager
-        self.mongodb_manipulator = self.user_manager.mongodb_manipulator
-        self.encryption = self.user_manager.encryption
+        # self.mongodb_manipulator = self.user_manager.mongodb_manipulator
+        # self.encryption = self.user_manager.encryption
 
     def run(self):
 

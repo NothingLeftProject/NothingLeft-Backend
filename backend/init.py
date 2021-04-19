@@ -24,7 +24,7 @@ class BaseAbilities:
 
         self.mongodb_manipulator = MongoDBManipulator(self.log, self.setting)
         self.memcached_manipulator = MemcachedManipulator(self.log, self.setting)
-        self.encryption = Encryption(self.log, self.setting)
+        self.encryption = Encryption()
 
 class BackendInit:
 
