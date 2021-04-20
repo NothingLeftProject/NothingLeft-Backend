@@ -52,12 +52,14 @@ class InboxManager:
         # self.memcached_manipulator = MemcachedManipulator(log, setting)
         # self.encryption = Encryption(log, setting)
 
-    def add_stuff(self, account, content, desc=None, tags=[], links=[], time=None, place=None, level=0, status="wait_classify"):
+    def add_stuff(self, account, content, create_date, lots, desc=None, tags=[], links=[], time=None, place=None, level=0, status="wait_classify"):
 
         """
         添加一个stuff到他个人的
         :param account: 用户名
         :param content: stuff内容
+        :param create_date: stuff创建日期，与客户端同步 格式：datetime.date.today()/time.strftime("%H:%M:%S")
+        :param lots: 最后操作时间戳-即客户端创建stuff的时间戳
         :param desc: stuff扩展补充
         :param tags: 标签
         :param links: 链接
@@ -103,8 +105,10 @@ class InboxManager:
         stuff_info["_id"] = stuff_id
         stuff_info["content"] = content
         stuff_info["description"] = desc
-        stuff_info["createDate"] = self.log.get_date() + "/" + self.log.get_formatted_time()
-        stuff_info["lastOperateTimeStamp"] = self.log.get_time_stamp()
+        # stuff_info["createDate"] = self.log.get_date() + "/" + self.log.get_formatted_time()
+        stuff_info["createDate"] = create_date
+        # stuff_info["lastOperateTimeStamp"] = self.log.get_time_stamp()
+        stuff_info["lastOperateTimeStamp"] = lots
         stuff_info["stuffId"] = stuff_id
         stuff_info["tags"] = tags
         stuff_info["links"] = links
@@ -733,7 +737,7 @@ class InboxManager:
             )[0]
             stuff_info["isAchieved"] = True
             # add stuff_id into achievedStuffs
-            achieved_stuffs.append(stuff_id)
+            achieved_stuffs.insert(stuff_id)
 
         if skip_ids:
             return True, "but fail with id-%s" % skip_ids
