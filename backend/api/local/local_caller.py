@@ -435,6 +435,8 @@ class LocalCaller:
         try:
             account = param["account"]
             content = param["content"]
+            create_date = param["createDate"]
+            lots = param["lastOperateTimeStamp"]
         except KeyError:
             self.log.add_log("LocalCaller: user_group_get_permissions: Your param is incomplete", 3)
             return False, "param incomplete"
@@ -465,7 +467,7 @@ class LocalCaller:
                 except KeyError:
                     pass
 
-            res, err = self.inbox_manager.add_stuff(account, content, desc=desc, tags=tags, links=links, time=time, place=place, level=level, status=status)
+            res, err = self.inbox_manager.add_stuff(account, content, create_date, lots, desc=desc, tags=tags, links=links, time=time, place=place, level=level, status=status)
             return res, err
 
     def stuff_modify(self, param):
