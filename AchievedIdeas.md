@@ -8,3 +8,7 @@
 
 ### 节省资源开销
 - 从init加载一个base_ability类像log一样传递下去
+
+### stuff等同类型事务的本地创建性
+- 注意！因为API的验证设置，必须要使请求时间戳与本地同步误差在5min以内
+  - 但同时，stuff等此类的事务的createDate和LastOperateTimeStamp仍然需要按照客户端本地时间，这是为了用户的体验所必须的
