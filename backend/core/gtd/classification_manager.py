@@ -355,12 +355,13 @@ class ClassificationManager:
         else:
             return result, "success"
 
-    def add_classification(self, account, name, cl_type="parent", desc=None, p_c_id=None):
+    def add_classification(self, account, name, lots, cl_type="parent", desc=None, p_c_id=None):
 
         """
         添加一个分类
         :param account: 用户名
         :param name: 分类名
+        :param lots: 最后操作时间戳
         :param cl_type: 分类种类 parent/child
         :param desc: 分类描述
         :param p_c_id: 父分类id（若type为child）
@@ -387,7 +388,7 @@ class ClassificationManager:
         cl_data = json.load(open("./backend/data/json/classification_info_template.json", "r", encoding="utf-8"))
         cl_data["name"] = name
         cl_data["description"] = desc
-        cl_data["lastOperatedTimeStamp"] = self.log.get_time_stamp()
+        cl_data["lastOperatedTimeStamp"] = lots
         cl_data["classificationId"] = cl_id
         cl_data["type"] = cl_type
         if cl_type == "child":  # ATTENTION: 这里可能有遗漏
