@@ -145,7 +145,7 @@ class ClassificationManager:
                 self.log.add_log("ClassificationManager: stuff-%s is not exist, skip" % stuff_id, 2)
                 skip_ids.append(stuff_id)
                 continue
-            cl_info["stuffList"].append(stuff_id)
+            cl_info["stuffList"].insert(stuff_id)
 
         # update
         if self.mongodb_manipulator.update_many_documents("classification", account, {"_id": cl_id}, cl_info) is False:
@@ -408,8 +408,8 @@ class ClassificationManager:
                 self.mongodb_manipulator.get_document("classification", account, {"_id": 0}, 1),
                 ["classificationNames"]
             )[0]["classificationNames"]
-            all_cl_ids.append(cl_id)
-            all_cl_names.append(name)
+            all_cl_ids.insert(cl_id)
+            all_cl_names.insert(name)
             result_1 = self.mongodb_manipulator.update_many_documents("classification", account, {"_id": 0},
                                                                       {"classificationNames": all_cl_names})
             result_2 = self.mongodb_manipulator.update_many_documents("classification", account, {"_id": 0},
