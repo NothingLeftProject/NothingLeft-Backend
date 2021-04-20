@@ -32,8 +32,8 @@ class BackendInit:
 
         self.base_abilities = BaseAbilities()
         
-        self.Maintainer = Maintainer(self.base_abilities, self.base_abilities.setting)
-        self.http_server = HttpServer(self.base_abilities, self.base_abilities.setting)
+        self.Maintainer = Maintainer(self.base_abilities)
+        self.http_server = HttpServer(self.base_abilities)
 
     def run_backend(self):
 
