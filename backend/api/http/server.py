@@ -25,13 +25,14 @@ def get_ip():
     return ip
 
 
-def run_server(class_log, setting):
+def run_server(b_a):
 
     """
     启动服务器
     :return:
     """
-    class_log.add_log("HttpServer: Start http server...", 1)
+    setting = b_a.setting
+    b_a.log.add_log("HttpServer: Start http server...", 1)
 
     try:
         if type(setting["hostIp"]) is not str or setting["hostIp"] == "":
@@ -40,12 +41,10 @@ def run_server(class_log, setting):
         setting["hostIp"] = str(get_ip())
         json.dump(setting, open("./backend/data/json/setting.json", "w", encoding="utf-8"))
 
-    global log_class
-    global settings
-    log_class = class_log
-    settings = setting
+    global base_abilities
+    base_abilities = b_a
 
-    class_log.add_log("HttpServer: ServerAddr: " + setting["hostIp"] + ":" +  str(setting["httpPort"]), 1)
+    b_a.log.add_log("HttpServer: ServerAddr: " + setting["hostIp"] + ":" +  str(setting["httpPort"]), 1)
     flask_app.run(host=setting["hostIp"], port=setting["httpPort"])
 
 
@@ -56,15 +55,14 @@ def route_api():
     处理请求到/api路径下的请求
     :return:
     """
-    return json.dumps(HttpHandler(log_class, settings).handle_request(request.get_json(force=True)))
+    return json.dumps(HttpHandler(base_abilities).handle_request(request.get_json(force=True)))
 
 
 class HttpServer:
 
-    def __init__(self, log, setting):
+    def __init__(self, base_abilities):
 
-        self.log = log
-        self.setting = setting
+        self.base_abilities = base_abilities
 
     def run_server(self):
 
@@ -72,4 +70,4 @@ class HttpServer:
         启动服务器
         :return
         """
-        run_server(self.log, self.setting)
+        run_server(self.base_abilities)
