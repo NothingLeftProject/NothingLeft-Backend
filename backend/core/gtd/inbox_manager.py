@@ -59,7 +59,7 @@ class InboxManager:
         :param account: 用户名
         :param content: stuff内容
         :param create_date: stuff创建日期，与客户端同步 格式：datetime.date.today()/time.strftime("%H:%M:%S")
-        :param lots: 最后操作时间戳-即客户端创建stuff的时间戳
+        :param lots: 最后操作时间戳-即客户端创建stuff的时间戳 str(int(time.time()))
         :param desc: stuff扩展补充
         :param tags: 标签
         :param links: 链接
@@ -69,6 +69,9 @@ class InboxManager:
         :param status: 状态
         :type tags: list
         :type links: list
+        :type create_date: str
+        :type lots: str
+        :type content: str
         :return: bool, str
         """
         self.log.add_log("InboxManager: add_stuff start for user-%s" % account, 1)
@@ -129,7 +132,7 @@ class InboxManager:
         else:
             self.log.add_log("InboxManager: add stuff-%s complete" % stuff_id, 1)
             # change preset_list
-            res, err_2 = self.set_many_stuffs_status(account, [stuff_id], status)
+            _, err_2 = self.set_many_stuffs_status(account, [stuff_id], status)
             return True, err + "success; preset_list_change:" + err_2
 
     def modify_stuff(self, account, stuff_id, info):
@@ -183,6 +186,8 @@ class InboxManager:
                 skip_keys.append(key)
                 continue
             stuff_info[key] = info[key]
+
+        stuff_info["lastOperateTimeStamp"] = self.log.get_time_stamp()
 
         if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, stuff_info) is False:
             self.log.add_log("InboxManager: modify stuff info fail because of database error", 3)
@@ -247,6 +252,9 @@ class InboxManager:
                 for index in range(0, len(keys)):
                     stuff_info["customizedAttributes"].append(keys[index])
                     stuff_info[keys[index]] = values[index]
+
+                stuff_info["lastOperateTimeStamp"] = self.log.get_time_stamp()
+
                 if self.mongodb_manipulator.update_many_documents("stuff", account, {"_id": stuff_id}, stuff_info) is False:
                     self.log.add_log("InboxManager: fail to add custom attributes for stuff-%s because of database error" % stuff_id, 3)
                     skip_ids.append(stuff_id)
@@ -321,6 +329,7 @@ class InboxManager:
                     skip_ids.append(stuff_id)
                     continue
                 else:
+                    stuff_info["lastOperateTimeStamp"] = self.log.get_time_stamp()
                     if self.mongodb_manipulator.add_many_documents("stuff", account, [stuff_info]) is False:
                         self.log.add_log("InboxManager: fail to delete custom attributes for stuff-%s because fail to upload new data" % stuff_id, 3)
                         skip_ids.append(stuff_id)
@@ -707,12 +716,12 @@ class InboxManager:
         for list_index in range(0, 9):
             list_name = self.preset_list_name[list_index]
             all_preset_list[list_name] = self.mongodb_manipulator.parse_document_result(
-                self.mongodb_manipulator.get_document("stuffs", account, {"_id": list_index}),
+                self.mongodb_manipulator.get_document("stuffs", account, {"_id": list_index}, 1),
                 [list_name]
             )[0][list_name]
 
         achieved_stuffs = self.mongodb_manipulator.parse_document_result(
-            self.mongodb_manipulator.get_document("stuffs", account, {"_id": 9}),
+            self.mongodb_manipulator.get_document("stuffs", account, {"_id": 9}, 1)
             ["achievedStuffs"]
         )[0]["achievedStuffs"]
 
@@ -736,8 +745,19 @@ class InboxManager:
                 self.stuff_standard_attributes_list
             )[0]
             stuff_info["isAchieved"] = True
+            stuff_info["lastOperateTimeStamp"] = self.log.get_time_stamp()
             # add stuff_id into achievedStuffs
             achieved_stuffs.insert(stuff_id)
+
+            # update stuff_info
+            self.mongodb_manipulator.update_many_documents("stuffs", account, {"_id": stuff_id}, stuff_info)
+
+        # update other
+        self.mongodb_manipulator.update_many_documents("stuffs", account, {"_id": 9}, achieved_stuffs)
+
+        for list_index in range(0, 9):
+            list_name = self.preset_list_name[list_index]
+            self.mongodb_manipulator.update_many_documents("stuffs", account, {"_id": list_index}, all_preset_list[list_name])
 
         if skip_ids:
             return True, "but fail with id-%s" % skip_ids

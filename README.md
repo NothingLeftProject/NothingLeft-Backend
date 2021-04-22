@@ -80,7 +80,28 @@
 - 多语言支持
 - 前端颜色与系统设置 or 本地时间 同步
 - 考虑支持为stuff添加附件，achieved的则自动删除文件（设置中可以设置更多关于附件留存，大小限制的决策）
+- 添加对stuff执行的计时，即「专注模式」
+- 支持Markdown语法显示（丰富的表达）
+- 检查update_document是否直接更新document中的key值，是的话则优化性能
+
 - ！将一直以来缺少的lastOperateTimeStamp的修改都加上（函数特化）
+- 对于GTD的思考：
+  - 我们应当建立一套快速简单的workflow去完成整个GTD流程
+  - 而对于每个部分又可以分别地详细管理，比如inbox页面可以清晰地看到stuff们的情况并知道接下来应该做些什么（去分类？马上去执行？）
+  - 我们还应当提供一个Dashboard，对已经完成了组织的内容进行最重要的展示，次之的则是显示各个部分的近况（Review>Inbox>Classification）
+  - InboxManager强大的功能是为maintainer服务的
+    - Nlu是为一句话stuff服务的，其从中自动填写信息并尽量不出差错的分类，所以也要为提供用户可编辑性
+  - ClassificationManager需要提供的功能仅仅只是对stuff分类罢了
+  - OrganizationManager需要分为「参考资料」和「下一步行动」，实现 行动细化 与 行动链，并提供强大的查询能力
+    - 即Project(stuff细化 or stuff组合)，ActionChain, MoreClear(在哪里执行等等)
+    - ReferenceManager一个参考资料管理系统，保存各种文章、文件、网址，方便使用
+  - Review这个部分主要以报告的形式来实现，用智能的Review来实现定期回顾并不断进步
+  - Tips也是重要的，它需要做到提醒使用者该做些什么并给予使用者一些常用的提示，明确的指导等
+  - 而Tips需要Maintainer和Review合作的指导
+    - Review不只是生成报告，在报告背后的数据才是最重要的，其为每个用户生成画像等等，收集数据，智能分析行为
+    - Maintainer监控整个系统，通过Review这只眼睛来实行适当的措施，督促使用者进步
+  - 有用的Reminder
+  - 本系统应该致力于帮助用户养成GTD的使用习惯 并提供一目了然的行事管理系统与资料管理系统
 
 ### 提交记录-Commit Log
 - 基本完成了user的全部内容，配合数据库
@@ -134,4 +155,4 @@
   - stuff_remove_event_status
 - AchievedPoint: 测试完基本的InboxManager功能
 - 添加了inbox归档功能
-- 优化md5加密性能并修复Enc...一个bug
+- 优化md5加密性能并修复Encryption...一个bug
