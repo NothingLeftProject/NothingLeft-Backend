@@ -82,7 +82,10 @@
 - 考虑支持为stuff添加附件，achieved的则自动删除文件（设置中可以设置更多关于附件留存，大小限制的决策）
 - 添加对stuff执行的计时，即「专注模式」
 - 支持Markdown语法显示（丰富的表达）
-- 检查update_document是否直接更新document中的key值，是的话则优化性能
+- 加上lots的变更
+- stuff先提条件的设定（在用next_stuff连接stuff时，可框定某部分存在信后顺序）
+- 用Project生成更加复杂的行动链（决策组）并管理资料
+- ERROR: 判断stuff之类的存不存在之后再添加，但忘了判断这个stuff是否已经存在于原来的列表中
 
 - ！将一直以来缺少的lastOperateTimeStamp的修改都加上（函数特化）
 - 对于GTD的思考：
@@ -156,3 +159,4 @@
 - AchievedPoint: 测试完基本的InboxManager功能
 - 添加了inbox归档功能
 - 优化md5加密性能并修复Encryption...一个bug
+- 通过修正错误使用update_many_documents优化了性能
