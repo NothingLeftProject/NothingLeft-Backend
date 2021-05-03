@@ -148,7 +148,7 @@ class ClassificationManager:
             cl_info["stuffList"].insert(stuff_id)
 
         # update
-        if self.mongodb_manipulator.update_many_documents("classification", account, {"_id": cl_id}, cl_info) is False:
+        if self.mongodb_manipulator.update_many_documents("classification", account, {"_id": cl_id}, {"stuffList": cl_info["stuffLIst"]}) is False:
             self.log.add_log("ClassificationManager: database error, can't add stuff into classification", 3)
             return False, "database error"
         else:
@@ -195,7 +195,7 @@ class ClassificationManager:
             cl_info["stuffList"].remove(stuff_id)
 
         # update
-        if self.mongodb_manipulator.update_many_documents("classification", account, {"_id": cl_id}, cl_info) is False:
+        if self.mongodb_manipulator.update_many_documents("classification", account, {"_id": cl_id}, {"stuffList": cl_info["stuffList"]}) is False:
             self.log.add_log("ClassificationManager: database error, can't remove stuff from classification", 3)
             return False, "database error"
         else:
