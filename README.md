@@ -11,8 +11,8 @@
     A time management system based on GTD.
 </p>
 <p align="center">
-  <a href="https://nothingleftproject.github.io/ProjectDocs">ProjectDocument</a> | 
-  <a href="https://nothingleftproject.github.io/ProjectDocs/#/usage/README">Usage</a>
+  <a href="http://nl_doc.hadream.ltd">ProjectDocument</a> | 
+  <a href="http://nl_doc.hadream.ltd/#/usage/README">Usage</a>
 </p>
 <p align="center">
     <img src="https://svg.hamm.cn/badge.svg?key=License&&value=Apache2.0">
