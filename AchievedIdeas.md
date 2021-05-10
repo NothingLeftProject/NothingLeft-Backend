@@ -14,3 +14,5 @@
   - 但同时，stuff等此类的事务的createDate和LastOperateTimeStamp仍然需要按照客户端本地时间，这是为了用户的体验所必须的
   
 ### 使用update_document直接更新document中的变更的key值以优化性能
+
+### 将一直以来缺少的lastOperateTimeStamp的修改都加上（函数特化）
