@@ -140,8 +140,12 @@ class ClassificationManager:
             self.mongodb_manipulator.get_document("classification", account, {"_id": cl_id}, 1),
             self.standard_classification_info_keys
         )[0]
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
         for stuff_id in stuff_ids:
-            if self.mongodb_manipulator.is_collection_exist("stuff", stuff_id) is False:
+            if stuff_id not in all_stuff_id_list:
                 self.log.add_log("ClassificationManager: stuff-%s is not exist, skip" % stuff_id, 2)
                 skip_ids.append(stuff_id)
                 continue
@@ -187,8 +191,12 @@ class ClassificationManager:
             self.mongodb_manipulator.get_document("classification", account, {"_id": cl_id}, 1),
             self.standard_classification_info_keys
         )[0]
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
         for stuff_id in stuff_ids:
-            if self.mongodb_manipulator.is_collection_exist("stuff", stuff_id) is False:
+            if stuff_id not in all_stuff_id_list:
                 self.log.add_log("ClassificationManager: stuff-%s is not exist, skip" % stuff_id, 3)
                 skip_ids.append(stuff_id)
                 continue
