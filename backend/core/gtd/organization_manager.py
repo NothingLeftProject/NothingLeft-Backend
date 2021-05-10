@@ -37,7 +37,7 @@ class ExecutableStuffOrganizer:
             "someday": 3
         }
 
-    def add_many_stuff_to_list(self, account, stuff_ids, list_name):
+    def add_many_stuffs_to_list(self, account, stuff_ids, list_name):
 
         """
         添加多个stuff到清单中
@@ -46,7 +46,7 @@ class ExecutableStuffOrganizer:
         :param list_name: 列表名称，支持id或者名字
         :type stuff_ids: list
         :type list_name: int/str
-        :return:
+        :return: bool, str
         """
         self.log.add_log("ExecutableStuffOrganizer: add many stuffs to list-%s, user-%s" % (list_name, account), 1)
         skip_ids = []
@@ -100,7 +100,7 @@ class ExecutableStuffOrganizer:
             else:
                 return True, "success"
 
-    def remove_many_stuff_from_list(self, account, stuff_ids, list_name):
+    def remove_many_stuffs_from_list(self, account, stuff_ids, list_name):
 
         """
         从清单中删除出多个stuff
@@ -109,9 +109,9 @@ class ExecutableStuffOrganizer:
         :param list_name: 列表名称，支持id或者名字
         :type stuff_ids: list
         :type list_name: int/str
-        :return:
+        :return: bool, str
         """
-        self.log.add_log("ExecutableStuffOrganizer: add many stuffs to list-%s, user-%s" % (list_name, account), 1)
+        self.log.add_log("ExecutableStuffOrganizer: remove many stuffs to list-%s, user-%s" % (list_name, account), 1)
         skip_ids = []
 
         # is param in law
@@ -145,7 +145,7 @@ class ExecutableStuffOrganizer:
             ["allIdList"]
         )[0]["allIdList"]
 
-        # add
+        # remove
         for stuff_id in stuff_ids:
             if stuff_id not in all_stuff_id_list or stuff_id not in stuff_list:
                 self.log.add_log("ExecutableStuffOrganizer: stuff-%s does not exist, skip", 2)
@@ -162,3 +162,39 @@ class ExecutableStuffOrganizer:
                 return True, "success, but fail with %s" % skip_ids
             else:
                 return True, "success"
+
+    # Thought
+    # 通过至少一个stuff来创建一个project，可以加入更多stuff或者对一个stuff进行细化
+    # 通过拖拽排列stuff，用各种逻辑关系将stuff连接起来，组成project的行动组
+
+    # 如果不想要这么复杂的project，只是想安排一天的任务，那么可以简单的选中几个stuff创建（也可以细化）行动链，并拖拽表示先后顺序
+    # project与referenceManager配合，实现附件及各种资料与行动的有机结合
+
+    def add_project(self, account, name, stuff_ids, description=None):
+
+        """
+        创建一个项目
+        :param account:
+        :param stuff_ids: stuff的id list
+        :param name: project名字
+        :param description: project的描述
+        :type stuff_ids: list
+        :return: bool, project_id
+        """
+        self.log.add_log("ExecutableStuffOrganizer: create a project for user-%s" % account, 1)
+        skip_ids = []
+
+        # is param in law
+        if type(stuff_ids) != list:
+            self.log.add_log("ExecutableStuffOrganizer: param-stuff_ids type error, it should be a list", 3)
+            return False, "param type error"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("ExecutableStuffOrganizer: user-%s does not exist" % account, 3)
+            return False, "user does not exist"
+
+        # main
+        # load project template
+
+
