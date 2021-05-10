@@ -727,7 +727,7 @@ class InboxManager:
 
         for stuff_id in stuff_ids:
             if stuff_id not in all_stuff_id_list:
-                self.log.add_log("InboxManager: stuff-%s does not exist, skip" % stuff_id, 2)
+                self.log.add_log("InboxManager: stuff-%s does not exist or already achieved, skip" % stuff_id, 2)
                 stuff_ids.remove(stuff_id)
                 skip_ids.append(stuff_id)
                 continue
@@ -905,37 +905,6 @@ class InboxManager:
             res = True
             err = "success"
         return res, err
-
-    def set_many_stuffs_level(self, account, stuff_ids, level):
-
-        """
-        设置多个stuffs的level(好像没有必要做)——放弃
-        :param account: 用户名
-        :param stuff_ids:
-        :param level: 级别 int
-        :return: bool, str
-        """
-        # is param in law
-        if type(stuff_ids) != list:
-            self.log.add_log("InboxManager: type error with param-stuff_ids", 3)
-            return False, "type error with param-stuff_ids"
-        if type(level) != int:
-            self.log.add_log("InboxManager: type error with param-level", 3)
-            return False, "type error with param-level"
-
-        self.log.add_log("InboxManager: set user-%s 's stuffs level to %s" % account, level, 1)
-        skip_ids = []
-
-        # is account exist
-        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
-            self.log.add_log("InboxManager: user-%s does not exist" % account, 3)
-            return False, "user-%s does not exist" % account
-
-        # start
-        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
-            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
-            ["allIdList"]
-        )[0]["allIdList"]
 
     def add_events(self, account, stuff_id, start_indexes, end_indexes):
 
