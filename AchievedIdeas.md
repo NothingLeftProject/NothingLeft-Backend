@@ -16,3 +16,5 @@
 ### 使用update_document直接更新document中的变更的key值以优化性能
 
 ### 将一直以来缺少的lastOperateTimeStamp的修改都加上（函数特化）
+
+### ERROR: 判断stuff之类的存不存在之后再添加，但忘了判断这个stuff是否已经存在于原来的列表中

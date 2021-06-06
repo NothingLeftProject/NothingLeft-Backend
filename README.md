@@ -84,8 +84,13 @@
 - 支持Markdown语法显示（丰富的表达）
 - stuff先提条件的设定（在用next_stuff连接stuff时，可框定某部分存在信后顺序）
 - 用Project生成更加复杂的行动链（决策组）并管理资料
-- ERROR: 判断stuff之类的存不存在之后再添加，但忘了判断这个stuff是否已经存在于原来的列表中
 - 多维的数据检索
+- 为stuff添加"domain"以指明stuff涉及的知识域
+- TimePanel的设计
+- inbox未achieve stuff的数量限制
+- 对organization中的内容进行tag标记以快速查找
+- 时间词替换："今天"=>2021.5.30 2021.5.31=>"昨天"
+- http请求请多个命令一条请求，不要多个http并发
 - ！在变更stuff得内容时，注意event也需要跟着变动，以防出现bug
 
 - 对于GTD的思考：
