@@ -640,7 +640,9 @@ class InboxManager:
                 skip_ids.append(stuff_id)
                 continue
 
-            self.mongodb_manipulator.delete_many_documents("stuff", account, {"_id": stuff_id})
+            if self.mongodb_manipulator.delete_many_documents("stuff", account, {"_id": stuff_id}) is False:
+                self.log.add_log("InboxManager: stuff delete fail, skip", 3)
+                skip_ids.append(stuff_id)
 
         # delete id in the preset_lists
         for list_id in range(0, 9):
