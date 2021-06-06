@@ -194,6 +194,9 @@ class ExecutableStuffOrganizer:
         if type(stuff_ids) != list:
             self.log.add_log("ExecutableStuffOrganizer: param-stuff_ids type error, it should be a list", 3)
             return False, "param type error"
+        if type(reference_ids) != list:
+            self.log.add_log("ExecutableStuffOrganizer: param-reference_ids type error, it should be a list", 3)
+            return False, "param type error"
 
         # is account exist
         if self.mongodb_manipulator.is_collection_exist("user", account) is False:
@@ -208,7 +211,7 @@ class ExecutableStuffOrganizer:
             ["projectIds"]
         )[0]["projectIds"]
         while project_id in all_project_ids:
-            self.log.add_log("OrganizationManager: project_id conflict, regenerate", 1)
+            self.log.add_log("ExecutableStuffOrganizer: project_id conflict, regenerate", 1)
             project_id = self.encryption.md5("project_" + name + self.encryption.generate_random_key())
         
         # is stuff_ids/reference_ids exist
@@ -218,14 +221,14 @@ class ExecutableStuffOrganizer:
         )[0]["allIdList"]
         for stuff_id in stuff_ids:
             if stuff_id not in all_stuff_id_list:
-                self.log.add_log("OrganizationManager: stuff-%s does not exist, skip", % stuff_id, 2)
+                self.log.add_log("ExecutableStuffOrganizer: stuff-%s does not exist, skip" % stuff_id, 2)
                 skip_ids.append(stuff_id)
                 stuff_ids.remove(stuff_id)
 
         if reference_ids:
             for reference_id in reference_ids:
                 if reference_id not in all_stuff_id_list:
-                    self.log.add_log("OrganizationManager: reference-%s does not exist, skip", % reference_id, 2)
+                    self.log.add_log("ExecutableStuffOrganizer: reference-%s does not exist, skip" % reference_id, 2)
                     skip_ids.append(reference_id)
                     reference_ids.remove(reference_id)
 
@@ -239,11 +242,11 @@ class ExecutableStuffOrganizer:
         project_info["lastOperateTimeStamp"] = lots
         project_info["status"] = "just_created"
         project_info["stuffList"] = stuff_ids
-        project_info["referenceList"] = reference_list
+        project_info["referenceList"] = reference_ids
 
         # update database
         if not self.mongodb_manipulator.add_one_document("organization", account, project_info):
-            self.log.add_log("OrganizationManager: meet database error while adding project", 3)
+            self.log.add_log("ExecutableStuffOrganizer: meet database error while adding project", 3)
             return False, "database error"
         else:
             if skip_ids:
@@ -259,12 +262,12 @@ class ExecutableStuffOrganizer:
         :type project_ids: list
         :return bool, str
         """
-        self.log.add_log("OrganizationManager: delete many project in user-%s" % account, 1)
+        self.log.add_log("ExecutableStuffOrganizer: delete many project in user-%s" % account, 1)
         skip_ids = []
 
         # is param in law
         if type(project_ids) != list:
-            self.log.add_log("OrganizationManager: param-project_ids type error, it should be a list", 3)
+            self.log.add_log("ExecutableStuffOrganizer: param-project_ids type error, it should be a list", 3)
             return False, "param type error"
 
         # is account exist
@@ -280,7 +283,7 @@ class ExecutableStuffOrganizer:
 
         for project_id in project_ids:
             if project_id not in all_project_ids:
-                self.log.add_log("OrganizationManager: project-%s does not exist, skip", 2)
+                self.log.add_log("ExecutableStuffOrganizer: project-%s does not exist, skip", 2)
                 skip_ids.append(project_id)
                 continue
             self.mongodb_manipulator.delete_many_documents("organization", account, {"_id": project_id})
@@ -293,3 +296,127 @@ class ExecutableStuffOrganizer:
             return True, "but fail with proejct-%s" % skip_ids
         else:
             return True, "success"
+
+    def add_action_chain(self, account, name, lots, create_date, stuff_ids, description=None, reference_ids=[]):
+
+        """
+        添加行动链
+        :param account:
+        :param name: 名称
+        :param lots: 客户端创建的时间戳
+        :param create_date: 客户端创建时的日期
+        :param stuff_ids: 
+        :param description:
+        :param reference_ids: 
+        :type stuff_ids: list
+        :type reference_ids: list
+        :return bool, str
+        """
+        self.log.add_log("ExecutableStuffOrganizer: add action chain for user-%s " % account, 1)
+        skip_ids = []
+
+        # is param in law
+        if type(stuff_ids) != list:
+            self.log.add_log("ExecutableStuffOrganizer: param-stuff_ids type error, it should be a list", 3)
+            return False, "param type error"
+        if type(reference_ids) != list:
+            self.log.add_log("ExecutableStuffOrganizer: param-reference_ids type error, it should be a list", 3)
+            return False, "param type error"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("ExecutableStuffOrganizer: user-%s does not exist" % account, 3)
+            return False, "user does not exist"
+        
+        # is stuff_ids/reference_ids exist
+        all_stuff_id_list = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+            ["allIdList"]
+        )[0]["allIdList"]
+        for stuff_id in stuff_ids:
+            if stuff_id not in all_stuff_id_list:
+                self.log.add_log("ExecutableStuffOrganizer: stuff-%s does not exist, skip" % stuff_id, 2)
+                skip_ids.append(stuff_id)
+                stuff_ids.remove(stuff_id)
+
+        if reference_ids:
+            for reference_id in reference_ids:
+                if reference_id not in all_stuff_id_list:
+                    self.log.add_log("ExecutableStuffOrganizer: reference-%s does not exist, skip" % reference_id, 2)
+                    skip_ids.append(reference_id)
+                    reference_ids.remove(reference_id)
+
+        # main
+        # generate chain_id
+        chain_id = self.encryption.md5("chain_" + name + self.encryption.generate_random_key())
+        all_chain_ids = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("organization", account, {"actionChainIds": 1}, 2),
+            ["actionChainIds"]
+        )[0]["actionChainIds"]
+        while chain_id in all_chain_ids:
+            self.log.add_log("ExecutableStuffOrganizer: chain_id conflict, regenerate", 1)
+            chain_id = self.encryption.md5("chain_" + name + self.encryption.generate_random_key())
+
+        # load action chain info
+        chain_info = json.load(open("./backend/data/json/action_chain_info_template.json", "r", encoding="utf-8"))
+        chain_info["name"] = name
+        chain_info["description"] = description
+        chain_info["lastOperateTimeStamp"] = lots
+        chain_info["createDate"] = create_date
+        chain_info["_id"] = chain_id
+        chain_info["chainId"] = chain_id
+        chain_info["status"] = "just_create"
+        chain_info["stuffList"] = stuff_ids
+        chain_info["referenceList"] = reference_ids
+
+        # update to database
+        if not self.mongodb_manipulator.add_one_document("organization", account, chain_info):
+            self.log.add_log("ExecutableStuffOrganizer: meet database error while adding action chain", 3)
+            return False, "database error"
+        else:
+            if skip_ids:
+                return True, "but %s can't be add in" % skip_ids
+            return True, "success"
+
+    def delete_many_action_chains(self, account, chain_ids):
+
+        """
+        删除多个行动链
+        :param account: 
+        :param chain_ids: 要删除的行动链id
+        :return bool, str
+        """
+        self.log.add_log("ExecutableStuffOrganizer: delete action chain for user-%s" % account, 1)
+        skip_ids = []
+
+        # is param in law
+        if type(chain_ids) != list:
+            self.log.add_log("ExecutableStuffOrganizer: param-chain_ids type error, it should be a list", 3)
+            return False, "param type error"
+
+        # is account exist
+        if self.mongodb_manipulator.is_collection_exist("user", account) is False:
+            self.log.add_log("ExecutableStuffOrganizer: user-%s does not exist" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # main
+        all_chain_ids = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("organization", account, {"actionChainIds": 1}, 2),
+            ["actionChainIds"]
+        )[0]["actionChainIds"]
+        for chain_id in chain_ids:
+            if chain_id not in all_chain_ids:
+                self.log.add_log("ExecutableStuffOrganizer: chain-%s is not exist, skip" % chain_id, 2)
+                skip_ids.append(chain_id)
+                continue
+            self.mongodb_manipulator.delete_many_documents("organization", account, {"_id": chain_id})
+            all_chain_ids.remove(chain_id)
+
+        
+        if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": 2}, {"chainIds": all_chain_ids}):
+            self.log.add_log("ExecutableStuffOrganizer：database error, can't update preset_list", 3)
+            return False, "database error"
+        
+        if skip_ids:
+            return True, "but fail with %s" % skip_ids
+        return True, "success"
