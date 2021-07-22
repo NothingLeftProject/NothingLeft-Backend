@@ -471,7 +471,7 @@ class ExecutableStuffOrganizer:
             :type mandatory_operation: bool
             :return: bool, str
             """
-            self.log.add_log("ExecutableStuffOrganizer: %s %s stuff reference list" % (operation, type_), 1)
+            self.log.add_log("ExecutableStuffOrganizer: modify_stuff_reference_list: %s %s stuff reference list" % (operation, type_), 1)
             if type(ids) != list:
                 self.log.add_log("ExecutableStuffOrganizer: type error, param-ids should be a list", 3)
                 return False, "param-ids type error"
@@ -572,7 +572,7 @@ class ExecutableStuffOrganizer:
             :type ids: list
             :return: bool, str
             """
-            self.log.add_log("ExecutableStuffOrganizer: %s chunks" % operation, 1)
+            self.log.add_log("ExecutableStuffOrganizer: modify_chunk_list: %s chunks" % operation, 1)
 
             # is param in law
             if operation == "add":
@@ -587,7 +587,12 @@ class ExecutableStuffOrganizer:
                     chunk_info_template["type"] = chunk_type
                     chunk_info_template["last"] = raw_info["last"]
                     chunk_info_template["next"] = raw_info["next"]
-                    # step.3 is content completed
+                    try:
+                        chunk_info_template["relateTo"] = raw_info["relateTo"]
+                    except KeyError:
+                        pass
+
+                    # step.2 is content completed
                     content = raw_info["content"]
                     if chunk_type == "stuff":
                         check_event = ["stuffId"]
@@ -606,6 +611,33 @@ class ExecutableStuffOrganizer:
                         except KeyError:
                             self.log.add_log("ExecutableStuffOrganizer: in the chunk_type-%s, %s is necessary in the param-content" % (chunk_type, event), 3)
                             return False, "chunk_content does not completed"
+                    chunk_info_template["content"] = content
+
+                    # step.3 generate chunk id
+                    project_info = self.mongodb_manipulator.parse_document_result(
+                        self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
+                        ["projectId"]
+                    )[0]
+                    chunk_id = self.encryption.md5(project_info["chunkCounts"]+1 + self.encryption.generate_random_key())
+                    while chunk_id in project_info["chunkIdList"]:
+                        chunk_id = self.encryption.md5(project_info["chunkCounts"] + 1 + self.encryption.generate_random_key())
+                    chunk_info_template["chunkId"] = chunk_id
+
+                    chunk_list = project_info["chunkList"]
+                    chunk_list.append(chunk_info_template)
+
+                    # step.4 update to database
+                    self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id},
+                                                                   {"chunkList": chunk_list,
+                                                                    "chunkCount": project_info["chunkCount"]+1,
+                                                                    "chunkIdList": project_info["chunkIdList"].append(chunk_id)
+                                                                    })
+            elif operation == "delete":
+                pass
+            else:
+                self.log.add_log("ExecutableStuffOrganizer: unknown operation-%s, exit" % operation, 3)
+                return False, "unknown operation-%s" % operation
+
 
         def modify_cs_list(operation, ids=None, info=None):
 
