@@ -6,9 +6,10 @@
   "createdDate": "",
   "lastOperateTimeStamp": "",
   "status": "",
+  "chunkCount": 0,
   "stuffList": [],
   "referenceList": [],
-  "chunkList": [],
+  "chunkList": {},
   "connectiveStructeList": [],
   "workflow": ""
 }
