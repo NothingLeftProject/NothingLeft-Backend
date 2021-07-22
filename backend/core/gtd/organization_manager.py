@@ -523,14 +523,14 @@ class ExecutableStuffOrganizer:
                     # step.2 is the id in using
                     using = False
                     index_id = project_info[type_].index(the_id)
-                    for chunk_id in range(0, project_info["chunkCount"]):
+                    for chunk_id in project_info["chunkIdList"]:
                         chunk_info = project_info["chunkList"][chunk_id]
                         chunk_type = chunk_info["type"]
-                        if chunk_type == "stuff" or chunk_type == "stuff_cs":
+                        if chunk_type == 0 or chunk_type == 2:
                             if index_id in chunk_info["content"]["stuffId"]:
                                 using = True
                                 break
-                        elif chunk_type == "reference":
+                        elif chunk_type == 1:
                             if index_id in chunk_info["content"]["referenceId"]:
                                 using = True
                                 break
@@ -541,7 +541,8 @@ class ExecutableStuffOrganizer:
                             now_operation_list.remove(the_id)
                         else:
                             self.log.add_log("ExecutableStuffOrganizer: %s-%s is still using, ask for confirmation", 2)
-                            return False, "ask: operation is still using, need confirmation"
+                            return False, {"operation": "ask",
+                                           "case": "001"}
                     else:
                         # step.3 delete
                         now_operation_list.remove(the_id)
