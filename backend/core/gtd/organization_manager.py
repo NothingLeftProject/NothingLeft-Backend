@@ -526,17 +526,21 @@ class ExecutableStuffOrganizer:
                     for chunk_id in project_info["chunkIdList"]:
                         chunk_info = project_info["chunkList"][chunk_id]
                         chunk_type = chunk_info["type"]
-                        if chunk_type == 0 or chunk_type == 2:
-                            if index_id in chunk_info["content"]["stuffId"]:
+                        if chunk_type == 0:
+                            if index_id == chunk_info["content"]["stuffId"]:
                                 using = True
                                 break
                         elif chunk_type == 1:
-                            if index_id in chunk_info["content"]["referenceId"]:
+                            if index_id == chunk_info["content"]["referenceId"]:
+                                using = True
+                                break
+                        elif chunk_type == 2:
+                            if index_id in chunk_info["content"]["stuffIdList"]:
                                 using = True
                                 break
                     if using:
                         if mandatory_operation:
-                            self.log.add_log("ExecutableStuffOrganizer: %s-%s is still using, mandatory operation may cause bad situation" % (type_, the_id), 2)
+                            self.log.add_log("ExecutableStuffOrganizer: %s-%s is still using, mandatory operation will also makes it being removed in workflow" % (type_, the_id), 2)
                             # step.3 mandatory delete
                             now_operation_list.remove(the_id)
                         else:
@@ -568,6 +572,40 @@ class ExecutableStuffOrganizer:
             :type ids: list
             :return: bool, str
             """
+            self.log.add_log("ExecutableStuffOrganizer: %s chunks" % operation, 1)
+
+            # is param in law
+            if operation == "add":
+                if type(info) != list or type(info[0]) != dict:
+                    self.log.add_log("ExecutableStuffOrganizer: type error, in the operation-add, param-info must be a list and its elements must be dict", 3)
+                    return False, "type error, operation-add requires info in type-list and its elements in type-dict"
+                for raw_info in info:
+                    # create a new chunk
+                    chunk_info_template = json.load(open("./backend/data/json/project_chunk_info_template.json", "r", encoding="utf-8"))
+                    # step.1 load params
+                    chunk_type = raw_info["type"]
+                    chunk_info_template["type"] = chunk_type
+                    chunk_info_template["last"] = raw_info["last"]
+                    chunk_info_template["next"] = raw_info["next"]
+                    # step.3 is content completed
+                    content = raw_info["content"]
+                    if chunk_type == "stuff":
+                        check_event = ["stuffId"]
+                    elif chunk_type == "reference":
+                        check_event = ["referenceId"]
+                    elif chunk_type == "stuff_cs":
+                        check_event = ["stuffIdList", "csId"]
+                    elif chunk_type == "chunk_cs":
+                        check_event = ["csId", "chunkIdList"]
+                    else:
+                        self.log.add_log("ExecutableStuffOrganizer: chunk_type-%s does not supported, exit" % chunk_type, 3)
+                        return False, "unknown value of chunk_type"
+                    for event in check_event:
+                        try:
+                            content[event]
+                        except KeyError:
+                            self.log.add_log("ExecutableStuffOrganizer: in the chunk_type-%s, %s is necessary in the param-content" % (chunk_type, event), 3)
+                            return False, "chunk_content does not completed"
 
         def modify_cs_list(operation, ids=None, info=None):
 
