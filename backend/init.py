@@ -26,6 +26,7 @@ class BaseAbilities:
         self.memcached_manipulator = MemcachedManipulator(self.log, self.setting)
         self.encryption = Encryption()
 
+
 class BackendInit:
 
     def __init__(self):
