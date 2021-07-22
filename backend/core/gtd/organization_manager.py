@@ -4,6 +4,7 @@
 # date: 2021/4/18
 
 from backend.database.mongodb import MongoDBManipulator
+from backend.core.gtd.classification_manager import ClassificationManager
 # from backend.data.encryption import Encryption
 
 import json
@@ -32,6 +33,7 @@ class ExecutableStuffOrganizer:
         # self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
         self.mongodb_manipulator = MongoDBManipulator(self.log, self.setting)
         self.encryption = self.base_abilities.encryption
+        self.classification_manager = ClassificationManager(base_abilities)
 
         self.all_list_name_id_list = {
             "next": 1,
@@ -411,7 +413,6 @@ class ExecutableStuffOrganizer:
                 continue
             self.mongodb_manipulator.delete_many_documents("organization", account, {"_id": chain_id})
             all_chain_ids.remove(chain_id)
-
         
         if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": 2}, {"chainIds": all_chain_ids}):
             self.log.add_log("ExecutableStuffOrganizer：database error, can't update preset_list", 3)
@@ -420,3 +421,179 @@ class ExecutableStuffOrganizer:
         if skip_ids:
             return True, "but fail with %s" % skip_ids
         return True, "success"
+
+    def modify_project_info(self, account, project_id, mode, param):
+
+        """
+        修改project的信息
+        :param account: 用户名
+        :param project_id: projectid
+        :param mode: 操作 1：modify_stuf_ref_list 2: modify_chunk_list 3: modify_cs_list 4: modify_chain_list
+        :param param: 参数
+        :type param: dict
+        :type mode: str/int
+        :return: bool/str
+        """
+        self.log.add_log("ExecutableStuffOrganizer: modify_project_info in mode-%s" % mode, 1)
+
+        # is param in law
+        if type(mode) != int or type(mode) != str:
+            self.log.add_log("ExecutableStuffOrganizer: param-mode type error, it should be a int or str", 3)
+            return False, "param-mode type error"
+        if type(param) != dict:
+            self.log.add_log("ExecutableStuffOrganizer: param-param type error, it should be a dict", 3)
+            return False, "param-param type error"
+
+        # is account exist
+        if not self.mongodb_manipulator.is_collection_exist("user", account):
+            self.log.add_log("ExecutableStuffOrganizer: user-%s does not exist, quit" % account, 3)
+            return False, "user-%s does not exist" % account
+
+        # main
+        # is project exist
+        all_chain_ids = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("organization", account, {"projectIds": 1}, 2),
+            ["projectIds"]
+        )[0]["projectIds"]
+        if project_id not in all_chain_ids:
+            self.log.add_log("ExecutableStuffOrganizer: project-%s does not exist, quit" % project_id, 3)
+            return False, "project-%s does not exist" % project_id
+
+        # init func
+        def modify_stuff_reference_list(type_, operation, ids, mandatory_operation):
+
+            """
+            修改stuff/reference列表内容
+            :param type_: 是修改stuff还是reference
+            :param operation: 操作：添加/删除
+            :param ids: 要添加/删除的
+            :param mandatory_operation: 是否强制操作
+            :type mandatory_operation: bool
+            :return: bool, str
+            """
+            self.log.add_log("ExecutableStuffOrganizer: %s %s stuff reference list" % (operation, type_), 1)
+            if type(ids) != list:
+                self.log.add_log("ExecutableStuffOrganizer: type error, param-ids should be a list", 3)
+                return False, "param-ids type error"
+            if type(mandatory_operation) != bool:
+                self.log.add_log("ExecutableStuffOrganizer: type error, param-mandatory_operation should be a bool", 1)
+                return False, "param-mandatory_operation type error"
+
+            # init the type_
+            if type_ == "stuff":
+                type_ = "stuffList"
+                all_ids_list = self.mongodb_manipulator.parse_document_result(
+                    self.mongodb_manipulator.get_document("stuff", account, {"allIdList": 1}, 2),
+                    ["allIdList"]
+                )[0]["allIdList"]
+            elif type_ == "reference":
+                type_ = "referenceList"
+                re_cl_id = self.classification_manager.cl_name_converter(account, type_, "parent")
+                all_ids_list = self.classification_manager.get_classifications_stuffs(account, [re_cl_id])[re_cl_id]
+            else:
+                self.log.add_log("ExecutableStuffOrganizer: unknown value of param-type_, exit", 3)
+                return False, "unknown value of param-type_"
+
+            now_operation_list = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
+                ["projectId"]
+            )[0][type_]
+            if operation == "add":
+                # append ids into the list
+                for the_id in ids:
+                    # step.1 is the id exist
+                    if the_id not in all_ids_list:
+                        self.log.add_log("ExecutableStuffOrganizer: %s does not exist, skip" % the_id, 2)
+                        continue
+                    # step.2 is the id already exist in the list
+                    if the_id in now_operation_list:
+                        self.log.add_log("ExecutableStuffOrganizer: %s does already exist in the %s list, skip" % (the_id, type_), 2)
+                        continue
+                    # step.3 append
+                    now_operation_list.append(the_id)
+
+            elif operation == "delete":
+                # delete ids from the list
+                for the_id in ids:
+                    # step.1 is the id exist in the list
+                    if the_id in now_operation_list:
+                        self.log.add_log("ExecutableStuffOrganizer: %s does already exist in the %s list, skip" % (the_id, type_), 2)
+                        continue
+                    # step.2 delete
+                    now_operation_list.remove(the_id)
+            else:
+                self.log.add_log("ExecutableStuffOrganizer: unknown operation-%s, exit" % operation, 3)
+                return False, "unknown operation"
+
+            # step.5 update to database
+            if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id}, {type_: now_operation_list}):
+                self.log.add_log("ExecutableStuffOrganizer: database error, can't update the changes to database", 3)
+                return False, "database error, can't update the changes to database"
+            else:
+                return True, "success"
+
+        def modify_chunk_list(operation, ids=None, info=None):
+
+            """
+            修改chunk列表
+            :param operation: 操作：添加/删除
+            :param ids: 删除时填写
+            :param info: 添加时填写
+            :type info: list[dict, dict]
+            :type ids: list
+            :return: bool, str
+            """
+
+        def modify_cs_list(operation, ids=None, info=None):
+
+            """
+            修改connection_structure列表
+            :param operation: 操作：添加/删除
+            :param ids: 删除时填写
+            :param info: 添加时填写
+            :type info: list[dict, dict]
+            :type ids: list
+            :return: bool, str
+            """
+
+        def modify_chain_list(operation, ids=None, info=None):
+
+            """
+            修改chain列表
+            :param operation: 操作：添加/删除
+            :param ids: 删除时填写
+            :param info: 添加时填写
+            :type info: list[dict, dict]
+            :type ids: list
+            :return: bool, str
+            """
+
+        # assign functions based on mode
+
+        if mode == 1 or mode == "modify_stu_ref_list":
+            try:
+                mandatory_operation = param["mandatory_operation"]
+            except KeyError:
+                mandatory_operation = True
+            return modify_stuff_reference_list(param["type"], param["operation"], param["ids"], mandatory_operation)
+        else:
+            optional_param = ["ids", "info"]
+            ids, info = None, None
+            for key in optional_param:
+                try:
+                    if key == "ids":
+                        ids = param["ids"]
+                    elif key == "info":
+                        info = param["info"]
+                except KeyError:
+                    pass
+            if mode == 2 or mode == "modify_chunk_list":
+                return modify_chunk_list(param["operation"], ids=ids, info=info)
+            elif mode == 3 or mode == "modify_cs_list":
+                return modify_cs_list(param["operation"], ids=ids, info=info)
+            elif mode == 4 or mode == "modify_chain_list":
+                return modify_chain_list(param["operation"], ids=ids, info=info)
+            else:
+                self.log.add_log("ExecutableStuffOrganizer: mode-%s does not supported in modify_project_workflow, exit" % mode, 3)
+                return False, "mode-%s does not supported"
+
