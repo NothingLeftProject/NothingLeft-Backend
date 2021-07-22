@@ -428,7 +428,7 @@ class ExecutableStuffOrganizer:
         修改project的信息
         :param account: 用户名
         :param project_id: projectid
-        :param mode: 操作 1：modify_stuf_ref_list 2: modify_chunk_list 3: modify_cs_list 4: modify_chain_list
+        :param mode: 操作 1：modify_stu_ref_list 2: modify_chunk_list 3: modify_cs_list 4: modify_chain_list
         :param param: 参数
         :type param: dict
         :type mode: str/int
@@ -494,10 +494,11 @@ class ExecutableStuffOrganizer:
                 self.log.add_log("ExecutableStuffOrganizer: unknown value of param-type_, exit", 3)
                 return False, "unknown value of param-type_"
 
-            now_operation_list = self.mongodb_manipulator.parse_document_result(
+            project_info = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
                 ["projectId"]
-            )[0][type_]
+            )[0]
+            now_operation_list = project_info[type_]
             if operation == "add":
                 # append ids into the list
                 for the_id in ids:
@@ -519,8 +520,31 @@ class ExecutableStuffOrganizer:
                     if the_id in now_operation_list:
                         self.log.add_log("ExecutableStuffOrganizer: %s does already exist in the %s list, skip" % (the_id, type_), 2)
                         continue
-                    # step.2 delete
-                    now_operation_list.remove(the_id)
+                    # step.2 is the id in using
+                    using = False
+                    index_id = project_info[type_].index(the_id)
+                    for chunk_id in range(0, project_info["chunkCount"]):
+                        chunk_info = project_info["chunkList"][chunk_id]
+                        chunk_type = chunk_info["type"]
+                        if chunk_type == "stuff" or chunk_type == "stuff_cs":
+                            if index_id in chunk_info["content"]["stuffId"]:
+                                using = True
+                                break
+                        elif chunk_type == "reference":
+                            if index_id in chunk_info["content"]["referenceId"]:
+                                using = True
+                                break
+                    if using:
+                        if mandatory_operation:
+                            self.log.add_log("ExecutableStuffOrganizer: %s-%s is still using, mandatory operation may cause bad situation" % (type_, the_id), 2)
+                            # step.3 mandatory delete
+                            now_operation_list.remove(the_id)
+                        else:
+                            self.log.add_log("ExecutableStuffOrganizer: %s-%s is still using, ask for confirmation", 2)
+                            return False, "ask: operation is still using, need confirmation"
+                    else:
+                        # step.3 delete
+                        now_operation_list.remove(the_id)
             else:
                 self.log.add_log("ExecutableStuffOrganizer: unknown operation-%s, exit" % operation, 3)
                 return False, "unknown operation"
