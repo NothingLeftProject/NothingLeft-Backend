@@ -70,13 +70,13 @@
   - QQ: 1481605673
 
 ### 想法区(完成即清除)
-- 分类-trashList中的stuff状态自动变成cancel
+- 分类-trashList中的stuff状态自动变成cancel ⭐
 - maintainer需要去监控各种动向，并根据不同的动向做出不同决策以自动维护整个系统
   - 变更即通知maintainer
   - 根据明显的stuff特征自动分类
   - 自动生成行动链
   - 提供行动模板（共享市场规划）
-- 使用memecached加快运行速度
+- 使用memcached加快运行速度 ⭐
 - 多语言支持
 - 前端颜色与系统设置 or 本地时间 同步
 - 考虑支持为stuff添加附件，achieved的则自动删除文件（设置中可以设置更多关于附件留存，大小限制的决策）
@@ -84,14 +84,13 @@
 - 支持Markdown语法显示（丰富的表达）
 - stuff先提条件的设定（在用next_stuff连接stuff时，可框定某部分存在信后顺序）
 - 用Project生成更加复杂的行动链（决策组）并管理资料
-- 多维的数据检索
-- 为stuff添加"domain"以指明stuff涉及的知识域
+- 多维的检索引擎
+- 为stuff添加"domain"以指明stuff涉及的知识域 ⭐
 - TimePanel的设计
-- inbox未achieve stuff的数量限制
-- 对organization中的内容进行tag标记以快速查找
+- inbox未achieve stuff的数量限制支持 ⭐
+- 对organization中的内容进行tag标记以快速查找 ⭐
 - 时间词替换："今天"=>2021.5.30 2021.5.31=>"昨天"
-- http请求请多个命令一条请求，不要多个http并发
-- ！在变更stuff得内容时，注意event也需要跟着变动，以防出现bug
+- ！在变更stuff的内容时，注意event也需要跟着变动，以防出现bug
 
 - 对于GTD的思考：
   - 我们应当建立一套快速简单的workflow去完成整个GTD流程
@@ -165,3 +164,5 @@
 - 添加了inbox归档功能
 - 优化md5加密性能并修复Encryption...一个bug
 - 通过修正错误使用update_many_documents优化了性能
+- 设计了Organization-Project架构，加入chain/chunk/connective_structure等概念
+- 完成了70%的Organization-Project-v1.0计划
