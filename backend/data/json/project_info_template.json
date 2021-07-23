@@ -7,6 +7,8 @@
   "lastOperateTimeStamp": "",
   "status": "",
   "chunkCount": 0,
+  "connectiveStructureCount": 0,
+  "chainCount": 0,
   "stuffList": [],
   "referenceList": [],
   "connectiveStructureIdList": [],
