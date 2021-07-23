@@ -540,11 +540,11 @@ class ExecutableStuffOrganizer:
                                 break
                     if using:
                         if mandatory_operation:
-                            self.log.add_log("ExecutableStuffOrganizer: %s-%s is still using, mandatory operation will also makes it being removed in workflow" % (type_, the_id), 2)
+                            self.log.add_log("ExecutableStuffOrganizer: %s-%s is in use, mandatory operation will also makes it being removed in workflow" % (type_, the_id), 2)
                             # step.3 mandatory delete
                             now_operation_list.remove(the_id)
                         else:
-                            self.log.add_log("ExecutableStuffOrganizer: %s-%s is still using, ask for confirmation", 2)
+                            self.log.add_log("ExecutableStuffOrganizer: %s-%s is in use, ask for confirmation", 2)
                             return False, {"operation": "ask",
                                            "case": "001"}
                     else:
@@ -574,14 +574,21 @@ class ExecutableStuffOrganizer:
             """
             self.log.add_log("ExecutableStuffOrganizer: modify_chunk_list: %s chunks" % operation, 1)
 
+            project_info = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
+                ["projectId"]
+            )[0]
+
             # is param in law
             if operation == "add":
                 if type(info) != list or type(info[0]) != dict:
                     self.log.add_log("ExecutableStuffOrganizer: type error, in the operation-add, param-info must be a list and its elements must be dict", 3)
                     return False, "type error, operation-add requires info in type-list and its elements in type-dict"
+
+                chunk_info_template_raw = json.load(open("./backend/data/json/project_chunk_info_template.json", "r", encoding="utf-8"))
                 for raw_info in info:
-                    # create a new chunk
-                    chunk_info_template = json.load(open("./backend/data/json/project_chunk_info_template.json", "r", encoding="utf-8"))
+                    chunk_info_template = chunk_info_template_raw
+                    # add new chunks
                     # step.1 load params
                     chunk_type = raw_info["type"]
                     chunk_info_template["type"] = chunk_type
@@ -614,30 +621,64 @@ class ExecutableStuffOrganizer:
                     chunk_info_template["content"] = content
 
                     # step.3 generate chunk id
-                    project_info = self.mongodb_manipulator.parse_document_result(
-                        self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
-                        ["projectId"]
-                    )[0]
                     chunk_id = self.encryption.md5(project_info["chunkCounts"]+1 + self.encryption.generate_random_key())
                     while chunk_id in project_info["chunkIdList"]:
                         chunk_id = self.encryption.md5(project_info["chunkCounts"] + 1 + self.encryption.generate_random_key())
                     chunk_info_template["chunkId"] = chunk_id
 
-                    chunk_list = project_info["chunkList"]
-                    chunk_list.append(chunk_info_template)
+                    project_info["chunkList"][chunk_id] = chunk_info_template
+                    project_info["chunkIdList"].append(chunk_id)
+                    project_info["chunkCount"] += 1
 
-                    # step.4 update to database
-                    self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id},
-                                                                   {"chunkList": chunk_list,
-                                                                    "chunkCount": project_info["chunkCount"]+1,
-                                                                    "chunkIdList": project_info["chunkIdList"].append(chunk_id)
-                                                                    })
             elif operation == "delete":
-                pass
+                # delete chunks
+                chain_id_list = project_info["chainIdList"]
+                for chunk_id in ids:
+                    # step.1 is chunk id exist
+                    if chunk_id not in project_info["chunkIdList"]:
+                        self.log.add_log("ExecutableStuffOrganizer: chunk-%s does not exist, skip" % chunk_id, 2)
+                        continue
+
+                    # step.2 is chunk in using
+                    using = False
+                    for chain_id in chain_id_list:
+                        content = project_info["chainList"][chain_id]["content"]
+                        if chunk_id in content:
+                            content_list = content.split("-")
+                            node = content_list.index(chunk_id)
+                            next_chunk_id = content_list[node+1]
+                            last_chunk_id = content_list[node-1]
+                            using = True
+                            break
+
+                    if using:
+                        # step.3 delete chunk in use
+                        self.log.add_log("ExecutableStuffOrganizer: chunk-%s is in use, delete will cause autofix", 2)
+
+                        # step.3-1 make the next chunk connect to last chunk
+                        project_info["chunkList"][next_chunk_id]["last"] = last_chunk_id
+                        # step.3-2 make the last chunk connect to next chunk
+                        project_info["chunkList"][last_chunk_id]["next"] = next_chunk_id
+
+                    # step.3 delete chunk in normal
+                    del project_info["chunkList"][chunk_id]
+                    project_info["chunkIdList"].remove(chunk_id)
+                    project_info["chunkCount"] -= 1
+
             else:
                 self.log.add_log("ExecutableStuffOrganizer: unknown operation-%s, exit" % operation, 3)
                 return False, "unknown operation-%s" % operation
 
+            # step.4 update to database
+            if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id},
+                                                           {"chunkList": project_info["chunkList"],
+                                                            "chunkCount": project_info["chunkCount"],
+                                                            "chunkIdList": project_info["chunkIdList"]
+                                                            }):
+                self.log.add_log("ExecutableStuffOrganizer: database error, cannot update", 3)
+                return False, "database error"
+            else:
+                return True, "success"
 
         def modify_cs_list(operation, ids=None, info=None):
 
