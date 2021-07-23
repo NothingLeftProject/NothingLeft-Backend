@@ -41,6 +41,8 @@ class ExecutableStuffOrganizer:
             "someday": 3
         }
 
+        self.cs_type_list = ["if", "prerequisite", "connective"]
+
     def add_many_stuffs_to_list(self, account, stuff_ids, list_name):
 
         """
@@ -621,14 +623,14 @@ class ExecutableStuffOrganizer:
                     chunk_info_template["content"] = content
 
                     # step.3 generate chunk id
-                    chunk_id = self.encryption.md5(project_info["chunkCounts"]+1 + self.encryption.generate_random_key())
+                    project_info["chunkCounts"] += 1
+                    chunk_id = self.encryption.md5(project_info["chunkCounts"] + self.encryption.generate_random_key())
                     while chunk_id in project_info["chunkIdList"]:
-                        chunk_id = self.encryption.md5(project_info["chunkCounts"] + 1 + self.encryption.generate_random_key())
+                        chunk_id = self.encryption.md5(project_info["chunkCounts"] + self.encryption.generate_random_key())
                     chunk_info_template["chunkId"] = chunk_id
 
                     project_info["chunkList"][chunk_id] = chunk_info_template
                     project_info["chunkIdList"].append(chunk_id)
-                    project_info["chunkCount"] += 1
 
             elif operation == "delete":
                 # delete chunks
@@ -691,6 +693,48 @@ class ExecutableStuffOrganizer:
             :type ids: list
             :return: bool, str
             """
+            self.log.add_log("ExecutableStuffOrganizer: modify_cs_list: %s connective structure", 1)
+
+            project_info = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
+                ["projectId"]
+            )[0]
+
+            if operation == "add":
+                if type(info) != list:
+                    self.log.add_log("ExecutableStuffOrganizer: type error, in the operation-add, param-info must be a list and its elements must be dict", 3)
+                    return False, "type error, operation-add requires info in type-list and its elements in type-dict"
+
+                cs_info_template_raw = json.load(open("./backend/data/json/project_cs_template.json", "r", encoding="utf-8"))
+                for cs_info in info:
+                    cs_info_template = cs_info_template_raw
+                    # step.1-1 check basic params
+                    if cs_info["type"] not in self.cs_type_list:
+                        self.log.add_log("ExecutableStuffOrganizer: cs_type-%s does not supported, skip" % cs_info["type"], 3)
+                        continue
+                    if "chunk" not in cs_info["last"] and "chain" not in cs_info["last"]:
+                        self.log.add_log("ExecutableStuffOrganizer: cs can only connect to chunk or chain, skip", 3)
+                        continue
+
+                    # step.2 load basic params
+                    cs_info_template["type"] = cs_info["type"]
+                    cs_info_template["last"] = cs_info["last"]
+                    cs_info_template["next"] = cs_info["next"]
+                    try:
+                        cs_info_template["param"] = cs_info["param"]
+                    except KeyError:
+                        cs_info_template["param"] = {}
+
+                    # step.3 generate cs_id
+                    project_info["connectiveStructureCount"] += 1
+                    cs_id = self.encryption.md5(project_info["connectiveStructureCount"] + self.encryption.generate_random_key())
+                    while cs_id in project_info["connectiveStructureIdList"]:
+                        cs_id = self.encryption.md5(project_info["connectiveStructureCount"] + self.encryption.generate_random_key())
+                    cs_info_template["csId"] = cs_id
+
+                    project_info["connectiveStructureIdList"].append(cs_id)
+                    project_info["connectiveStructureList"][cs_id] = cs_info_template
+
 
         def modify_chain_list(operation, ids=None, info=None):
 
