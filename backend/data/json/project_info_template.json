@@ -9,8 +9,10 @@
   "chunkCount": 0,
   "stuffList": [],
   "referenceList": [],
+  "connectiveStructureList": [],
   "chunkList": {},
   "chunkIdList": [],
-  "connectiveStructureList": [],
+  "chainList": {},
+  "chainIdList": [],
   "workflow": ""
 }
