@@ -585,7 +585,7 @@ class ExecutableStuffOrganizer:
             if operation == "add":
                 if type(info) != list or type(info[0]) != dict:
                     self.log.add_log("ExecutableStuffOrganizer: type error, in the operation-add, param-info must be a list and its elements must be dict", 3)
-                    return False, "type error, operation-add requires info in type-list and its elements in type-dict"
+                    return False, "type error, operation-add requires param-info in type-list and its elements in type-dict"
 
                 chunk_info_template_raw = json.load(open("./backend/data/json/project_chunk_info_template.json", "r", encoding="utf-8"))
                 for raw_info in info:
@@ -633,11 +633,16 @@ class ExecutableStuffOrganizer:
                     project_info["chunkIdList"].append(chunk_id)
 
             elif operation == "delete":
+                if type(ids) != list:
+                    self.log.add_log("ExecutableStuffOrganizer: type error, param-ids must be a list while operation-delete, exit", 3)
+                    return False, "type error, param-ids must be a list"
+
                 # delete chunks
                 chain_id_list = project_info["chainIdList"]
+                chunk_id_list = project_info["chunkIdList"]
                 for chunk_id in ids:
-                    # step.1 is chunk id exist
-                    if chunk_id not in project_info["chunkIdList"]:
+                    # step.1 is chunk_id exist
+                    if chunk_id not in chunk_id_list:
                         self.log.add_log("ExecutableStuffOrganizer: chunk-%s does not exist, skip" % chunk_id, 2)
                         continue
 
@@ -703,8 +708,9 @@ class ExecutableStuffOrganizer:
             if operation == "add":
                 if type(info) != list:
                     self.log.add_log("ExecutableStuffOrganizer: type error, in the operation-add, param-info must be a list and its elements must be dict", 3)
-                    return False, "type error, operation-add requires info in type-list and its elements in type-dict"
+                    return False, "type error, operation-add requires param-info in type-list and its elements in type-dict"
 
+                # add cs
                 cs_info_template_raw = json.load(open("./backend/data/json/project_cs_template.json", "r", encoding="utf-8"))
                 for cs_info in info:
                     cs_info_template = cs_info_template_raw
@@ -734,6 +740,45 @@ class ExecutableStuffOrganizer:
 
                     project_info["connectiveStructureIdList"].append(cs_id)
                     project_info["connectiveStructureList"][cs_id] = cs_info_template
+            elif operation == "delete":
+                if type(ids) != list:
+                    self.log.add_log("ExecutableStuffOrganizer: type error, param-ids must be a list while operation-delete, exit", 3)
+                    return False, "type error, param-ids must be a list"
+
+                # delete cs
+                chain_id_list = project_info["chainIdList"]
+                cs_id_list = project_info["connectiveStructureIdList"]
+                for cs_id in ids:
+                    # step.1 is cs_id exist
+                    if cs_id not in cs_id_list:
+                        self.log.add_log("ExecutableStuffOrganizer: cs-%s does not exist, skip" % cs_id, 3)
+                        continue
+
+                    # step.2 is in use
+                    using = 0
+                    for chain_id in chain_id_list:
+                        content = project_info["chainList"][chain_id]["content"]
+                        last = project_info["chainList"][chain_id]["last"]
+                        next = project_info["chainList"][chain_id]["next"]
+                        if cs_id in content:
+                            # use in chain: use mode 1
+                            content_list = content.split("-")
+                            node = content_list.index(chunk_id)
+                            next_chunk_id = content_list[node+1]
+                            last_chunk_id = content_list[node-1]
+                            using = 1
+                            break
+                        if cs_id == last:
+                            # use in last
+
+                    if using != 0:
+                        # step.3 delete chunk in use
+                        self.log.add_log("ExecutableStuffOrganizer: chunk-%s is in use, delete will cause autofix", 2)
+
+                        # step.3-1 make the next chunk connect to last chunk
+                        project_info["chunkList"][next_chunk_id]["last"] = last_chunk_id
+                        # step.3-2 make the last chunk connect to next chunk
+                        project_info["chunkList"][last_chunk_id]["next"] = next_chunk_id
 
 
         def modify_chain_list(operation, ids=None, info=None):
