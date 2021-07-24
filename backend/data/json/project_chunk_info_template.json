@@ -2,7 +2,7 @@
     "chunkId": "",
     "type": 0,
     "content": {},
-    "last": "",
-    "next": "",
+    "last": null,
+    "next": null,
     "relateTo": []
 }
