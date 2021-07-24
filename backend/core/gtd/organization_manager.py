@@ -542,7 +542,7 @@ class ExecutableStuffOrganizer:
                                 break
                     if using:
                         if mandatory_operation:
-                            self.log.add_log("ExecutableStuffOrganizer: %s-%s is in use, mandatory operation will also makes it being removed in workflow" % (type_, the_id), 2)
+                            self.log.add_log("ExecutableStuffOrganizer: %s-%s is in use, mandatory operation will make it removed in workflow" % (type_, the_id), 2)
                             # step.3 mandatory delete
                             now_operation_list.remove(the_id)
                         else:
@@ -646,25 +646,27 @@ class ExecutableStuffOrganizer:
                         self.log.add_log("ExecutableStuffOrganizer: chunk-%s does not exist, skip" % chunk_id, 2)
                         continue
 
-                    # step.2 is chunk in using
-                    using = False
-                    for chain_id in chain_id_list:
-                        content = project_info["chainList"][chain_id]["content"]
-                        if chunk_id in content:
-                            content_list = content.split("-")
-                            node = content_list.index(chunk_id)
-                            next_chunk_id = content_list[node+1]
-                            last_chunk_id = content_list[node-1]
-                            using = True
-                            break
+                    # step.2 is chunk in use ATTENTION: 虽然此处使用last/next_chunk_id，但不一定就是chunk的id了，
+                    now_chunk_info = project_info["chunkList"][chunk_id]
+                    if now_chunk_info["last"] is None and now_chunk_info["next"] is not None:
+                        # using mode1: startup
+                        self.log.add_log("ExecutableStuffOrganizer: chunk-%s is in use(mode1), delete will cause autofix" % chunk_id, 2)
 
-                    if using:
-                        # step.3 delete chunk in use
-                        self.log.add_log("ExecutableStuffOrganizer: chunk-%s is in use, delete will cause autofix", 2)
+                        next_chunk_id = now_chunk_info["next"]
+                        project_info["chunkList"][next_chunk_id]["last"] = None
+                    elif now_chunk_info["last"] is not None and now_chunk_info["next"] is None:
+                        # using mode2: ending
+                        self.log.add_log("ExecutableStuffOrganizer: chunk-%s is in use(mode2), delete will cause autofix" % chunk_id, 2)
 
-                        # step.3-1 make the next chunk connect to last chunk
+                        last_chunk_id = now_chunk_info["last"]
+                        project_info["chunkList"][last_chunk_id]["next"] = None
+                    elif now_chunk_info["last"] is not None and now_chunk_info["next"] is not None:
+                        # using mode3: normal
+                        self.log.add_log("ExecutableStuffOrganizer: chunk-%s is in use(mode3), delete will cause autofix" % chunk_id, 2)
+
+                        last_chunk_id = now_chunk_info["last"]
+                        next_chunk_id = now_chunk_info["next"]
                         project_info["chunkList"][next_chunk_id]["last"] = last_chunk_id
-                        # step.3-2 make the last chunk connect to next chunk
                         project_info["chunkList"][last_chunk_id]["next"] = next_chunk_id
 
                     # step.3 delete chunk in normal
@@ -754,32 +756,48 @@ class ExecutableStuffOrganizer:
                         self.log.add_log("ExecutableStuffOrganizer: cs-%s does not exist, skip" % cs_id, 3)
                         continue
 
-                    # step.2 is in use
-                    using = 0
-                    for chain_id in chain_id_list:
-                        content = project_info["chainList"][chain_id]["content"]
-                        last = project_info["chainList"][chain_id]["last"]
-                        next = project_info["chainList"][chain_id]["next"]
-                        if cs_id in content:
-                            # use in chain: use mode 1
-                            content_list = content.split("-")
-                            node = content_list.index(chunk_id)
-                            next_chunk_id = content_list[node+1]
-                            last_chunk_id = content_list[node-1]
-                            using = 1
-                            break
-                        if cs_id == last:
-                            # use in last
+                    # step.2 is cs in use
+                    now_cs_info = project_info["connectiveStructureList"][cs_id]
+                    if now_cs_info["last"] is None and now_cs_info["next"] is not None:
+                        # using mode1: startup
+                        self.log.add_log("ExecutableStuffOrganizer: cs-%s is in use(mode1), delete will cause autofix" % cs_id, 2)
 
-                    if using != 0:
-                        # step.3 delete chunk in use
-                        self.log.add_log("ExecutableStuffOrganizer: chunk-%s is in use, delete will cause autofix", 2)
+                        next_cs_id = now_cs_info["next"]
+                        project_info["connectiveStructureList"][next_cs_id]["last"] = None
+                    elif now_cs_info["last"] is not None and now_cs_info["next"] is None:
+                        # using mode2: ending
+                        self.log.add_log("ExecutableStuffOrganizer: cs-%s is in use(mode2), delete will cause autofix" % cs_id, 2)
 
-                        # step.3-1 make the next chunk connect to last chunk
-                        project_info["chunkList"][next_chunk_id]["last"] = last_chunk_id
-                        # step.3-2 make the last chunk connect to next chunk
-                        project_info["chunkList"][last_chunk_id]["next"] = next_chunk_id
+                        last_cs_id = now_cs_info["last"]
+                        project_info["connectiveStructureList"][last_cs_id]["next"] = None
+                    elif now_cs_info["last"] is not None and now_cs_info["next"] is not None:
+                        # using mode3: normal
+                        self.log.add_log("ExecutableStuffOrganizer: cs-%s is in use(mode3), delete will cause autofix" % cs_id, 2)
 
+                        last_cs_id = now_cs_info["last"]
+                        next_cs_id = now_cs_info["next"]
+                        project_info["connectiveStructureList"][next_cs_id]["last"] = last_cs_id
+                        project_info["connectiveStructureList"][last_cs_id]["next"] = next_cs_id
+
+                    # step.3 delete cs in normal
+                    del project_info["connectiveStructureList"][cs_id]
+                    project_info["connectiveStructureIdList"].remove(cs_id)
+                    project_info["connectiveStructureCount"] -= 1
+
+            else:
+                self.log.add_log("ExecutableStuffOrganizer: unknown operation-%s, exit" % operation, 3)
+                return False, "unknown operation-%s" % operation
+
+            # step.4 update to database
+            if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id},
+                                               {"connectiveStructureList": project_info["connectiveStructureList"],
+                                                "connectiveStructureIdList": project_info["connectiveStructureIdList"],
+                                                "connectiveStructureCount": project_id["connectiveStructureCount"]
+                                                }):
+                self.log.add_log("ExecutableStuffOrganizer: database error, cannot update to database", 3)
+                return False, "database error"
+            else:
+                return True, "suceess"
 
         def modify_chain_list(operation, ids=None, info=None):
 
