@@ -638,7 +638,6 @@ class ExecutableStuffOrganizer:
                     return False, "type error, param-ids must be a list"
 
                 # delete chunks
-                chain_id_list = project_info["chainIdList"]
                 chunk_id_list = project_info["chunkIdList"]
                 for chunk_id in ids:
                     # step.1 is chunk_id exist
@@ -700,7 +699,7 @@ class ExecutableStuffOrganizer:
             :type ids: list
             :return: bool, str
             """
-            self.log.add_log("ExecutableStuffOrganizer: modify_cs_list: %s connective structure", 1)
+            self.log.add_log("ExecutableStuffOrganizer: modify_cs_list: %s connective structure" % operation, 1)
 
             project_info = self.mongodb_manipulator.parse_document_result(
                 self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
@@ -748,7 +747,6 @@ class ExecutableStuffOrganizer:
                     return False, "type error, param-ids must be a list"
 
                 # delete cs
-                chain_id_list = project_info["chainIdList"]
                 cs_id_list = project_info["connectiveStructureIdList"]
                 for cs_id in ids:
                     # step.1 is cs_id exist
@@ -797,7 +795,7 @@ class ExecutableStuffOrganizer:
                 self.log.add_log("ExecutableStuffOrganizer: database error, cannot update to database", 3)
                 return False, "database error"
             else:
-                return True, "suceess"
+                return True, "success"
 
         def modify_chain_list(operation, ids=None, info=None):
 
@@ -810,6 +808,70 @@ class ExecutableStuffOrganizer:
             :type ids: list
             :return: bool, str
             """
+            self.log.add_log("ExecutableStuffOrganizer: modify_chain_list: %s connective structure" % operation, 1)
+
+            project_info = self.mongodb_manipulator.parse_document_result(
+                self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
+                ["projectId"]
+            )[0]
+
+            if operation == "add":
+                if type(info) != list:
+                    self.log.add_log("ExecutableStuffOrganizer: type error, in the operation-add, param-info must be a list and its elements must be dict", 3)
+                    return False, "type error, operation-add requires param-info in type-list and its elements in type-dict"
+
+                # add chain
+                chain_info_template_raw = json.load(
+                    open("./backend/data/json/project_chain_info_template.json", "r", encoding="utf-8"))
+                for chain_info in info:
+                    chain_info_template = chain_info_template_raw
+
+                    # step.1 load basic params
+                    chain_info_template["last"] = chain_info["last"]
+                    chain_info_template["next"] = chain_info["next"]
+                    chain_info_template["content"] = chain_info["content"]
+
+                    # step.3 generate chain_id
+                    project_info["chainCount"] += 1
+                    chain_id = self.encryption.md5(project_info["chainCount"] + self.encryption.generate_random_key())
+                    while chain_id in project_info["chainIdList"]:
+                        chain_id = self.encryption.md5(project_info["chainCount"] + self.encryption.generate_random_key())
+                    chain_info_template["chainId"] = chain_id
+
+                    project_info["chainIdList"].append(chain_id)
+                    project_info["chainList"][chain_id] = chain_info_template
+            elif operation == "delete":
+                if type(ids) != list:
+                    self.log.add_log("ExecutableStuffOrganizer: type error, param-ids must be a list while operation-delete, exit", 3)
+                    return False, "type error, param-ids must be a list"
+
+                # delete cs
+                chain_id_list = project_info["chainIdList"]
+                for chain_id in ids:
+                    # step.1 is chain_id exist
+                    if chain_id not in chain_id_list:
+                        self.log.add_log("ExecutableStuffOrganizer: chain-%s does not exist, skip" % chain_id, 3)
+                        continue
+
+                    # step.3 delete chain in normal
+                    del project_info["chainList"][chain_id]
+                    project_info["chainIdList"].remove(chain_id)
+                    project_info["chainCount"] -= 1
+
+            else:
+                self.log.add_log("ExecutableStuffOrganizer: unknown operation-%s, exit" % operation, 3)
+                return False, "unknown operation-%s" % operation
+
+            # step.4 update to database
+            if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id},
+                                                                  {"chainList": project_info["chainList"],
+                                                                   "chainIdList": project_info["chainIdList"],
+                                                                   "chainCount": project_id["chainCount"]
+                                                                   }):
+                self.log.add_log("ExecutableStuffOrganizer: database error, cannot update to database", 3)
+                return False, "database error"
+            else:
+                return True, "success"
 
         # assign functions based on mode
 
