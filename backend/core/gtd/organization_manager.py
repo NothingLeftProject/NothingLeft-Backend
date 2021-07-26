@@ -594,8 +594,16 @@ class ExecutableStuffOrganizer:
                     # step.1 load params
                     chunk_type = raw_info["type"]
                     chunk_info_template["type"] = chunk_type
-                    chunk_info_template["last"] = raw_info["last"]
-                    chunk_info_template["next"] = raw_info["next"]
+                    if "cs:" in raw_info["last"] or "chunk:" in raw_info["last"]:
+                        chunk_info_template["last"] = raw_info["last"]
+                    else:
+                        self.log.add_log("ExecutableStuffOrganizer: wrong format of param-'last', skip", 3)
+                        continue
+                    if "cs:" in raw_info["next"] or "chunk:" in raw_info["next"]:
+                        chunk_info_template["next"] = raw_info["next"]
+                    else:
+                        self.log.add_log("ExecutableStuffOrganizer: wrong format of param-'next', skip", 3)
+                        continue
                     try:
                         chunk_info_template["relateTo"] = raw_info["relateTo"]
                     except KeyError:
@@ -603,13 +611,13 @@ class ExecutableStuffOrganizer:
 
                     # step.2 is content completed
                     content = raw_info["content"]
-                    if chunk_type == "stuff":
+                    if chunk_type == 0:
                         check_event = ["stuffId"]
-                    elif chunk_type == "reference":
+                    elif chunk_type == 1:
                         check_event = ["referenceId"]
-                    elif chunk_type == "stuff_cs":
+                    elif chunk_type == 2:
                         check_event = ["stuffIdList", "csId"]
-                    elif chunk_type == "chunk_cs":
+                    elif chunk_type == 3:
                         check_event = ["csId", "chunkIdList"]
                     else:
                         self.log.add_log("ExecutableStuffOrganizer: chunk_type-%s does not supported, exit" % chunk_type, 3)
@@ -901,4 +909,118 @@ class ExecutableStuffOrganizer:
             else:
                 self.log.add_log("ExecutableStuffOrganizer: mode-%s does not supported in modify_project_workflow, exit" % mode, 3)
                 return False, "mode-%s does not supported"
+
+    def edit_workflow_element(self, account, project_id, mode, param):
+
+        """
+        编辑workflow元素：即编辑组成workflow的元素：chunk/chain/cs的配置信息
+        :param account: 账户名
+        :param project_id: project id
+        :param mode: 编辑内容：chunk/cs/chain
+        :param param: 参数，其中的内容依据编辑内容而定
+        :type param: dict
+        :return: bool, str
+        """
+        self.log.add_log("ExecutableStuffOrganizer: edit_workflow_element: mode-%s start" % mode, 1)
+
+        project_info = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
+            ["projectId"]
+        )[0]
+
+        def modify_chunk_info():
+
+            """
+            修改chunk信息
+            :return:
+            """
+            # 编辑「已有」块的信息
+            all_chunk_ids = project_info["chunkIdList"]
+
+            # step.1 load param
+            try:
+                chunk_id = param["chunk_id"]
+            except KeyError:
+                self.log.add_log("ExecutableStuffOrganizer: cannot find 'chunk_id' in param", 3)
+                return False, "param-chunk_id lost"
+
+            # step.2 is chunk_id exist
+            if chunk_id not in all_chunk_ids:
+                self.log.add_log("ExecutableStuffOrganizer: chunk-%s does not exist, exit" % chunk_id, 3)
+                return False, "chunk-%s does not exist" % chunk_id
+
+            # step.3 load changed keys
+            changed_list = []
+            for key in list(param.keys()):
+                value = param[key]
+                if key == "chunk_id":
+                    continue
+                elif key == "type":
+                    if 0 <= int(value) <= 3:
+                        project_info["chunkList"][chunk_id]["type"] = value
+                        changed_list.append("type")
+                    else:
+                        self.log.add_log("ExecutableStuffOrganizer: chunk_type-%s does not supported" % value, 3)
+                        return False, "chunk_type-%s does not supported" % value
+                elif key == "content":
+                    if "type" in changed_list:
+                        changed_list.append(key)
+                        project_info["chunkList"][chunk_id]["content"] = value
+                    else:
+                        self.log.add_log("ExecutableStuffOrganizer: to change 'content', you have to change type first",
+                                         3)
+                        return False, "you have to change 'type' first to change 'content'"
+                elif key == "last" or key == "next":
+                    # is id exist
+                    if "chunk:" in value:
+                        id_type = "chunkIdList"
+                    elif "cs:" in value:
+                        id_type = "connectiveStructureIdList"
+                    else:
+                        self.log.add_log("ExecutableStuffOrganizer: wrong value of 'last' or 'next', id_type error."
+                                         "\n point: chunk-%s" % chunk_id, 3)
+                        return False, "id_type is not found in 'last' or 'next'"
+
+                    if value not in project_info[id_type]:
+                        self.log.add_log("ExecutableStuffOrganizer: %s does not exist, can't add as '%s', exit"
+                                         % (value, key), 3)
+                        return False, "the value of '%s' does not correct or not exist" % key
+                    else:
+                        changed_list.append(key)
+                        project_info["chunkList"][chunk_id][key] = value
+                elif key == "relateTo":
+                    project_info["relateTo"] = value
+                    changed_list.append(key)
+
+            # step.4 update to database
+            if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id},
+                                                                  {"chunkList": project_info["chunkList"]}):
+                self.log.add_log("ExecutableStuffOrganizer: database error, can't update data", 3)
+                return False, "database error"
+            else:
+                return True, "success"
+
+        if mode == "chunk":
+            return modify_chunk_info()
+        elif mode == "workflow":
+            return modify_workflow_info()
+        elif mode == "cs":
+            return modify_cs_info()
+        elif mode == "chain":
+            return modify_chain_info()
+        else:
+            self.log.add_log("ExecutableStuffOrganizer: mode-%s does not supported" % mode, 3)
+            return False, "mode-%s does not supported" % mode
+
+    def generate_workflow(self, account, project_id, is_return=False):
+
+        """
+        计算出该project的工作流并存储
+        :param account: 账户名
+        :param project_id: project id
+        :param is_return: 是否返回计算结果
+        :type is_return: bool
+        :return: bool, str
+        """
+
 
