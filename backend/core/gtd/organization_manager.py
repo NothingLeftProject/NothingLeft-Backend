@@ -480,6 +480,7 @@ class ExecutableStuffOrganizer:
             if type(mandatory_operation) != bool:
                 self.log.add_log("ExecutableStuffOrganizer: type error, param-mandatory_operation should be a bool", 1)
                 return False, "param-mandatory_operation type error"
+            skip_ids = []
 
             # init the type_
             if type_ == "stuff":
@@ -507,10 +508,12 @@ class ExecutableStuffOrganizer:
                     # step.1 is the id exist
                     if the_id not in all_ids_list:
                         self.log.add_log("ExecutableStuffOrganizer: %s does not exist, skip" % the_id, 2)
+                        skip_ids.append(the_id)
                         continue
                     # step.2 is the id already exist in the list
                     if the_id in now_operation_list:
                         self.log.add_log("ExecutableStuffOrganizer: %s does already exist in the %s list, skip" % (the_id, type_), 2)
+                        skip_ids.append(the_id)
                         continue
                     # step.3 append
                     now_operation_list.append(the_id)
@@ -521,6 +524,7 @@ class ExecutableStuffOrganizer:
                     # step.1 is the id exist in the list
                     if the_id in now_operation_list:
                         self.log.add_log("ExecutableStuffOrganizer: %s does already exist in the %s list, skip" % (the_id, type_), 2)
+                        skip_ids.append(the_id)
                         continue
                     # step.2 is the id in using
                     using = False
@@ -561,7 +565,10 @@ class ExecutableStuffOrganizer:
                 self.log.add_log("ExecutableStuffOrganizer: database error, can't update the changes to database", 3)
                 return False, "database error, can't update the changes to database"
             else:
-                return True, "success"
+                if not skip_ids:
+                    return True, "success"
+                else:
+                    return True, "but %s being skipped" % skip_ids
 
         def modify_chunk_list(operation, ids=None, info=None):
 
@@ -580,6 +587,7 @@ class ExecutableStuffOrganizer:
                 self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
                 ["projectId"]
             )[0]
+            skip_ids = []
 
             # is param in law
             if operation == "add":
@@ -598,11 +606,13 @@ class ExecutableStuffOrganizer:
                         chunk_info_template["last"] = raw_info["last"]
                     else:
                         self.log.add_log("ExecutableStuffOrganizer: wrong format of param-'last', skip", 3)
+                        skip_ids.append(info.index(raw_info))
                         continue
                     if "cs:" in raw_info["next"] or "chunk:" in raw_info["next"]:
                         chunk_info_template["next"] = raw_info["next"]
                     else:
                         self.log.add_log("ExecutableStuffOrganizer: wrong format of param-'next', skip", 3)
+                        skip_ids.append(info.index(raw_info))
                         continue
                     try:
                         chunk_info_template["relateTo"] = raw_info["relateTo"]
@@ -651,6 +661,7 @@ class ExecutableStuffOrganizer:
                     # step.1 is chunk_id exist
                     if chunk_id not in chunk_id_list:
                         self.log.add_log("ExecutableStuffOrganizer: chunk-%s does not exist, skip" % chunk_id, 2)
+                        skip_ids.append(chunk_id)
                         continue
 
                     # step.2 is chunk in use ATTENTION: 虽然此处使用last/next_chunk_id，但不一定就是chunk的id了，
@@ -694,7 +705,10 @@ class ExecutableStuffOrganizer:
                 self.log.add_log("ExecutableStuffOrganizer: database error, cannot update", 3)
                 return False, "database error"
             else:
-                return True, "success"
+                if not skip_ids:
+                    return True, "success"
+                else:
+                    return True, "but skip %s" % skip_ids
 
         def modify_cs_list(operation, ids=None, info=None):
 
@@ -713,6 +727,7 @@ class ExecutableStuffOrganizer:
                 self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
                 ["projectId"]
             )[0]
+            skip_ids = []
 
             if operation == "add":
                 if type(info) != list:
@@ -726,9 +741,11 @@ class ExecutableStuffOrganizer:
                     # step.1-1 check basic params
                     if cs_info["type"] not in self.cs_type_list:
                         self.log.add_log("ExecutableStuffOrganizer: cs_type-%s does not supported, skip" % cs_info["type"], 3)
+                        skip_ids.append(info.index(cs_info))
                         continue
                     if "chunk" not in cs_info["last"] and "chain" not in cs_info["last"]:
                         self.log.add_log("ExecutableStuffOrganizer: cs can only connect to chunk or chain, skip", 3)
+                        skip_ids.append(info.index(cs_info))
                         continue
 
                     # step.2 load basic params
@@ -760,6 +777,7 @@ class ExecutableStuffOrganizer:
                     # step.1 is cs_id exist
                     if cs_id not in cs_id_list:
                         self.log.add_log("ExecutableStuffOrganizer: cs-%s does not exist, skip" % cs_id, 3)
+                        skip_ids.append(cs_id)
                         continue
 
                     # step.2 is cs in use
@@ -803,7 +821,10 @@ class ExecutableStuffOrganizer:
                 self.log.add_log("ExecutableStuffOrganizer: database error, cannot update to database", 3)
                 return False, "database error"
             else:
-                return True, "success"
+                if not skip_ids:
+                    return True, "success"
+                else:
+                    return True, "but skip %s" % skip_ids
 
         def modify_chain_list(operation, ids=None, info=None):
 
@@ -822,6 +843,7 @@ class ExecutableStuffOrganizer:
                 self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
                 ["projectId"]
             )[0]
+            skip_ids = []
 
             if operation == "add":
                 if type(info) != list:
@@ -859,6 +881,7 @@ class ExecutableStuffOrganizer:
                     # step.1 is chain_id exist
                     if chain_id not in chain_id_list:
                         self.log.add_log("ExecutableStuffOrganizer: chain-%s does not exist, skip" % chain_id, 3)
+                        skip_ids.append(chain_id)
                         continue
 
                     # step.3 delete chain in normal
