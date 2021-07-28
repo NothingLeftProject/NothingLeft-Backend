@@ -997,20 +997,22 @@ class ExecutableStuffOrganizer:
                     # is id exist
                     if "chunk:" in value:
                         id_type = "chunkIdList"
+                        id_ = value.replace("chunk:", "")
                     elif "cs:" in value:
                         id_type = "connectiveStructureIdList"
+                        id_ = value.replace("cs:", "")
                     else:
                         self.log.add_log("ExecutableStuffOrganizer: wrong value of 'last' or 'next', id_type error."
                                          "\n point: chunk-%s" % chunk_id, 3)
                         return False, "id_type is not found in 'last' or 'next'"
 
-                    if value not in project_info[id_type]:
+                    if id_ not in project_info[id_type]:
                         self.log.add_log("ExecutableStuffOrganizer: %s does not exist, can't add as '%s', exit"
                                          % (value, key), 3)
-                        return False, "the value of '%s' does not correct or not exist" % key
+                        return False, "the value of '%s' does not correct or not exist" % id_
                     else:
                         changed_list.append(key)
-                        project_info["chunkList"][chunk_id][key] = value
+                        project_info["chunkList"][chunk_id][key] = id_
                 elif key == "relateTo":
                     project_info["relateTo"] = value
                     changed_list.append(key)
@@ -1022,6 +1024,52 @@ class ExecutableStuffOrganizer:
                 return False, "database error"
             else:
                 return True, "success"
+
+        def modify_workflow_info():
+
+            """
+            修改workflow信息：即变更组成元素(chain/cs)的排列：chain-cs-chain
+            param格式：operation: "add"/"delete"/"move"
+                      target: "target_type:target_id"
+                      last, next
+            :return:
+            """
+            # 更改chain/cs的排列（变更/加入）
+            try:
+                operation = param["operation"]
+                self.log.add_log("ExecutableStuffOrganizer: modify_workflow_info: %s" % operation, 1)
+            except KeyError:
+                self.log.add_log("ExecutableStuffOrganizer: param-operation not found, exit", 3)
+                return False, "param-operation not found"
+
+            # is param completed
+            try:
+                target = param["target"]
+            except KeyError:
+                self.log.add_log("ExecutableStuffOrganizer: param-target not found, exit", 3)
+                return False, "param-target not found"
+            else:
+                # is target in law
+                if "chain:" in target:
+                    target_type = "chainIdList"
+                    target_id = target.replace("chain:", "")
+                elif "cs:" in target:
+                    target_type = "connectiveStructureIdList"
+                    target_id = target.replace("cs:", "")
+                else:
+                    self.log.add_log("ExecutableStuffOrganizer: target-%s is illegal" % target, 3)
+                    return False, "target-%s is illegal" % target
+
+            # step.1 classify operation
+            if operation == "add":
+                # 要求last与next同时有
+                pass
+            elif operation == "delete":
+                # 不用提供last与next，自动衔接
+                pass
+            elif operation == "move":
+                # 提供移动的地方，实际上是先delete再add
+                pass
 
         if mode == "chunk":
             return modify_chunk_info()
