@@ -929,10 +929,15 @@ class ExecutableStuffOrganizer:
                         self.log.add_log("ExecutableStuffOrganizer: chain-%s is in use, delete will cause autofix", 2)
                         # step.3 delete in in-use mdoe
                         chain_index = project_info["workflow"].index(chain_id)
-                        last_index = chain_index-1
-                        next_index = chain_index+1
-                        # autofix
 
+                        # autofix
+                        last_ = project_info["workflow"][chain_index - 1]
+                        next_ = project_info["workflow"][chain_index + 1]
+                        last_type, last_id, next_type, next_id = self.get_last_next_info(last_, next_)
+                        if not last_type:
+                            return last_type, last_id
+                        project_info[last_type][last_id]["next"] = next_
+                        project_info[next_type][next_id]["last"] = last_
 
                     # step.3 delete chain in normal
                     del project_info["chainList"][chain_id]
@@ -1151,12 +1156,10 @@ class ExecutableStuffOrganizer:
                 # step.1 get target/next/last index and delete
                 target_index = project_info["workflow"].index(target)
                 del project_info["workflow"][target_index]
-                last_index = target_index-1
-                next_index = target_index+1
 
                 # step.2 change last/next info
-                last_ = project_info["workflow"][last_index]
-                next_ = project_info["workflow"][next_index]
+                last_ = project_info["workflow"][target_index-1]
+                next_ = project_info["workflow"][target_index+1]
                 last_type, last_id, next_type, next_id = get_last_next_info(last_, next_)
                 if not last_type:
                     return last_type, last_id
