@@ -43,6 +43,46 @@ class ExecutableStuffOrganizer:
 
         self.cs_type_list = ["if", "prerequisite", "connective"]
 
+    def get_last_next_info(self, last_, next_):
+
+        """
+        分析出last/next的类型与id
+        :param last_: 原数据
+        :param next_: 原数据
+        :return:
+        """
+        if "chain:" in last_:
+            last_type = "chainList"
+            last_id = last_.replace("chain:", "")
+        elif "cs:" in last_:
+            last_type = "connectiveStructureList"
+            last_id = last_.replace("cs:", "")
+        elif "chunk:" in last_:
+            last_type = "chunkList"
+            last_id = last_.replace("chunk:", "")
+        elif last_ is None:
+            last_type, last_id = None, None
+        else:
+            self.log.add_log("ExecutableStuffOrganizer: last-%s is illegal" % last_, 3)
+            return False, "last-%s is illegal" % last_
+
+        if "chain:" in next_:
+            next_type = "chainList"
+            next_id = next_.replace("chain:", "")
+        elif "cs:" in next_:
+            next_type = "connectiveStructureList"
+            next_id = next_.replace("cs:", "")
+        elif "chunk:" in next_:
+            next_type = "chunkList"
+            next_id = next_.replace("chunk:", "")
+        elif next_ is None:
+            next_type, next_id = None, None
+        else:
+            self.log.add_log("ExecutableStuffOrganizer: next-%s is illegal" % next_, 3)
+            return False, "next-%s is illegal" % next_, 0, 0
+
+        return last_type, last_id, next_type, next_id
+
     def add_many_stuffs_to_list(self, account, stuff_ids, list_name):
 
         """
@@ -884,6 +924,16 @@ class ExecutableStuffOrganizer:
                         skip_ids.append(chain_id)
                         continue
 
+                    # step.2 is chain in use
+                    if "chain:%s" % chain_id in project_info["workflow"]:
+                        self.log.add_log("ExecutableStuffOrganizer: chain-%s is in use, delete will cause autofix", 2)
+                        # step.3 delete in in-use mdoe
+                        chain_index = project_info["workflow"].index(chain_id)
+                        last_index = chain_index-1
+                        next_index = chain_index+1
+                        # autofix
+
+
                     # step.3 delete chain in normal
                     del project_info["chainList"][chain_id]
                     project_info["chainIdList"].remove(chain_id)
@@ -950,6 +1000,7 @@ class ExecutableStuffOrganizer:
             self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
             ["projectId"]
         )[0]
+        get_last_next_info = self.get_last_next_info
 
         def modify_chunk_info():
 
@@ -1051,25 +1102,82 @@ class ExecutableStuffOrganizer:
             else:
                 # is target in law
                 if "chain:" in target:
-                    target_type = "chainIdList"
+                    target_type = "chainList"
                     target_id = target.replace("chain:", "")
                 elif "cs:" in target:
-                    target_type = "connectiveStructureIdList"
+                    target_type = "connectiveStructureList"
                     target_id = target.replace("cs:", "")
                 else:
                     self.log.add_log("ExecutableStuffOrganizer: target-%s is illegal" % target, 3)
                     return False, "target-%s is illegal" % target
+                if target_id not in project_info[target_type.replace("List", "IdList")]:
+                    self.log.add_log("ExecutableStuffOrganizer: id-%s does not exist in %s" % (target_id, target_type), 3)
+                    return False, "target_id-%s does not exist" % target_id
 
             # step.1 classify operation
             if operation == "add":
                 # 要求last与next同时有
-                pass
+                last_ = param["last"]
+                next_ = param["next"]
+                if last_ is None and next_ is None:
+                    self.log.add_log("ExecutableStuffOrganizer: there can only be one 'None' between 'last' and 'next'", 3)
+                    return False, "'last' and 'next' can't be both is 'None'"
+
+                last_type, last_id, next_type, next_id = get_last_next_info(last_, next_)
+                if not last_type:
+                    return last_type, last_id
+                # step.1 变更last与next对象的链接
+                try:
+                    if last_ is not None:
+                        project_info[last_type][last_id]["next"] = target
+                except KeyError:
+                    self.log.add_log("ExecutableStuffOrganizer: id-%s does not exist in %s" % (last_id, last_type), 3)
+                try:
+                    if next_ is not None:
+                        project_info[next_type][next_id]["last"] = target
+                except KeyError:
+                    self.log.add_log("ExecutableStuffOrganizer: id-%s does not exist in %s" % (next_id, next_type), 3)
+
+                # step.2 变更target的next/next属性
+                project_info[target_type][target_id]["last"] = last_
+                project_info[target_type][target_id]["next"] = next_
+
+                # step.3 变更workflow的信息
+                next_index = project_info["workflow"].index(next_)
+                project_info["workflow"].insert(next_index, target)
+
             elif operation == "delete":
                 # 不用提供last与next，自动衔接
-                pass
+                # step.1 get target/next/last index and delete
+                target_index = project_info["workflow"].index(target)
+                del project_info["workflow"][target_index]
+                last_index = target_index-1
+                next_index = target_index+1
+
+                # step.2 change last/next info
+                last_ = project_info["workflow"][last_index]
+                next_ = project_info["workflow"][next_index]
+                last_type, last_id, next_type, next_id = get_last_next_info(last_, next_)
+                if not last_type:
+                    return last_type, last_id
+
+                project_info[last_type][last_id]["next"] = next_
+                project_info[next_type][next_id]["last"] = last_
+
             elif operation == "move":
                 # 提供移动的地方，实际上是先delete再add
-                pass
+                a_last = param["last"]
+                a_next = param["next"]
+
+            # update to database
+            if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id}, {
+                                                    "connectiveStructureList": project_info["connectiveStructureList"],
+                                                    "chainList": project_info["chainList"],
+                                                    "workflow": project_info["workflow"]}):
+                self.log.add_log("ExecutableStuffOrganizer: database error, can't update", 3)
+                return False, "database error"
+            else:
+                return True, "success"
 
         if mode == "chunk":
             return modify_chunk_info()
