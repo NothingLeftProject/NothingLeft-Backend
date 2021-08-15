@@ -15,7 +15,7 @@
   <a href="http://nl_doc.hadream.ltd/#/usage/README">Usage</a>
 </p>
 <p align="center">
-    <img src="https://svg.hamm.cn/badge.svg?key=License&&value=Apache2.0">
+    <img src="https://svg.hamm.cn/badge.svg?key=License&&value=LGPL-3.0">
     <img src="https://svg.hamm.cn/badge.svg?key=Status&&value=InDeveloping">
     <img src="https://svg.hamm.cn/badge.svg?key=Version&&value=dev-0.6">
 </p>
