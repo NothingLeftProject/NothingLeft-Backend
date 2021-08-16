@@ -1,8 +1,9 @@
 {
     "csId": "",
-    "type": "",
+    "desc": "",
+    "type": null,
     "param": {},
     "belongedChainId": "",
-    "last": null,
-    "next": null
+    "last": [],
+    "next": []
 }

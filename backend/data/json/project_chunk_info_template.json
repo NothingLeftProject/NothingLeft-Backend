@@ -1,6 +1,8 @@
 {
     "chunkId": "",
-    "type": 0,
+    "type": null,
+    "desc": "",
+    "status": null,
     "content": {},
     "last": null,
     "next": null,
