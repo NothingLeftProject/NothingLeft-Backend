@@ -72,7 +72,7 @@ class MemcachedManipulator():
         """
         if type(key) == int or type(key) == str or type(key) == float:
             self.log.add_log("MemcachedManipulator: Replace: key " + str(key) + " value: " + str(value), 1)
-            self.mc.replace(key, value)
+            self.mc = self.mc.replace(key, value)
             return True
             
         self.log.add_log("MemcachedManipulator: key can't be a list or dict", 3)
