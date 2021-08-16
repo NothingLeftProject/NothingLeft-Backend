@@ -5,6 +5,7 @@
 
 from backend.database.mongodb import MongoDBManipulator
 from backend.core.gtd.classification_manager import ClassificationManager
+from backend.core.gtd.inbox_manager import InboxManager
 # from backend.data.encryption import Encryption
 
 import json
@@ -34,6 +35,7 @@ class ExecutableStuffOrganizer:
         self.mongodb_manipulator = MongoDBManipulator(self.log, self.setting)
         self.encryption = self.base_abilities.encryption
         self.classification_manager = ClassificationManager(base_abilities)
+        self.inbox_manager = InboxManager(base_abilities)
 
         self.all_list_name_id_list = {
             "next": 1,
@@ -1038,6 +1040,7 @@ class ExecutableStuffOrganizer:
                     if 0 <= int(value) <= 3:
                         project_info["chunkList"][chunk_id]["type"] = value
                         changed_list.append("type")
+                        # ATTENTION： 未完成，此处还应该接着变更content ！！！！！！
                     else:
                         self.log.add_log("ExecutableStuffOrganizer: chunk_type-%s does not supported" % value, 3)
                         return False, "chunk_type-%s does not supported" % value
@@ -1079,7 +1082,7 @@ class ExecutableStuffOrganizer:
                 self.log.add_log("ExecutableStuffOrganizer: database error, can't update data", 3)
                 return False, "database error"
             else:
-                return True, "success"
+                return True, "success" % changed_list
 
         def modify_workflow_info():
 
@@ -1182,6 +1185,140 @@ class ExecutableStuffOrganizer:
             else:
                 return True, "success"
 
+        def modify_cs_info():
+
+            """
+            修改connectiveStructure信息
+            :return:
+            """
+            # 编辑「已有」cs的信息
+            all_cs_id = project_info["connectiveStructureIdList"]
+
+            # step.1 load param
+            try:
+                cs_id = param["cs_id"]
+            except KeyError:
+                self.log.add_log("ExecutableStuffOrganizer: cannot find 'cs_id' in param", 3)
+                return False, "param-cs_id lost"
+
+            # step.2 is chunk_id exist
+            if cs_id not in all_cs_id:
+                self.log.add_log("ExecutableStuffOrganizer: chunk-%s does not exist, exit" % cs_id, 3)
+                return False, "chunk-%s does not exist" % cs_id
+
+            # step.3 load changed keys
+            changed_list = []
+            for key in list(param.keys()):
+                value = param[key]
+                if key == "cs_id":
+                    continue
+                elif key == "type": # 这意味着只有type的变动才允许param的变动，而type的变动也意味着移动要变动param
+                    if 0 <= int(value) <= 2:
+                        # is type in law
+                        project_info["connectiveStructureList"][cs_id]["type"] = value
+                        changed_list.append("type")
+                        type_param = param["param"]
+                        if value == 0:
+                            # mode1: stuff级的判断
+                            # step.1 参数是否齐全
+                            try:
+                                judgement = type_param["judgement"]
+                                del type_param["judgement"]
+                                var_names_list = list(type_param.keys())
+                            except KeyError:
+                                self.log.add_log("ExecutableStuffOrganizer: the param does not complete if you want"
+                                                 "to change the type of this cs", 3)
+                                return False, "param not complete for the type you want to change to"
+
+                            # step.2 extract the var in the judgement
+                            tmp = judgement.split(" ")
+                            try:
+                                tmp.remove("and")
+                                tmp.remove("or")
+                            except AttributeError:
+                                pass
+                            for var_name in tmp:
+                                var_name = var_name.replace("(", "").replace(")", "")
+                                if var_name not in var_names_list:
+                                    self.log.add_log("ExecutableStuffOrganizer: var-%s is lost in param" % var_name,
+                                                     3)
+                                    return False, "var-%s is lost in param" % var_name
+                                else:
+                                    # step.1.2 is the value of var in law
+                                    where = type_param[var_name][0]
+                                    # is exist
+                                    if "last:" in where or "next:" in where:
+                                        stuff_id = project_info["connectiveStructureList"][cs_id][where[0:4]][
+                                            where[5:]]
+                                    else:
+                                        stuff_id = where
+                                    target_keys_list, _err = self.inbox_manager.get_many_stuffs(account, [stuff_id])
+                                    if var_name not in target_keys_list:
+                                        self.log.add_log(
+                                            "ExecutableStuffOrganizer: var-%s does not exist in stuff-%s" % (
+                                            var_name, stuff_id), 3)
+                                        return False, "var-%s does not exist in stuff-%s" % (var_name, stuff_id)
+                        elif value == 1:
+                            # mode2: chunk级的连接
+                            # step.1 参数是否齐全
+                            try:
+                                from_ = type_param["from"]
+                                to_ = type_param["to"]
+                                directivity = type_param["directivity"]
+                            except KeyError:
+                                self.log.add_log("ExecutableStuffOrganizer: he param does not complete if you want"
+                                                 "to change the type of this cs", 3)
+                                return False, "param"
+
+                            # step.2 参数是否合法
+                            if from_ or to_ not in project_info["chunkIdList"]:
+                                self.log.add_log("ExecutableStuffOrganizer: param-from/to does not in law(chunk not exist)", 3)
+                                return False, "param-from/to does not in law(chunk not exist)"
+                            if type(directivity) != bool:
+                                self.log.add_log("ExecutableStuffOrganizer: param-directivity should be a bool", 3)
+                                return False, "param-directivity should be a bool"
+
+                        project_info["connectiveStructureList"][cs_id]["param"] = type_param
+                    else:
+                        self.log.add_log("ExecutableStuffOrganizer: cs_type-%s does not supported" % value, 3)
+                        return False, "chunk_type-%s does not supported" % value
+                elif key == "belongedChainId":
+                    # is chain exist
+                    all_chain_ids = project_info["chainIdList"]
+                    if value not in all_chain_ids:
+                        self.log.add_log("ExecutableStuffOrganizer: chain-%s does not exist" % value, 3)
+                    else:
+                        project_info["connectiveStructureList"][cs_id]["belongedChainId"] = value
+                        changed_list.append(key)
+                elif key == "last" or key == "next":
+                    # is id exist
+                    if "chunk:" in value:
+                        id_type = "chunkIdList"
+                        id_ = value.replace("chunk:", "")
+                    elif "chain:" in value:
+                        id_type = "chainIdList"
+                        id_ = value.replace("chain:", "")
+                    else:
+                        self.log.add_log("ExecutableStuffOrganizer: wrong value of 'last' or 'next', id_type error."
+                                         "\n point: cs-%s" % cs_id, 3)
+                        return False, "id_type is not found in 'last' or 'next'"
+
+                    if id_ not in project_info[id_type]:
+                        self.log.add_log("ExecutableStuffOrganizer: %s does not exist, can't add as '%s', exit"
+                                         % (value, key), 3)
+                        return False, "the value of '%s' does not correct or not exist" % id_
+                    else:
+                        changed_list.append(key)
+                        project_info["connectiveStructureList"][cs_id][key] = id_
+
+            # step.4 update to database
+            if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id},
+                                                                  {"connectiveStructureList": project_info["connectiveStructureList"]}):
+                self.log.add_log("ExecutableStuffOrganizer: database error, can't update data", 3)
+                return False, "database error"
+            else:
+                return True, "success, %s" % changed_list
+
         if mode == "chunk":
             return modify_chunk_info()
         elif mode == "workflow":
@@ -1205,4 +1342,17 @@ class ExecutableStuffOrganizer:
         :return: bool, str
         """
 
+
+# 对cs的参数说明：
+"""
+{
+    "csId": "",  # 唯一的id，在创建时生成
+    "type": "",  # cs的类型，可分为chain级的判断/连接（指向性允许） 以及 chunk级判断/连接（指向性允许） 还有 stuff级的判断，连接到output，output值为其所属chunk的status值 (4~0)
+                 #     chain和chunk级的判断，只允许判断chain和chunk的状态值 而stuff的判断   stuff级的连接不存在，只需要在其所属chunk中的content中表现即可
+    "param": {}, # 根据type而不同的配置参数
+    "belongedChainId": "", # 所属的chain的id，以防止删除本对象后影响chain的解析
+    "last": [],  # 可以连接多个对象，但是根据type的独特性，我们无需指定每一个值的id类型
+    "next": []   # last与next是用于workflow的ui显示的，也同样可以记载数据，但是更多是为了解析
+}
+"""
 
