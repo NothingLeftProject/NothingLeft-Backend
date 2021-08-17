@@ -1201,10 +1201,10 @@ class ExecutableStuffOrganizer:
                 self.log.add_log("ExecutableStuffOrganizer: cannot find 'cs_id' in param", 3)
                 return False, "param-cs_id lost"
 
-            # step.2 is chunk_id exist
+            # step.2 is cs_id exist
             if cs_id not in all_cs_id:
-                self.log.add_log("ExecutableStuffOrganizer: chunk-%s does not exist, exit" % cs_id, 3)
-                return False, "chunk-%s does not exist" % cs_id
+                self.log.add_log("ExecutableStuffOrganizer: cs-%s does not exist, exit" % cs_id, 3)
+                return False, "cs-%s does not exist" % cs_id
 
             # step.3 load changed keys
             changed_list = []
@@ -1219,7 +1219,7 @@ class ExecutableStuffOrganizer:
                         changed_list.append("type")
                         type_param = param["param"]
                         if value == 0:
-                            # mode1: stuff级的判断
+                            # mode0: stuff级的判断
                             # step.1 参数是否齐全
                             try:
                                 judgement = type_param["judgement"]
@@ -1259,14 +1259,14 @@ class ExecutableStuffOrganizer:
                                             var_name, stuff_id), 3)
                                         return False, "var-%s does not exist in stuff-%s" % (var_name, stuff_id)
                         elif value == 1:
-                            # mode2: chunk级的连接
+                            # mode1: chunk级的连接
                             # step.1 参数是否齐全
                             try:
                                 from_ = type_param["from"]
                                 to_ = type_param["to"]
                                 directivity = type_param["directivity"]
                             except KeyError:
-                                self.log.add_log("ExecutableStuffOrganizer: he param does not complete if you want"
+                                self.log.add_log("ExecutableStuffOrganizer: the param does not complete if you want"
                                                  "to change the type of this cs", 3)
                                 return False, "param"
 
@@ -1277,11 +1277,63 @@ class ExecutableStuffOrganizer:
                             if type(directivity) != bool:
                                 self.log.add_log("ExecutableStuffOrganizer: param-directivity should be a bool", 3)
                                 return False, "param-directivity should be a bool"
+                        elif value == 2:
+                            # mode2: chunk级判断: 主要是根据多个chunk的status执行对应的操作
+                            # step.1 参数是否齐全
+                            try:
+                                judgements = type_param["judgements"] # list 每一个元素是一个判断式，成立则执行对应index的operation  format: chunk_id == chunk_id2
+                                operations = type_param["operations"] # list chunk_id作为元素
+                            except KeyError:
+                                self.log.add_log("ExecutableStuffOrganizer: the param does not complete if you want"
+                                                 "to change the type of this cs", 3)
+                                return False, "param not complete for the type you want to change to"
+
+                            # step.2 参数是否合法
+                            if type(judgements) != list or type(operations) != list:
+                                self.log.add_log("ExecutableStuffOrganizer: param-judgements/operations must be a list", 3)
+                                return False, "param-judgements/operations must be a list"
+
+                            # 为了避免消耗过多的资源，此处就不对chunk_id是否存在作检验了
+                        elif value == 3:
+                            # mode3: chain级的连接
+                            # step.1 参数是否齐全
+                            try:
+                                from_ = type_param["from"]
+                                to_ = type_param["to"]
+                                directivity = type_param["directivity"]
+                            except KeyError:
+                                self.log.add_log("ExecutableStuffOrganizer: the param does not complete if you want"
+                                                 "to change the type of this cs", 3)
+                                return False, "param"
+
+                            # step.2 参数是否合法
+                            if from_ or to_ not in project_info["chainIdList"]:
+                                self.log.add_log("ExecutableStuffOrganizer: param-from/to does not in law(chain not exist)", 3)
+                                return False, "param-from/to does not in law(chain not exist)"
+                            if type(directivity) != bool:
+                                self.log.add_log("ExecutableStuffOrganizer: param-directivity should be a bool", 3)
+                                return False, "param-directivity should be a bool"
+                        elif value == 4:
+                            # mode4: chain级的判断
+                            # ps: chain的status可以：属于此chain的所有chunk都处于true则true（默认） 也可以手动变更 也可以绑定到某个chunk的状态
+                            try:
+                                judgements = type_param["judgements"]
+                                operations = type_param["operations"]
+                            except KeyError:
+                                self.log.add_log("ExecutableStuffOrganizer: the param does not complete if you want"
+                                                 "to change the type of this cs", 3)
+                                return False, "param not complete for the type you want to change to"
+
+                            # step.2 参数是否合法
+                            if type(judgements) != list or type(operations) != list:
+                                self.log.add_log("ExecutableStuffOrganizer: param-judgements/operations must be a list",
+                                                 3)
+                                return False, "param-judgements/operations must be a list"
 
                         project_info["connectiveStructureList"][cs_id]["param"] = type_param
                     else:
                         self.log.add_log("ExecutableStuffOrganizer: cs_type-%s does not supported" % value, 3)
-                        return False, "chunk_type-%s does not supported" % value
+                        return False, "cs_type-%s does not supported" % value
                 elif key == "belongedChainId":
                     # is chain exist
                     all_chain_ids = project_info["chainIdList"]
