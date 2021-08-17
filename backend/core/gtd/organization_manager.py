@@ -1053,25 +1053,23 @@ class ExecutableStuffOrganizer:
                                          3)
                         return False, "you have to change 'type' first to change 'content'"
                 elif key == "last" or key == "next":
-                    # is id exist
-                    if "chunk:" in value:
-                        id_type = "chunkIdList"
-                        id_ = value.replace("chunk:", "")
-                    elif "cs:" in value:
-                        id_type = "connectiveStructureIdList"
-                        id_ = value.replace("cs:", "")
-                    else:
-                        self.log.add_log("ExecutableStuffOrganizer: wrong value of 'last' or 'next', id_type error."
-                                         "\n point: chunk-%s" % chunk_id, 3)
-                        return False, "id_type is not found in 'last' or 'next'"
+                    # is the format of value correct
+                    if type(value) != list:
+                        self.log.add_log("ExecutableStuffOrganizer: the value of 'last'/'next' must be a list", 3)
+                        return False, "wrong type for last/next"
+                    for i in value:
+                        if "chunk:" not in i and "chain:" not in i:
+                            self.log.add_log("ExecutableStuffOrganizer: wrong value of 'last' or 'next', id_type error."
+                                             "\n point: cs-%s" % chunk_id, 3)
+                            return False, "id_type is not found in 'last' or 'next'"
 
-                    if id_ not in project_info[id_type]:
-                        self.log.add_log("ExecutableStuffOrganizer: %s does not exist, can't add as '%s', exit"
-                                         % (value, key), 3)
-                        return False, "the value of '%s' does not correct or not exist" % id_
-                    else:
-                        changed_list.append(key)
-                        project_info["chunkList"][chunk_id][key] = id_
+                    # if id_ not in project_info[id_type]:
+                    #     self.log.add_log("ExecutableStuffOrganizer: %s does not exist, can't add as '%s', exit"
+                    #                      % (value, key), 3)
+                    #     return False, "the value of '%s' does not correct or not exist" % id_
+                    # else:
+                    #     changed_list.append(key)
+                    #     project_info["chunkList"][chunk_id][key] = id_
                 elif key == "relateTo":
                     project_info["relateTo"] = value
                     changed_list.append(key)
@@ -1342,26 +1340,25 @@ class ExecutableStuffOrganizer:
                     else:
                         project_info["connectiveStructureList"][cs_id]["belongedChainId"] = value
                         changed_list.append(key)
-                elif key == "last" or key == "next":
-                    # is id exist
-                    if "chunk:" in value:
-                        id_type = "chunkIdList"
-                        id_ = value.replace("chunk:", "")
-                    elif "chain:" in value:
-                        id_type = "chainIdList"
-                        id_ = value.replace("chain:", "")
-                    else:
-                        self.log.add_log("ExecutableStuffOrganizer: wrong value of 'last' or 'next', id_type error."
-                                         "\n point: cs-%s" % cs_id, 3)
-                        return False, "id_type is not found in 'last' or 'next'"
+                elif key == "last" or key == "next": # ATTENTION: 只有cs的last和next被允许为list
+                    # is the format of value correct
+                    if type(value) != list:
+                        self.log.add_log("ExecutableStuffOrganizer: the value of 'last'/'next' must be a list", 3)
+                        return False, "wrong type for last/next"
+                    for i in value:
+                        if "chunk:" not in i and "chain:" not in i:
+                            self.log.add_log("ExecutableStuffOrganizer: wrong value of 'last' or 'next', id_type error."
+                                             "\n point: cs-%s" % cs_id, 3)
+                            return False, "id_type is not found in 'last' or 'next'"
 
-                    if id_ not in project_info[id_type]:
-                        self.log.add_log("ExecutableStuffOrganizer: %s does not exist, can't add as '%s', exit"
-                                         % (value, key), 3)
-                        return False, "the value of '%s' does not correct or not exist" % id_
-                    else:
-                        changed_list.append(key)
-                        project_info["connectiveStructureList"][cs_id][key] = id_
+                        # 为节省性能，不验证id是否存在，只做数据的格式验证
+                        # if id_ not in project_info[id_type]:
+                        #     self.log.add_log("ExecutableStuffOrganizer: %s does not exist, can't add as '%s', exit"
+                        #                      % (value, key), 3)
+                        #     return False, "the value of '%s' does not correct or not exist" % id_
+                        # else:
+                        #     changed_list.append(key)
+                        #     project_info["connectiveStructureList"][cs_id][key] = id_
 
             # step.4 update to database
             if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id},
