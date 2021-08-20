@@ -1041,7 +1041,7 @@ class ExecutableStuffOrganizer:
                         pass
                         # ATTENTION： 未完成，此处还应该接着变更content ！！！！！！
                     else:
-                        self.log.add_log("ExecutableStuffOrganizer: chunk_type-%s does not supported" % value, 3)
+                        self.log.add_log("ExecutableStuffOrganizer: chunk_type-%s does not supported" % value, 2)
                         # return False, "chunk_type-%s does not supported" % value
                         continue
                 elif key == "content":
@@ -1054,19 +1054,19 @@ class ExecutableStuffOrganizer:
                 elif key == "last" or key == "next":
                     # is the format of value correct
                     if type(value) != list:
-                        self.log.add_log("ExecutableStuffOrganizer: the value of 'last'/'next' must be a list", 3)
+                        self.log.add_log("ExecutableStuffOrganizer: the value of 'last'/'next' must be a list", 2)
                         # return False, "wrong type for last/next"
                         continue
                     for i in value:
                         if "chunk:" not in i and "chain:" not in i:
                             self.log.add_log("ExecutableStuffOrganizer: wrong value of 'last' or 'next', id_type error."
-                                             "\n point: cs-%s" % chunk_id, 3)
+                                             "\n point: cs-%s" % chunk_id, 2)
                             # return False, "id_type is not found in 'last' or 'next'"
                             continue
 
                     # if id_ not in project_info[id_type]:
                     #     self.log.add_log("ExecutableStuffOrganizer: %s does not exist, can't add as '%s', exit"
-                    #                      % (value, key), 3)
+                    #                      % (value, key), 2)
                     #     return False, "the value of '%s' does not correct or not exist" % id_
                     # else:
                     #     changed_list.append(key)
@@ -1131,7 +1131,7 @@ class ExecutableStuffOrganizer:
                 last_ = param["last"]
                 next_ = param["next"]
                 if last_ is None and next_ is None:
-                    self.log.add_log("ExecutableStuffOrganizer: there can only be one 'None' between 'last' and 'next'", 3)
+                    self.log.add_log("ExecutableStuffOrganizer: there can only be one 'None' between 'last' and 'next'", 2)
                     return False, "'last' and 'next' can't be both is 'None'"
 
                 last_type, last_id, next_type, next_id = get_last_next_info(last_, next_)
@@ -1142,12 +1142,12 @@ class ExecutableStuffOrganizer:
                     if last_ is not None:
                         project_info[last_type][last_id]["next"] = target
                 except KeyError:
-                    self.log.add_log("ExecutableStuffOrganizer: id-%s does not exist in %s" % (last_id, last_type), 3)
+                    self.log.add_log("ExecutableStuffOrganizer: id-%s does not exist in %s" % (last_id, last_type), 2)
                 try:
                     if next_ is not None:
                         project_info[next_type][next_id]["last"] = target
                 except KeyError:
-                    self.log.add_log("ExecutableStuffOrganizer: id-%s does not exist in %s" % (next_id, next_type), 3)
+                    self.log.add_log("ExecutableStuffOrganizer: id-%s does not exist in %s" % (next_id, next_type), 2)
 
                 # step.2 变更target的next/next属性
                 project_info[target_type][target_id]["last"] = last_
@@ -1231,7 +1231,7 @@ class ExecutableStuffOrganizer:
                                 var_names_list = list(type_param.keys())
                             except KeyError:
                                 self.log.add_log("ExecutableStuffOrganizer: the param does not complete if you want"
-                                                 "to change the type of this cs", 3)
+                                                 "to change the type of this cs", 2)
                                 # return False, "param not complete for the type you want to change to"
                                 continue
 
@@ -1261,7 +1261,7 @@ class ExecutableStuffOrganizer:
                                     target_keys_list, _err = self.inbox_manager.get_many_stuffs(account, [stuff_id])
                                     if var_name not in target_keys_list:
                                         self.log.add_log(
-                                            "ExecutableStuffOrganizer: var-%s does not exist in stuff-%s" % (var_name, stuff_id), 3)
+                                            "ExecutableStuffOrganizer: var-%s does not exist in stuff-%s" % (var_name, stuff_id), 2)
                                         # return False, "var-%s does not exist in stuff-%s" % (var_name, stuff_id)
                                         continue
                         elif value == 1:
@@ -1273,16 +1273,16 @@ class ExecutableStuffOrganizer:
                                 directivity = type_param["directivity"]
                             except KeyError:
                                 self.log.add_log("ExecutableStuffOrganizer: the param does not complete if you want"
-                                                 "to change the type of this cs", 3)
+                                                 "to change the type of this cs", 2)
                                 continue
 
                             # step.2 参数是否合法
                             if from_ or to_ not in project_info["chunkIdList"]:
-                                self.log.add_log("ExecutableStuffOrganizer: param-from/to does not in law(chunk not exist)", 3)
+                                self.log.add_log("ExecutableStuffOrganizer: param-from/to does not in law(chunk not exist)", 2)
                                 # return False, "param-from/to does not in law(chunk not exist)"
                                 continue
                             if type(directivity) != bool:
-                                self.log.add_log("ExecutableStuffOrganizer: param-directivity should be a bool", 3)
+                                self.log.add_log("ExecutableStuffOrganizer: param-directivity should be a bool", 2)
                                 # return False, "param-directivity should be a bool"
                                 continue
                         elif value == 2:
@@ -1293,13 +1293,13 @@ class ExecutableStuffOrganizer:
                                 operations = type_param["operations"] # list chunk_id作为元素
                             except KeyError:
                                 self.log.add_log("ExecutableStuffOrganizer: the param does not complete if you want"
-                                                 "to change the type of this cs", 3)
+                                                 "to change the type of this cs", 2)
                                 # return False, "param not complete for the type you want to change to"
                                 continue
 
                             # step.2 参数是否合法
                             if type(judgements) != list or type(operations) != list:
-                                self.log.add_log("ExecutableStuffOrganizer: param-judgements/operations must be a list", 3)
+                                self.log.add_log("ExecutableStuffOrganizer: param-judgements/operations must be a list", 2)
                                 # return False, "param-judgements/operations must be a list"
                                 continue
 
@@ -1313,15 +1313,15 @@ class ExecutableStuffOrganizer:
                                 directivity = type_param["directivity"]
                             except KeyError:
                                 self.log.add_log("ExecutableStuffOrganizer: the param does not complete if you want"
-                                                 "to change the type of this cs", 3)
+                                                 "to change the type of this cs", 2)
                                 continue
 
                             # step.2 参数是否合法
                             if from_ or to_ not in project_info["chainIdList"]:
-                                self.log.add_log("ExecutableStuffOrganizer: param-from/to does not in law(chain not exist)", 3)
+                                self.log.add_log("ExecutableStuffOrganizer: param-from/to does not in law(chain not exist)", 2)
                                 continue
                             if type(directivity) != bool:
-                                self.log.add_log("ExecutableStuffOrganizer: param-directivity should be a bool", 3)
+                                self.log.add_log("ExecutableStuffOrganizer: param-directivity should be a bool", 2)
                                 continue
                         elif value == 4:
                             # mode4: chain级的判断
@@ -1331,23 +1331,23 @@ class ExecutableStuffOrganizer:
                                 operations = type_param["operations"]
                             except KeyError:
                                 self.log.add_log("ExecutableStuffOrganizer: the param does not complete if you want"
-                                                 "to change the type of this cs", 3)
+                                                 "to change the type of this cs", 2)
                                 continue
 
                             # step.2 参数是否合法
                             if type(judgements) != list or type(operations) != list:
-                                self.log.add_log("ExecutableStuffOrganizer: param-judgements/operations must be a list", 3)
+                                self.log.add_log("ExecutableStuffOrganizer: param-judgements/operations must be a list", 2)
                                 continue
 
                         project_info["connectiveStructureList"][cs_id]["param"] = type_param
                     else:
-                        self.log.add_log("ExecutableStuffOrganizer: cs_type-%s does not supported" % value, 3)
+                        self.log.add_log("ExecutableStuffOrganizer: cs_type-%s does not supported" % value, 2)
                         continue
                 elif key == "belongedChainId":
                     # is chain exist
                     all_chain_ids = project_info["chainIdList"]
                     if value not in all_chain_ids:
-                        self.log.add_log("ExecutableStuffOrganizer: chain-%s does not exist" % value, 3)
+                        self.log.add_log("ExecutableStuffOrganizer: chain-%s does not exist" % value, 2)
                         continue
                     # else:
                     #     project_info["connectiveStructureList"][cs_id][key] = value
@@ -1355,17 +1355,17 @@ class ExecutableStuffOrganizer:
                 elif key == "last" or key == "next": # ATTENTION: 只有cs的last和next被允许为list
                     # is the format of value correct
                     if type(value) != list:
-                        self.log.add_log("ExecutableStuffOrganizer: the value of 'last'/'next' must be a list", 3)
+                        self.log.add_log("ExecutableStuffOrganizer: the value of 'last'/'next' must be a list", 2)
                         continue
                     for i in value:
                         if "chunk:" not in i and "chain:" not in i:
                             self.log.add_log("ExecutableStuffOrganizer: wrong value of 'last' or 'next', id_type error."
-                                             "\n point: cs-%s" % cs_id, 3)
+                                             "\n point: cs-%s" % cs_id, 2)
                             continue
                         # 为节省性能，不验证id是否存在，只做数据的格式验证
                         # if id_ not in project_info[id_type]:
                         #     self.log.add_log("ExecutableStuffOrganizer: %s does not exist, can't add as '%s', exit"
-                        #                      % (value, key), 3)
+                        #                      % (value, key), 2)
                         #     return False, "the value of '%s' does not correct or not exist" % id_
                         # else:
                         #     changed_list.append(key)
@@ -1410,22 +1410,22 @@ class ExecutableStuffOrganizer:
                     continue
                 elif key == "content":
                     if type(value) != list:
-                        self.log.add_log("ExecutableStuffOrganizer: wrong type of param-content, it should be list", 3)
+                        self.log.add_log("ExecutableStuffOrganizer: wrong type of param-content, it should be list", 2)
                         continue
                     for i in value:
                         if type(i) != dict:
-                            self.log.add_log("ExecutableStuffOrganizer: every elements in content should be dict", 3)
+                            self.log.add_log("ExecutableStuffOrganizer: every elements in content should be dict", 2)
                             continue
                 elif key == "status":
                     if type(value) != bool:
-                        self.log.add_log("ExecutableStuffOrganizer: param-status should be a bool", 3)
+                        self.log.add_log("ExecutableStuffOrganizer: param-status should be a bool", 2)
                         continue
                 elif key == "last" or key == "next": # ATTENTION: chain 只允许与chunk
                     # is the format of value correct
                     for i in value:
                         if "chunk:" not in i and "cs:" not in i:
                             self.log.add_log("ExecutableStuffOrganizer: wrong value of 'last' or 'next', id_type error."
-                                             "\n point: chain-%s" % chain_id, 3)
+                                             "\n point: chain-%s" % chain_id, 2)
                             continue
 
                 project_info["chainList"][chain_id][key] = value
@@ -1462,6 +1462,14 @@ class ExecutableStuffOrganizer:
         :return: bool, str
         """
 
+
+# TODO
+"""
+- 支持status
+- 支持desc
+- modify_chunk_info 的 type 修改还缺少content部分
+- modify_workflow_info 的move还没完成
+"""
 
 # 对cs的参数说明：
 """
