@@ -858,7 +858,6 @@ class ExecutableStuffOrganizer:
             if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id},
                                                {"connectiveStructureList": project_info["connectiveStructureList"],
                                                 "connectiveStructureIdList": project_info["connectiveStructureIdList"],
-                                                "connectiveStructureCount": project_id["connectiveStructureCount"]
                                                 "connectiveStructureCount": project_info["connectiveStructureCount"]
                                                 }):
                 self.log.add_log("ExecutableStuffOrganizer: database error, cannot update to database", 3)
