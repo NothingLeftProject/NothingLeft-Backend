@@ -20,7 +20,7 @@
     <img src="https://svg.hamm.cn/badge.svg?key=Version&&value=dev-0.6">
 </p>
 
-<h3 align="center">
+<h3 align="left">
     <b>NothingLeft-Backend</b>
   </h3>
 
