@@ -20,9 +20,9 @@
     <img src="https://svg.hamm.cn/badge.svg?key=Version&&value=dev-0.6">
 </p>
 
-<h3 align="left">
+<h2 align="left">
     <b>NothingLeft-Backend</b>
-  </h3>
+  </h2>
 
 > :calendar: NothingLeft经典系统-后端
 
