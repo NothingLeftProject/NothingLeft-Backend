@@ -5,27 +5,31 @@
   </p>
 
 <h1 align="center">
-    <b>NothingLeft</b>
+    <b>NothingLeftProject</b>
   </h1>
 <p align="center">
-    A time management system based on GTD.
+    Time management application based on GTD
 </p>
 <p align="center">
   <a href="http://nl_doc.hadream.ltd">ProjectDocument</a> | 
-  <a href="http://nl_doc.hadream.ltd/#/usage/README">Usage</a>
+  <a href="http://nl_doc.hadream.ltd/#/usage/README">How-to</a>
 </p>
 <p align="center">
     <img src="https://svg.hamm.cn/badge.svg?key=License&&value=LGPL-3.0">
-    <img src="https://svg.hamm.cn/badge.svg?key=Status&&value=InDeveloping">
+    <img src="https://svg.hamm.cn/badge.svg?key=Status&&value=AtGtdCore">
     <img src="https://svg.hamm.cn/badge.svg?key=Version&&value=dev-0.6">
 </p>
 
-# NothingLeft-Backend
-- NothingLeft经典系统-后端
+<h3 align="center">
+    <b>NothingLeft-Backend</b>
+  </h3>
+
+> :calendar: NothingLeft经典系统-后端
 
 
 ## 简介-Introduction
-- Version: 2021/8/15 0:50
+- 本仓库是NothingLeftProject的NothingLeft经典系统的后端
+- ReadmeVersion: 2021/8/15 0:50
 - Other languages: 
   - [English](./README_en.md)
 
@@ -97,6 +101,8 @@
   - 究竟是使双方都同时拥有一个同步变化的对象（协作），还是使他们共同看到一个共享空间呢...各有各的好处，情侣可能可以独立出来
   - 呜呜呜呜，明明我还是单身的说
 - 空格（其它分隔符）快速添加多个stuff或方便后期拆分
+- NL或许可以使用zfile来存储资料文件
+- 自定义关键词及反应（MOR/AFT）
 
 - 对于GTD的思考：
   - 我们应当建立一套快速简单的workflow去完成整个GTD流程
