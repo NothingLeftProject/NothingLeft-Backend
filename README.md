@@ -75,7 +75,7 @@
   - QQ: 1481605673
 
 ### 想法区-Ideas(完成即清除)
-- 分类-trashList中的stuff状态自动变成cancel ⭐
+- 分类-trashList中的stuff状态自动变成cancel ⭐(客户端实现)
 - maintainer需要去监控各种动向，并根据不同的动向做出不同决策以自动维护整个系统
   - 变更即通知maintainer
   - 根据明显的stuff特征自动分类

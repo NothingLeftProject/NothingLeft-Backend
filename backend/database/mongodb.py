@@ -4,15 +4,16 @@
 # date: 2020/11/21
 
 import pymongo
+import sys
 
 
 class MongoDBManipulator:
 
-    def __init__(self, log, setting, database_name="default"):
+    def __init__(self, log, setting, server_name="default"):
 
         self.log = log
         self.setting = setting
-        self.database_name = database_name
+        self.server_name = server_name
 
         self.mongodb_settings = self.setting["databaseSettings"]["mongodb"]
 
@@ -20,13 +21,15 @@ class MongoDBManipulator:
         self.collection_names_list = {}
 
         try:
-            self.mongodb_server_address = self.mongodb_settings["address"][database_name]
+            self.mongodb_server_address = self.mongodb_settings["address"][server_name]
+            self.mongodb_server_auth = self.mongodb_settings["auth"][server_name]["admin"]
         except KeyError:
-            self.log.add_log("MongoDB: Can't find mongodb server named: "
-                             + database_name + "'s address in the settings, please check it.", 3)
+            self.log.add_log("MongoDB: Can't find mongodb_server-%s's address in the setting" % server_name, 3)
+            sys.exit(-1)
         else:
             self.server = pymongo.MongoClient(
-                [self.mongodb_server_address]
+                host=self.mongodb_server_address["host"], port=self.mongodb_server_address["port"],
+                username=self.mongodb_server_auth[0], password=self.mongodb_server_auth[1], authSource="admin"
             )
             self.get_database_names_list()
 
@@ -37,7 +40,7 @@ class MongoDBManipulator:
         :param db_name: 数据库名
         :return: bool
         """
-        self.log.add_log("MongoDB: try add database: " + db_name, 1)
+        self.log.add_log("MongoDB: try add database-%s " % db_name, 1)
         try:
             self.server[db_name]
         except:
@@ -58,11 +61,11 @@ class MongoDBManipulator:
             db = self.server[db_name]
             coll = db[coll_name]
         except:
-            self.log.add_log("MongoDB: add coll: " + coll_name + " to db: " + db_name + " fail", 3)
+            self.log.add_log("MongoDB: add coll-%s into db-%s failed" % (coll_name, db_name), 3)
             return False
         else:
             self.get_collection_names_list(db_name)
-            self.log.add_log("MongoDB: add coll: " + coll_name + " to db: " + db_name + " success", 1)
+            self.log.add_log("MongoDB: add coll-%s into db-%s successfully" % (coll_name, db_name), 1)
             return True
 
     def delete_collection(self, db_name, coll_name):
@@ -77,11 +80,11 @@ class MongoDBManipulator:
             db = self.server[db_name]
             db[coll_name].drop()
         except:
-            self.log.add_log("MongoDB: delete coll: " + coll_name + " is in db: " + db_name + " fail", 3)
+            self.log.add_log("MongoDB: delete coll-%s from db-%s failed" % (coll_name, db_name), 3)
             return False
         else:
             self.get_collection_names_list(db_name)
-            self.log.add_log("MongoDB: delete coll: " + coll_name + " is in db: " + db_name + " success", 1)
+            self.log.add_log("MongoDB: delete coll-%s from db-%s successfully" % (coll_name, db_name), 1)
             return True
 
     def get_database_names_list(self):
@@ -91,7 +94,7 @@ class MongoDBManipulator:
         :return: list
         """
         self.database_names_list = self.server.list_database_names()
-        self.log.add_log("MongoDB: database names list has been updated", 1)
+        self.log.add_log("MongoDB: database_names_list has been updated", 1)
         return self.database_names_list
 
     def get_collection_names_list(self, db_name):
@@ -104,7 +107,7 @@ class MongoDBManipulator:
         db = self.server[db_name]
 
         self.collection_names_list[db_name] = db.list_collection_names()
-        self.log.add_log("MongoDB: collection names list had been updated", 1)
+        self.log.add_log("MongoDB: collection_names_list has been updated", 1)
         return self.collection_names_list[db_name]
 
     def is_database_exist(self, name, update=False):
@@ -125,10 +128,10 @@ class MongoDBManipulator:
             self.log.add_log("MongoDB: db_exist?: second time search start", 1)
             self.get_database_names_list()
             if name in self.database_names_list:
-                self.log.add_log("MongoDB: database-%s" % name + " exist", 1)
+                self.log.add_log("MongoDB: db-%s exist" % name, 1)
                 return True
             else:
-                self.log.add_log("MongoDB: database-%s" % name + " is not exist", 1)
+                self.log.add_log("MongoDB: db-%s does not exist" % name, 1)
                 return False
 
     def is_collection_exist(self, db_name, coll_name, update=False):
@@ -145,16 +148,16 @@ class MongoDBManipulator:
 
         try:
             if coll_name in self.collection_names_list[db_name]:
-                self.log.add_log("MongoDB: collection%s" % coll_name + " exist", 1)
+                self.log.add_log("MongoDB: collection-%s" % coll_name + " exist", 1)
                 return True
         finally:
             self.log.add_log("MongoDB: coll_exist?: second time search start", 1)
             self.get_collection_names_list(db_name)
             if coll_name in self.collection_names_list[db_name]:
-                self.log.add_log("MongoDB: collection-%s" % coll_name + " exist", 1)
+                self.log.add_log("MongoDB: collection-%s exist" % coll_name, 1)
                 return True
             else:
-                self.log.add_log("MongoDB: collection-%s" % coll_name + " is not exist", 1)
+                self.log.add_log("MongoDB: collection-%s does not exist" % coll_name, 1)
                 return False
 
     def add_one_document(self, db_name, coll_name, docu):
@@ -181,10 +184,10 @@ class MongoDBManipulator:
                 try:
                     result = coll.insert_one(docu)
                 except:
-                    self.log.add_log("MongoDB: add one document fail", 3)
+                    self.log.add_log("MongoDB: add one document failed", 3)
                     return False
                 else:
-                    self.log.add_log("MongoDB: add one document success", 1)
+                    self.log.add_log("MongoDB: add one document successfully", 1)
                     return result
 
     def add_many_documents(self, db_name, coll_name, docu_s):
@@ -250,12 +253,12 @@ class MongoDBManipulator:
                         self.log.add_log("MongoDB: mode error!", 3)
                         return False
                 except:
-                    self.log.add_log("MongoDB: get document fail", 3)
+                    self.log.add_log("MongoDB: get document failed", 3)
                     return False
                 else:
                     return list(result)
         else:
-            self.log.add_log("MongoDB: get one: param query must be a dict", 3)
+            self.log.add_log("MongoDB: get one document: param query must be a dict", 3)
             return False
 
     def parse_document_result(self, documents, targets, debug=True):

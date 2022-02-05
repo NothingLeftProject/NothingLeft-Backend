@@ -16,7 +16,7 @@ import threading
 
 
 class BaseAbilities:
-    '''基础能力：log，MongoDB、MemcachedDB传递'''
+    """基础能力：log，MongoDB、MemcachedDB传递"""
     def __init__(self):
 
         self.log = GtdLog()
