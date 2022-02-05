@@ -9,21 +9,21 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@192.168.3.156:22 password">
+      <paths name="hadream-server">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="rasp-1">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@192.168.3.156:22 password (1)">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="root@192.168.3.156:22 password (2)">
+      <paths name="rasp-2">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
