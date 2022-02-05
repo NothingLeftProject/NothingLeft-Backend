@@ -35,17 +35,17 @@ def run_server(b_a):
     b_a.log.add_log("HttpServer: Start http server...", 1)
 
     try:
-        if type(setting["hostIp"]) is not str or setting["hostIp"] == "":
+        if type(setting["bindIp"]) is not str or setting["bindIp"] == "":
             raise KeyError
     except KeyError:
-        setting["hostIp"] = str(get_ip())
+        setting["bindIp"] = str(get_ip())
         json.dump(setting, open("./backend/data/json/setting.json", "w", encoding="utf-8"))
 
     global base_abilities
     base_abilities = b_a
 
-    b_a.log.add_log("HttpServer: ServerAddr: " + setting["hostIp"] + ":" +  str(setting["httpPort"]), 1)
-    flask_app.run(host=setting["hostIp"], port=setting["httpPort"])
+    b_a.log.add_log("HttpServer: ServerAddr: " + setting["bindIp"] + ":" +  str(setting["httpPort"]), 1)
+    flask_app.run(host=setting["bindIp"], port=setting["httpPort"])
 
 
 @flask_app.route('/api', methods=["POST", "GET"])
