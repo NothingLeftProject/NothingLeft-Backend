@@ -1,12 +1,12 @@
 # coding=utf-8
 # author: Lan_zhijiang
-# desciption: 操作memcached数据库
+# description: 操作memcached数据库
 # date: 2020/10/2
 
 import memcache
 
 
-class MemcachedManipulator():
+class MemcachedManipulator:
 
     def __init__(self, log, setting, database_name="default"):
 

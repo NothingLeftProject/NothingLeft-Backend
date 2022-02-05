@@ -11,18 +11,6 @@ from backend.core.gtd.inbox_manager import InboxManager
 import json
 
 
-class ReferenceManager:
-
-    def __init__(self, base_abilities):
-
-        self.base_abilities = base_abilities
-        self.log = base_abilities.log
-        self.setting = base_abilities.setting
-
-        self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
-        self.encryption = self.base_abilities.encryption
-
-
 class ExecutableStuffOrganizer:
 
     def __init__(self, base_abilities):
@@ -40,7 +28,8 @@ class ExecutableStuffOrganizer:
         self.all_list_name_id_list = {
             "next": 1,
             "tracking": 2,
-            "someday": 3
+            "someday": 3,
+            "waiting": 4
         }
 
         self.cs_type_list = ["if", "prerequisite", "connective"]
@@ -211,7 +200,7 @@ class ExecutableStuffOrganizer:
             else:
                 return True, "success"
 
-    # Thought
+    # TODO
     # 通过至少一个stuff来创建一个project，可以加入更多stuff或者对一个stuff进行细化
     # 通过拖拽排列stuff，用各种逻辑关系将stuff连接起来，组成project的行动组
 
@@ -1046,9 +1035,10 @@ class ExecutableStuffOrganizer:
                         continue
                 elif key == "content":
                     if "type" not in changed_list:
-                        self.log.add_log("ExecutableStuffOrganizer: to change 'content', you have to change type first",
-                                         3)
+                        self.log.add_log("ExecutableStuffOrganizer: to change 'content', you have to change type first", 3)
                         # return False, "you have to change 'type' first to change 'content'"
+                        continue
+                    else:
                         continue
 
                 elif key == "last" or key == "next":
@@ -1074,6 +1064,14 @@ class ExecutableStuffOrganizer:
                 elif key == "relateTo":
                     if type(value) != list:
                         self.log.add_log("ExecutableStuffOrganizer: wrong type of param-relateTo, should be a list", 2)
+                        continue
+                elif key == "status":
+                    if type(value) != bool:
+                        self.log.add_log("ExecutableStuffOrganizer: wrong type of param-status, should be a bool", 2)
+                        continue
+                elif key == "desc":
+                    if type(value) != str:
+                        self.log.add_log("ExecutableStuffOrganizer: wrong type of param-desc, should be a str", 2)
                         continue
 
                 changed_list.append(key)
@@ -1175,9 +1173,51 @@ class ExecutableStuffOrganizer:
 
             elif operation == "move":
                 # 提供移动的地方，实际上是先delete再add
-                a_last = param["last"]
-                a_next = param["next"]
-                # not finished yet
+                to_last = param["last"]
+                to_next = param["next"]
+
+                if to_last is None and to_next is None:
+                    self.log.add_log("ExecutableStuffOrganizer: there can only be one 'None' between 'last' and 'next'", 2)
+                    return False, "'last' and 'next' can't be both is 'None'"
+                
+                # delete
+                # step.1 get target/next/last index and delete
+                target_index = project_info["workflow"].index(target)
+                del project_info["workflow"][target_index]
+
+                # step.2 change last/next info
+                last_ = project_info["workflow"][target_index-1]
+                next_ = project_info["workflow"][target_index+1]
+                last_type, last_id, next_type, next_id = get_last_next_info(last_, next_)
+                if not last_type:
+                    return last_type, last_id
+
+                project_info[last_type][last_id]["next"] = next_
+                project_info[next_type][next_id]["last"] = last_
+
+                # add
+                last_type, last_id, next_type, next_id = get_last_next_info(to_last, to_next)
+                if not last_type:
+                    return last_type, last_id
+                # step.1 变更last与next对象的链接
+                try:
+                    if last_ is not None:
+                        project_info[last_type][last_id]["next"] = target
+                except KeyError:
+                    self.log.add_log("ExecutableStuffOrganizer: id-%s does not exist in %s" % (last_id, last_type), 2)
+                try:
+                    if next_ is not None:
+                        project_info[next_type][next_id]["last"] = target
+                except KeyError:
+                    self.log.add_log("ExecutableStuffOrganizer: id-%s does not exist in %s" % (next_id, next_type), 2)
+
+                # step.2 变更target的next/next属性
+                project_info[target_type][target_id]["last"] = to_last
+                project_info[target_type][target_id]["next"] = to_next
+
+                # step.3 变更workflow的信息
+                next_index = project_info["workflow"].index(to_next)
+                project_info["workflow"].insert(next_index, target)
 
             # update to database
             if not self.mongodb_manipulator.update_many_documents("organization", account, {"_id": project_id}, {
@@ -1217,7 +1257,7 @@ class ExecutableStuffOrganizer:
                 if key == "csId":
                     continue
                 elif key == "type": # 这意味着只有type的变动才允许param的变动，而type的变动也意味着移动要变动param
-                    if 0 <= int(value) <= 2:
+                    if 0 <= int(value) <= 4:
                         # is type in law
                         project_info["connectiveStructureList"][cs_id]["type"] = value
                         changed_list.append("type")
@@ -1370,6 +1410,11 @@ class ExecutableStuffOrganizer:
                         # else:
                         #     changed_list.append(key)
                         #     project_info["connectiveStructureList"][cs_id][key] = id_
+                elif key == "desc":
+                    if type(value) != str:
+                        self.log.add_log("ExecutableStuffOrganizer: wrong type of param-desc, should be a str", 2)
+                        continue
+
                 changed_list.append(key)
                 project_info["connectiveStructureList"][cs_id][key] = value
 
@@ -1420,6 +1465,10 @@ class ExecutableStuffOrganizer:
                     if type(value) != bool:
                         self.log.add_log("ExecutableStuffOrganizer: param-status should be a bool", 2)
                         continue
+                elif key == "desc":
+                    if type(value) != str:
+                        self.log.add_log("ExecutableStuffOrganizer: param-desc should be a str", 2)
+                        continue
                 elif key == "last" or key == "next": # ATTENTION: chain 只允许与chunk
                     # is the format of value correct
                     for i in value:
@@ -1461,14 +1510,69 @@ class ExecutableStuffOrganizer:
         :type is_return: bool
         :return: bool, str
         """
+        # 层层遍历，先遍历chain与cs，再是chain下面的chunk和cs，通过列表中放入列表:[[type, [id, content], last, next], []]来标记
+        self.log.add_log("ExecutableStuffOrganizer: generate_workflow: start", 1)
+
+        project_info = self.mongodb_manipulator.parse_document_result(
+            self.mongodb_manipulator.get_document("organization", account, {"_id": project_id}, 1),
+            ["projectId"]
+        )[0]
+        if not project_info:
+            self.log.add_log("ExecutableStuffOrganizer: project_info is empty, data may be destoryzed", 3)
+            return False, " project_info is empty, maybe the data had destroyed"
+        
+        workflow = []
+        # 遍历chain与cs
+        chain_list = project_info["chainList"]
+        cs_list = project_info["connectiveStructureList"]
+        for chain in chain_list:
+            if chain["content"]:
+                # 有东西的有效chain
+                if chain["last"] is None or chain["last"] == "": 
+                    # 该chain为初始chain
+                    next_ = chain["next"]
+                    workflow.append(["chain", [chain["chainId"], chain["content"]], None, 1])
+                    now_index = 1
+                    while True:
+                        if "cs" in next_:
+                            # 下一个是cs
+                            next_type = "cs"
+                            next_id = next_.replace(next_type, "")
+                            next_info = cs_list[next_id]
+                        elif "chain" in next_:
+                            # 下一个是chain
+                            next_type = "chain"
+                            next_id = next_.replace(next_type, "")
+                            next_info = chain_list[next_id]
+                        elif next_ == "" or next_ is None:
+                            # 结束了
+                            break
+                        else:
+                            # 错误的格式
+                            self.log.add_log("ExecutableStuffOrganizer: wrong format of 'next' of %s-%s" % ("chain", chain["chainId"]), 3)
+                            return False, "wrong format of 'next' of %s-%s" % ("chain", chain["chainId"])
+                        
+                        # 效验并记录下一个模块的信息
+                        if next_info["last"] == "chain:%s" % chain["chainId"]:
+                            workflow.append([next_type, [next_id, next_info["content"]], now_index-1, now_index+1])
+                            next_ = next_info["next"] #TODO BUGHERE?
+                        else:
+                            # 信息损坏
+                            self.log.add_log("ExecutableStuffOrganizer: the 'last' of %s-%s is not correct or else" % (next_type, next_id), 3)
+                            return False, "'last' does not correct in  %s-%s" % (next_type, next_id)
+                        now_index+=1
+                else:
+                    continue
+        
 
 
 # TODO
 """
-- 支持status
-- 支持desc
+- 支持status done
+- 支持desc done
 - modify_chunk_info 的 type 修改还缺少content部分
-- modify_workflow_info 的move还没完成
+- modify_workflow_info 的move还没完成 done
+- 对account和project_info的合法性判断
 """
 
 # 对cs的参数说明：
@@ -1482,5 +1586,11 @@ class ExecutableStuffOrganizer:
     "last": [],  # 可以连接多个对象，但是根据type的独特性，我们无需指定每一个值的id类型
     "next": []   # last与next是用于workflow的ui显示的，也同样可以记载数据，但是更多是为了解析
 }
+cs_type: 
+    0: stuff级的判断 
+    1: chunk级的连接 
+    2: chunk级的判断 
+    3: chain级的连接 
+    4: chain级的判断
 """
 

@@ -2,69 +2,57 @@
   {"_id": 0, "classificationNames": [], "classificationIds": []},
   {
     "_id": "7bd5b03638dd4dd3e281f184dbebb4ad",
-    "name": "canExecuteList",
+    "name": "NextActionList",
     "description": "{{001}}",
     "stuffList": [],
     "stuffCount": 0,
-    "lastOperatedTimeStamp": "",
+    "lastOperationTimeStamp": "",
     "classificationId": "7bd5b03638dd4dd3e281f184dbebb4ad",
     "type": "parent",
     "childClassificationList": []
   },
   {
-    "_id": "0331eb93118f43b7167098ed6c607a99", 
-    "name": "cannotExecuteList",
-    "description": "{{002}}",
-    "stuffList": [],
-    "stuffCount": 0,
-    "lastOperatedTimeStamp": "",
-    "classificationId": "0331eb93118f43b7167098ed6c607a99",
-    "type": "parent",
-    "childClassificationList": [
-      "0331eb93118f43b7167098ed6c607a99-4092240e2374f8854743fcb3b3b39a1f",
-      "0331eb93118f43b7167098ed6c607a99-52308b9035a4a19632a98746d2cac243",
-      "0331eb93118f43b7167098ed6c607a99-150abb28646d037c63cfe565bb25af93",
-      "0331eb93118f43b7167098ed6c607a99-3ce3406c5811472f2909f6c4d8abfc86"
-    ]
-  },
-  {
-    "_id": "0331eb93118f43b7167098ed6c607a99-4092240e2374f8854743fcb3b3b39a1f", 
-    "name": "referenceList",
-    "description": "{{003}}",
-    "stuffList": [],
-    "stuffCount": 0,
-    "lastOperatedTimeStamp": "",
-    "classificationId": "0331eb93118f43b7167098ed6c607a99-4092240e2374f8854743fcb3b3b39a1f",
-    "type": "child"
-  },
-  {
-    "_id": "0331eb93118f43b7167098ed6c607a99-52308b9035a4a19632a98746d2cac243", 
+    "_id": "52308b9035a4a19632a98746d2cac243",
     "name": "trackingList",
     "description": "{{004}}",
     "stuffList": [],
     "stuffCount": 0,
-    "lastOperatedTimeStamp": "",
-    "classificationId": "0331eb93118f43b7167098ed6c607a99-52308b9035a4a19632a98746d2cac243",
-    "type": "child"
+    "lastOperationTimeStamp": "",
+    "classificationId": "52308b9035a4a19632a98746d2cac243",
+    "type": "parent",
+    "childClassificationList": []
   },
   {
-    "_id": "0331eb93118f43b7167098ed6c607a99-150abb28646d037c63cfe565bb25af93", 
+    "_id": "150abb28646d037c63cfe565bb25af93",
     "name": "somedayList",
     "description": "{{005}}",
     "stuffList": [],
     "stuffCount": 0,
-    "lastOperatedTimeStamp": "",
-    "classificationId": "0331eb93118f43b7167098ed6c607a99-150abb28646d037c63cfe565bb25af93",
-    "type": "child"
+    "lastOperationTimeStamp": "",
+    "classificationId": "150abb28646d037c63cfe565bb25af93",
+    "type": "parent",
+    "childClassificationList": []
   },
   {
-    "_id": "0331eb93118f43b7167098ed6c607a99-3ce3406c5811472f2909f6c4d8abfc86", 
+    "_id": "4092240e2374f8854743fcb3b3b39a1f",
+    "name": "referenceList",
+    "description": "{{003}}",
+    "stuffList": [],
+    "stuffCount": 0,
+    "lastOperationTimeStamp": "",
+    "classificationId": "4092240e2374f8854743fcb3b3b39a1f",
+    "type": "parent",
+    "childClassificationList": []
+  },
+  {
+    "_id": "3ce3406c5811472f2909f6c4d8abfc86", 
     "name": "trashList",
     "description": "{{006}}",
     "stuffList": [],
     "stuffCount": 0,
-    "lastOperatedTimeStamp": "",
-    "classificationId": "0331eb93118f43b7167098ed6c607a99-3ce3406c5811472f2909f6c4d8abfc86",
-    "type": "child"
+    "lastOperationTimeStamp": "",
+    "classificationId": "3ce3406c5811472f2909f6c4d8abfc86",
+    "type": "parent",
+    "childClassificationList": []
   }
 ]

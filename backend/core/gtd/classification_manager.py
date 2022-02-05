@@ -23,7 +23,7 @@ class ClassificationManager:
         # self.encryption = Encryption(self.log, self.setting)
 
         self.standard_classification_info_keys = [
-            "name", "description", "stuffList", "stuffCount", "lastOperatedTimeStamp",
+            "name", "description", "stuffList", "stuffCount", "lastOperationTimeStamp",
             "classificationId", "type", "childClassificationList"
         ]
 
@@ -396,7 +396,7 @@ class ClassificationManager:
         cl_data = json.load(open("./backend/data/json/classification_info_template.json", "r", encoding="utf-8"))
         cl_data["name"] = name
         cl_data["description"] = desc
-        cl_data["lastOperatedTimeStamp"] = lots
+        cl_data["lastOperationTimeStamp"] = lots
         cl_data["classificationId"] = cl_id
         cl_data["type"] = cl_type
         if cl_type == "child":  # ATTENTION: 这里可能有遗漏
@@ -460,3 +460,15 @@ class ClassificationManager:
                 return False, "database error that can't update preset_list"
             else:
                 return True, "success"
+
+
+class ReferenceManager:
+
+    def __init__(self, base_abilities):
+
+        self.base_abilities = base_abilities
+        self.log = base_abilities.log
+        self.setting = base_abilities.setting
+
+        self.mongodb_manipulator = self.base_abilities.mongodb_manipulator
+        self.encryption = self.base_abilities.encryption
