@@ -9,7 +9,7 @@ import string
 import random
 
 
-class Encryption():
+class Encryption:
 
     def __init__(self):
 
@@ -18,7 +18,7 @@ class Encryption():
 
         self.md5_ = hashlib.md5()
         self.sha1_ = hashlib.sha1()
-        self.hmca_ = hmac.new(bytes(string))
+        # self.hmca_ = hmac.new("a")
 
     def md5(self, string):
 
@@ -40,15 +40,15 @@ class Encryption():
         self.sha1_.update(string.encode("utf-8"))
         return self.sha1_.hexdigest()
 
-    def hmac(self, string):
-
-        """
-        进行hmac加密
-        :param string:
-        :return:
-        """
-        self.hmca_.update(string)
-        return self.hmca_.hexdigest()
+    # def hmac(self, string):
+    #
+    #     """
+    #     进行hmac加密
+    #     :param string:
+    #     :return:
+    #     """
+    #     self.hmca_.update(string)
+    #     return self.hmca_.hexdigest()
 
     def generate_random_key(self):
 
