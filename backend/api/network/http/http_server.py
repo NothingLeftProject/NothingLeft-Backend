@@ -37,7 +37,7 @@ def run_server(ba):
     flask_app.run(host=setting["bindIp"], port=setting["httpPort"])
 
 
-@flask_app.route('/<operate_class/<target_id>>', methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
+@flask_app.route('/api/<operate_class/<target_id>>', methods=["POST", "GET", "PUT", "PATCH", "DELETE"])
 def handle_request(operate_class, target_id):
 
     """

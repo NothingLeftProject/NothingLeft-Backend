@@ -1,6 +1,6 @@
 # coding=utf-8
 # author: Lan_zhijiang
-# description 本地api(规范化输出和输入)
+# description 本地api(规范化输出和输入，遵守restfulAPI)
 # date: 2020/11/15
 
 from backend.user.user_manager import UserManager
@@ -33,27 +33,27 @@ class LocalCaller:
         self.user_group_manager = UserGroupManager(self.ba)
         self.inbox_manager = InboxManager(self.ba)
 
-    def user_login(self, param):
+    def user_login(self, target, param):
 
         """
         用户登录
         :return:
         """
-        self.log.add_log("LocalCaller: start user_login", 1)
+        self.log.add_log("start user_login", 1)
 
         result = {}
 
         try:
-            account = param["account"]
+            account = target
             password = param["password"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_login: Your param is incomplete!", 3)
+            self.log.add_log("user_login: param is incomplete!", 3)
             return False, "param incomplete"
         else:
             password = self.user_manager.encryption.md5(password)
             res, err = self.user_manager.login(account, password)
             if res is False:
-                return False, err
+                return False, err, 400
             else:
                 result["token"] = res
                 return result, err
@@ -64,12 +64,12 @@ class LocalCaller:
         用户登出
         :return:
         """
-        self.log.add_log("LocalCaller: start user_logout", 1)
+        self.log.add_log("start user_logout", 1)
 
         try:
             account = param["account"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_sign_up: Your param is incomplete!", 3)
+            self.log.add_log("user_sign_up: Your param is incomplete!", 3)
             return False, "param incomplete"
         else:
             res, err = self.user_manager.logout(account)
@@ -81,14 +81,14 @@ class LocalCaller:
         用户注册
         :return:
         """
-        self.log.add_log("LocalCaller: start user_sign_up", 1)
+        self.log.add_log("start user_sign_up", 1)
 
         result = {}
         try:
             account = param["account"]
             password = param["password"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_sign_up: Your param is incomplete!", 3)
+            self.log.add_log("user_sign_up: Your param is incomplete!", 3)
             return False, "param incomplete"
         else:
             optional_param = ["email", "user_group"]
@@ -114,13 +114,13 @@ class LocalCaller:
         删除用户
         :return:
         """
-        self.log.add_log("LocalCaller: start user_delete", 1)
+        self.log.add_log("start user_delete", 1)
 
         result = {}
         try:
             account = param["account"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_delete: Your param is incomplete", 3)
+            self.log.add_log("user_delete: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             res, err = self.user_manager.delete_user(account)
@@ -135,7 +135,7 @@ class LocalCaller:
         更新用户信息
         :return:
         """
-        self.log.add_log("LocalCaller: start user_info_update", 1)
+        self.log.add_log("start user_info_update", 1)
         res, err = False, ""
 
         result = {}
@@ -143,7 +143,7 @@ class LocalCaller:
             account = param["account"]
             info = param["info"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_info_update: Your param is incomplete", 3)
+            self.log.add_log("user_info_update: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -167,13 +167,13 @@ class LocalCaller:
         获取用户所有信息(WARNING: ONLY ROOT CAN OWN)
         :return:
         """
-        self.log.add_log("LocalCaller: start user_info_get_all", 1)
+        self.log.add_log("start user_info_get_all", 1)
 
         result = {}
         try:
             accounts = param["accounts"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_info_get_all: Your param is incomplete", 3)
+            self.log.add_log("user_info_get_all: Your param is incomplete", 3)
             return False, "param incomplete, attention, it's 'accounts'"
         else:
             res, err = self.user_info_manager.get_users_all_info(accounts)
@@ -189,7 +189,7 @@ class LocalCaller:
         获取一个用户的多个信息
         :return:
         """
-        self.log.add_log("LocalCaller: start user_info_get_one_multi", 1)
+        self.log.add_log("start user_info_get_one_multi", 1)
 
         result = {}
         res, err = False, ""
@@ -198,7 +198,7 @@ class LocalCaller:
             account = param["account"]
             keys = param["keys"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_info_get_one_multi: Your param is incomplete", 3)
+            self.log.add_log("user_info_get_one_multi: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -217,14 +217,14 @@ class LocalCaller:
         获取多个用户的多个信息
         :return:
         """
-        self.log.add_log("LocalCaller: start user_info_get_multi_multi", 1)
+        self.log.add_log("start user_info_get_multi_multi", 1)
 
         result = {}
         try:
             accounts = param["accounts"]
             keys = param["keys"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_info_get_multi_multi: Your param is incomplete", 3)
+            self.log.add_log("user_info_get_multi_multi: Your param is incomplete", 3)
             return False, "param incomplete, caution! it's 'accounts'"
         else:
             res, err = self.user_info_manager.get_multi_users_multi_info(accounts, keys)
@@ -237,13 +237,13 @@ class LocalCaller:
         获取用户权限  其实吧...这里有个安全漏洞，用户可以获取别的用户的权限...但是吧...你获取了也没什么关系啊...
         :return:
         """
-        self.log.add_log("LocalCaller: start user_get_permission", 1)
+        self.log.add_log("start user_get_permission", 1)
 
         result = {}
         try:
             account = param["account"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_get_permission: Your param is incomplete", 3)
+            self.log.add_log("user_get_permission: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             try:
@@ -270,13 +270,13 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: start user_write_permissions", 1)
+        self.log.add_log("start user_write_permissions", 1)
 
         try:
             account = param["account"]
             new_permission_list = param["newPermissionList"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_write_permissions: Your param is incomplete", 3)
+            self.log.add_log("user_write_permissions: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             res, err = self.user_permission_manager.write_user_permissions(account, new_permission_list)
@@ -289,13 +289,13 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: start user_edit_permissions", 1)
+        self.log.add_log("start user_edit_permissions", 1)
 
         try:
             account = param["account"]
             permissions_to_edit = param["permissionToEdit"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_edit_permissions: Your param is incomplete", 3)
+            self.log.add_log("user_edit_permissions: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             res, err = self.user_permission_manager.edit_user_permissions(account, permissions_to_edit)
@@ -308,13 +308,13 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: user_group_add_users", 1)
+        self.log.add_log("user_group_add_users", 1)
 
         try:
             accounts = param["accounts"]
             target_group = param["targetGroup"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_group_add_users: Your param is incomplete", 3)
+            self.log.add_log("user_group_add_users: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             res, err = self.user_group_manager.add_users_into_group(accounts, target_group)
@@ -327,13 +327,13 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: user_group_remove_users", 1)
+        self.log.add_log("user_group_remove_users", 1)
 
         try:
             accounts = param["accounts"]
             target_group = param["targetGroup"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_group_remove_users: Your param is incomplete", 3)
+            self.log.add_log("user_group_remove_users: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             res, err = self.user_group_manager.remove_users_from_group(accounts, target_group)
@@ -346,13 +346,13 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: user_group_move_one_to_one", 1)
+        self.log.add_log("user_group_move_one_to_one", 1)
 
         try:
             account = param["account"]
             target_group = param["targetGroup"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_group_move_one_to_one: Your param is incomplete", 3)
+            self.log.add_log("user_group_move_one_to_one: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             res, err = self.user_group_manager.move_user_to_another_group(account, target_group)
@@ -365,12 +365,12 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: user_group_add", 1)
+        self.log.add_log("user_group_add", 1)
 
         try:
             group_name = param["groupName"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_group_add: Your param is incomplete", 3)
+            self.log.add_log("user_group_add: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             # 支持permissionsList和fromTemple来加载，任何一个有了不能有第二个，优先permissionsList
@@ -397,12 +397,12 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: user_group_remove", 1)
+        self.log.add_log("user_group_remove", 1)
 
         try:
             target_group = param["targetGroup"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_group_remove: Your param is incomplete", 3)
+            self.log.add_log("user_group_remove: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             res, err = self.user_group_manager.remove_user_group(target_group)
@@ -415,12 +415,12 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: user_group_remove", 1)
+        self.log.add_log("user_group_remove", 1)
 
         try:
             user_groups = param["userGroups"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_group_get_permissions: Your param is incomplete", 3)
+            self.log.add_log("user_group_get_permissions: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             res, err = self.user_permission_manager.get_user_groups_permissions(user_groups)
@@ -433,7 +433,7 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_add", 1)
+        self.log.add_log("stuff_add", 1)
 
         try:
             account = param["account"]
@@ -441,7 +441,7 @@ class LocalCaller:
             create_date = param["createDate"]
             lots = param["lastOperateTimeStamp"]
         except KeyError:
-            self.log.add_log("LocalCaller: user_group_get_permissions: Your param is incomplete", 3)
+            self.log.add_log("user_group_get_permissions: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -480,14 +480,14 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_modify", 1)
+        self.log.add_log("stuff_modify", 1)
 
         try:
             account = param["account"]
             stuff_id = param["stuffId"]
             info = param["info"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_modify: Your param is incomplete", 3)
+            self.log.add_log("stuff_modify: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -505,13 +505,13 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_get_many", 1)
+        self.log.add_log("stuff_get_many", 1)
 
         try:
             account = param["account"]
             stuff_ids = param["stuffIds"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_get_many: Your param is incomplete", 3)
+            self.log.add_log("stuff_get_many: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -542,13 +542,13 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_get_id_from_condition", 1)
+        self.log.add_log("stuff_get_id_from_condition", 1)
 
         try:
             account = param["account"]
             condition = param["condition"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_get_id_from_condition: Your param is incomplete", 3)
+            self.log.add_log("stuff_get_id_from_condition: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -582,13 +582,13 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_get_id_from_preset", 1)
+        self.log.add_log("stuff_get_id_from_preset", 1)
 
         try:
             account = param["account"]
             mode = param["mode"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_get_id_from_preset: Your param is incomplete", 3)
+            self.log.add_log("stuff_get_id_from_preset: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -618,13 +618,13 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_delete_many", 1)
+        self.log.add_log("stuff_delete_many", 1)
 
         try:
             account = param["account"]
             stuff_ids = param["stuffIds"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_delete_many: Your param is incomplete", 3)
+            self.log.add_log("stuff_delete_many: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -642,12 +642,12 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_generate_preset_list", 1)
+        self.log.add_log("stuff_generate_preset_list", 1)
 
         try:
             account = param["account"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_generate_preset_list: Your param is incomplete", 3)
+            self.log.add_log("stuff_generate_preset_list: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             optional_param = ["list_name", "update"]
@@ -671,14 +671,14 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_set_many_status", 1)
+        self.log.add_log("stuff_set_many_status", 1)
 
         try:
             account = param["account"]
             stuff_ids = param["stuffIds"]
             status = param["status"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_set_many_status: Your param is incomplete", 3)
+            self.log.add_log("stuff_set_many_status: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -696,13 +696,13 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_is_exist", 1)
+        self.log.add_log("stuff_is_exist", 1)
 
         try:
             account = param["account"]
             stuff_id = param["stuffId"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_is_exist: Your param is incomplete", 3)
+            self.log.add_log("stuff_is_exist: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -720,7 +720,7 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_add_many_custom_attribute", 1)
+        self.log.add_log("stuff_add_many_custom_attribute", 1)
 
         try:
             account = param["account"]
@@ -728,7 +728,7 @@ class LocalCaller:
             keys = param["keys"]
             values = param["values"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_add_many_custom_attribute: Your param is incomplete", 3)
+            self.log.add_log("stuff_add_many_custom_attribute: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -746,14 +746,14 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_delete_many_custom_attribute", 1)
+        self.log.add_log("stuff_delete_many_custom_attribute", 1)
 
         try:
             account = param["account"]
             stuff_ids = param["stuffIds"]
             keys = param["keys"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_delete_many_custom_attribute: Your param is incomplete", 3)
+            self.log.add_log("stuff_delete_many_custom_attribute: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -771,7 +771,7 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_add_events", 1)
+        self.log.add_log("stuff_add_events", 1)
 
         try:
             account = param["account"]
@@ -779,7 +779,7 @@ class LocalCaller:
             start_indexes = param["startIndexes"]
             end_indexes = param["endIndexes"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_add_events: Your param is incomplete", 3)
+            self.log.add_log("stuff_add_events: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -797,7 +797,7 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_remove_events", 1)
+        self.log.add_log("stuff_remove_events", 1)
 
         try:
             account = param["account"]
@@ -805,7 +805,7 @@ class LocalCaller:
             start_indexes = param["startIndexes"]
             end_indexes = param["endIndexes"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_remove_events: Your param is incomplete", 3)
+            self.log.add_log("stuff_remove_events: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -823,7 +823,7 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_set_event_status", 1)
+        self.log.add_log("stuff_set_event_status", 1)
 
         try:
             account = param["account"]
@@ -832,7 +832,7 @@ class LocalCaller:
             end_index = param["endIndex"]
             status = param["status"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_set_event_status: Your param is incomplete", 3)
+            self.log.add_log("stuff_set_event_status: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -850,7 +850,7 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_get_event_status", 1)
+        self.log.add_log("stuff_get_event_status", 1)
 
         try:
             account = param["account"]
@@ -858,7 +858,7 @@ class LocalCaller:
             start_index = param["startIndex"]
             end_index = param["endIndex"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_get_event_status: Your param is incomplete", 3)
+            self.log.add_log("stuff_get_event_status: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:
@@ -876,7 +876,7 @@ class LocalCaller:
         :param param:
         :return:
         """
-        self.log.add_log("LocalCaller: stuff_remove_event_status", 1)
+        self.log.add_log("stuff_remove_event_status", 1)
 
         try:
             account = param["account"]
@@ -884,7 +884,7 @@ class LocalCaller:
             start_index = param["startIndex"]
             end_index = param["endIndex"]
         except KeyError:
-            self.log.add_log("LocalCaller: stuff_remove_event_status: Your param is incomplete", 3)
+            self.log.add_log("stuff_remove_event_status: Your param is incomplete", 3)
             return False, "param incomplete"
         else:
             if self.not_root:

@@ -56,8 +56,7 @@ class HttpHandler:
             user_type = self.request_data["header"]["userType"]
             if user_type not in ["user"]:
                 self.log.add_log("user_type not correct, auth fail", 1)
-                self.response_headers["msg"] = "user_type error"
-                self.response_headers["code"] = 1
+                self.response_body["msg"] = "user_type error"
                 return False
 
         now_time_stamp = self.parent_log.get_time_stamp()
@@ -65,7 +64,7 @@ class HttpHandler:
             gave_time_stamp = self.response_headers["timeStamp"]
         except KeyError:
             self.log.add_log("headers is not complete", 1)
-            self.response_headers["msg"] = "headers is not complete"
+            self.response_body["msg"] = "headers is not complete"
             return False
 
         time_loss = abs(int(now_time_stamp) - int(gave_time_stamp))  # might not be safe here
@@ -84,7 +83,7 @@ class HttpHandler:
                 login_time_loss = abs(int(gave_time_stamp) - int(last_login_time_stamp))
             except TypeError:
                 self.log.add_log("user-%s haven't login for once yet" % user, 1)
-                self.response_headers["msg"] = "user-%s haven't login for once yet" % user
+                self.response_body["msg"] = "user-%s haven't login for once yet" % user
                 return False
             else:
                 self.log.add_log("user-%s's LLTS: %s" % (user, last_login_time_stamp), 1)
@@ -94,7 +93,7 @@ class HttpHandler:
                 )[0]["isOnline"]
                 if not is_online:
                     self.log.add_log("user-%s haven't login yet" % user, 1)
-                    self.response_headers["msg"] = "user-%s haven't login yet" % user
+                    self.response_body["msg"] = "user-%s haven't login yet" % user
                     return False
 
             # is token valid
@@ -114,17 +113,17 @@ class HttpHandler:
                 else:
                     # auth fail, wrong token
                     self.log.add_log("wrong token, auth fail", 1)
-                    self.response_headers["msg"] = "wrong token"
+                    self.response_body["msg"] = "wrong token"
                     return False
             else:
                 # auth fail, login outdated
                 self.log.add_log("login outdated, auth fail", 1)
-                self.response_headers["msg"] = "login outdated, please login"  # login outdated error
+                self.response_body["msg"] = "login outdated, please login"  # login outdated error
                 return False
         else:
             # auth fail, time stamp not in law
             self.log.add_log("time stamp not in law, time_loss > 600, auth fail", 1)
-            self.response_headers["msg"] = "time_loss > 600, check your network or timezone"  # timestamp error
+            self.response_body["msg"] = "time_loss > 600, check your network or timezone"  # timestamp error
             return False
 
     def handle_request(self, request):
@@ -144,22 +143,21 @@ class HttpHandler:
         self.request_data = request.get_json(force=True)
         self.request_headers = request.headers
         self.request_method = request.method
-        self.request_path = request.url.replace("/api", "")
+        self.request_path = request.url.replace("/api/", "")
 
         # 绕过auth的唯二方式：login和signup
-        if self.request_method == "GET" and self.request_path == "/user/login":
+        if self.request_method == "GET" and "/user/login" in self.request_path:
             # login request
             self.log.add_log("a login request, specially allow", 1)
             self.special_auth_pass = True
             self.special_auth_pass_type = "login"
-        elif self.request_method == "POST" and self.request_path == "/user/signup":
+        elif self.request_method == "POST" and "/user/signup" in self.request_path:
             self.log.add_log("a signup request, specially allow", 1)
             if self.setting["user"]["allowSignup"]:
                 self.special_auth_pass = True
                 self.special_auth_pass_type = "signup"
             else:
-                self.response_headers["code"] = 1
-                self.response_headers["msg"] = "signup was not allowed by user, please contact your admin"
+                self.response_body["msg"] = "signup was not allowed by user, please contact your admin"
                 self.log.add_log("self-signup was not allowed", 1)
 
         if self.auth() or self.special_auth_pass:
@@ -168,12 +166,13 @@ class HttpHandler:
             self.urls = Urls(self.ba, user, user_type)
 
             try:
-                command_name = self.request_path
+                path_split = self.request_path.split("/")
+                command_target = path_split[-1]
+                command_name = self.request_path.replace(command_target)
                 command_param = self.request_data["param"]
             except KeyError:
                 self.log.add_log("the command info is wrong, 'param' lost", 1)
-                self.response_headers["code"] = 1
-                self.response_headers["msg"] = "command info wrong, 'param' lost"
+                self.response_body["msg"] = "command_info wrong, 'param' lost"
                 self.response_code = 400
                 command_name = None
             else:
@@ -182,34 +181,31 @@ class HttpHandler:
                     self.mongodb_manipulator.get_document(user_type, user, {"permissionList": 1}, 2),
                     ["permissionList"]
                 )[0]["permissionList"]
+
                 if command_name in self.permission_list or self.special_auth_pass:
                     self.log.add_log("command-%s is allowed, start handle" % command_name, 1)
                     try:
                         command_handle_function = self.urls.command_list[self.request_method][command_name]
                     except KeyError:
                         self.log.add_log("can't find command-%s in urls-method-%s, skip" % (command_name, self.request_method), 3)
-                        self.response_headers["code"] = 1
-                        self.response_headers["msg"] = "can't find command in urls, check your commandName(path) and httpMethod"
-                        self.response_code = 400
+                        self.response_body["msg"] = "can't find command in urls, check your commandName(path) and httpMethod"
+                        self.response_code = 404
                     else:
                         # real handle
-                        res, err, code, http_code = command_handle_function(command_param)
-                        self.response_code = http_code
-                        self.response_headers["code"] = code
-                        self.response_headers["msg"] = err
+                        res, err, http_code = command_handle_function(command_target, command_param)
+                        self.response_code = http_code  # http_code就是code
+                        self.response_body["msg"] = err
                         self.response_body["result"] = res
                 else:
-                    self.response_headers["code"] = 1
-                    self.response_headers["msg"] = "you have no permission requesting command-%s or wrong command name" % command_name
+                    self.response_body["msg"] = "you have no permission requesting command-%s or wrong command name" % command_name
                     self.response_body["result"] = None
-                    self.response_code = 400
-            
+                    self.response_code = 403
+
             self.log.add_log("command-%s handle completed" % command_name, 1)
         else:
             self.log.add_log("auth fail", 1)
-            self.response_headers["code"] = 1
-            self.response_headers["msg"] = "auth fail"
-            self.response_code = 400
+            self.response_body["msg"] = "auth fail"
+            self.response_code = 401
 
         self.response_headers["timeStamp"] = self.parent_log.get_time_stamp()
         return self.response_body, self.response_code, self.response_headers
