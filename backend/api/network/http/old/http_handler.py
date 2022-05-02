@@ -5,9 +5,8 @@
 
 import json
 
-from backend.database.mongodb import MongoDBManipulator
 from backend.user.user_permission_mamanger import UserPermissionManager
-from backend.api.http.command_finder import CommandFinder
+from backend.api.network.http.old.command_finder import CommandFinder
 
 
 class HttpHandler:
@@ -17,10 +16,10 @@ class HttpHandler:
         self.base_abilities = base_abilities
         self.log = base_abilities.log
         self.setting = base_abilities.setting
-        
+
         self.request_data = {}
         self.permission_list = []
-        self.response_data_raw = json.load(open("./backend/data/json/response_template.json", "r", encoding="utf-8"))
+        self.response_data_raw = json.load(open("./backend/data/json/response_body_template.json", "r", encoding="utf-8"))
         self.response_data = {}
         self.special_auth_pass = False
         self.special_auth_pass_type = ""
@@ -105,7 +104,7 @@ class HttpHandler:
                     if real_token == need_verify_token:
                         # auth pass, load permission list
                         self.log.add_log("HttpHandler: token compared. load permissions list", 1)
-                        
+
                         self.permission_list, _ = self.permission_manager.get_user_permissions(account, ask_update=True)
                         if self.permission_list is False:
                             self.log.add_log("HttpHandler: can't load permission list", 3)

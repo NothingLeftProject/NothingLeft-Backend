@@ -1,10 +1,9 @@
 # coding=utf-8
 # author: Lan_zhijiang
-# desciption: 用户管理器
-# date: 2020/11/1
+# description: 加密字符串（MD5 SHA256）
+# date: 2022/5/1
 
 import hashlib
-import hmac
 import string
 import random
 
@@ -13,42 +12,34 @@ class Encryption:
 
     def __init__(self):
 
-        # self.log = log
-        # self.setting = setting
+        pass
 
-        self.md5_ = hashlib.md5()
-        self.sha1_ = hashlib.sha1()
-        # self.hmca_ = hmac.new("a")
-
-    def md5(self, string):
+    def md5(self, string_):
 
         """
         进行md5加密 32位！
-        :param string:
+        :param string_:
         :return:
         """
-        self.md5_.update(string.encode("utf-8"))
-        return self.md5_.hexdigest()
+        return hashlib.md5(string_.encode('utf-8')).hexdigest()
 
-    def sha1(self, string):
+    def sha1(self, string_):
 
         """
         进行sha1加密
-        :param string:
+        :param string_:
         :return:
         """
-        self.sha1_.update(string.encode("utf-8"))
-        return self.sha1_.hexdigest()
+        return hashlib.sha1(string_.encode('utf-8')).hexdigest()
 
-    # def hmac(self, string):
-    #
-    #     """
-    #     进行hmac加密
-    #     :param string:
-    #     :return:
-    #     """
-    #     self.hmca_.update(string)
-    #     return self.hmca_.hexdigest()
+    def sha256(self, string_):
+
+        """
+        进行sha256加密
+        :param string_:
+        :return:
+        """
+        return hashlib.sha256(string_.encode('utf-8')).hexdigest()
 
     def generate_random_key(self):
 

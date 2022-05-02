@@ -1,4 +1,4 @@
 {
-  "displayLevel": 0,
+  "displayLevel": 1,
   "logPath": "./backend/data/log/"
 }

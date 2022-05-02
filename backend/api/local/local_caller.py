@@ -1,6 +1,6 @@
 # coding=utf-8
 # author: Lan_zhijiang
-# desciption 本地api
+# description 本地api(规范化输出和输入)
 # date: 2020/11/15
 
 from backend.user.user_manager import UserManager
@@ -8,27 +8,30 @@ from backend.user.user_info_operator import UserInfoManager
 from backend.user.user_permission_mamanger import UserPermissionManager
 from backend.user.user_group_manager import UserGroupManager
 from backend.core.gtd.inbox_manager import InboxManager
+from backend.data.log import Log
 
 
 class LocalCaller:
 
-    def __init__(self, base_abilities, caller):
+    def __init__(self, ba, user, user_type):
 
-        self.base_abilities = base_abilities
-        self.log = base_abilities.log
-        self.setting = base_abilities.setting
-        self.caller = caller
+        self.ba = ba
+        self.parent_log = ba.parent_log
+        self.log = Log(self.parent_log, "LocalCaller")
+        self.setting = ba.setting
+        self.user = user
+        self.user_type = user_type
 
-        if self.caller == "root":
+        if self.user == "root":
             self.not_root = False
         else:
             self.not_root = True
 
-        self.user_manager = UserManager(self.base_abilities)
-        self.user_permission_manager = UserPermissionManager(self.base_abilities)
-        self.user_info_manager = UserInfoManager(self.base_abilities)
-        self.user_group_manager = UserGroupManager(self.base_abilities)
-        self.inbox_manager = InboxManager(self.base_abilities)
+        self.user_manager = UserManager(self.ba)
+        self.user_permission_manager = UserPermissionManager(self.ba)
+        self.user_info_manager = UserInfoManager(self.ba)
+        self.user_group_manager = UserGroupManager(self.ba)
+        self.inbox_manager = InboxManager(self.ba)
 
     def user_login(self, param):
 
@@ -76,7 +79,7 @@ class LocalCaller:
 
         """
         用户注册
-        :return: 
+        :return:
         """
         self.log.add_log("LocalCaller: start user_sign_up", 1)
 
@@ -104,7 +107,7 @@ class LocalCaller:
                 return False, err
             else:
                 return result, err
-    
+
     def user_delete(self, param):
 
         """
@@ -112,7 +115,7 @@ class LocalCaller:
         :return:
         """
         self.log.add_log("LocalCaller: start user_delete", 1)
-        
+
         result = {}
         try:
             account = param["account"]
@@ -179,7 +182,7 @@ class LocalCaller:
             else:
                 result["usersInfo"] = res
                 return result, err
-                
+
     def user_info_get_one_multi(self, param):
 
         """
